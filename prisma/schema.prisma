@@ -1,0 +1,10 @@
+// Schema completo é criado na fase 2 (seção 7 da especificação).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

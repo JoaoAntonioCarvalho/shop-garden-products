@@ -1,0 +1,36 @@
+# dependências
+/node_modules
+
+# testes
+/coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# prisma client gerado
+/src/generated/
+
+# ambiente (somente o .env.example entra no repositório)
+.env*
+!.env.example
+
+# armazenamento local de imagens em desenvolvimento
+/uploads/
+
+# arquivos de importação com dados reais (LGPD): nunca entram no repositório
+/data-privada/
+
+# diversos
+.DS_Store
+*.pem
+npm-debug.log*
+.pnpm-debug.log*
+.vercel
