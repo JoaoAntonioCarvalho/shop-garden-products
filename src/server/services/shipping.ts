@@ -4,7 +4,11 @@ import { isBlockedByLocalOnly, LOCAL_ONLY_NOTICE } from "@/server/providers/ship
 import type { ShippingOption, ShippingQuoteItem } from "@/server/providers/shipping/types";
 import type { CouponData } from "./coupons";
 
-export type ShippingQuote = { options: ShippingOption[]; notice: string | null; blockedByLocalOnly: boolean };
+export type ShippingQuote = {
+  options: ShippingOption[];
+  notice: string | null;
+  blockedByLocalOnly: boolean;
+};
 
 /** Métodos em que o cupom de frete grátis vale: entregas locais; a do mesmo dia só se o cupom permitir. */
 function couponCoversOption(coupon: CouponData, option: ShippingOption): boolean {
@@ -14,9 +18,14 @@ function couponCoversOption(coupon: CouponData, option: ShippingOption): boolean
 }
 
 /** Zera o frete dos métodos elegíveis quando há cupom de frete grátis válido. */
-export function applyFreeShippingCoupon(options: ShippingOption[], coupon: CouponData | null): ShippingOption[] {
+export function applyFreeShippingCoupon(
+  options: ShippingOption[],
+  coupon: CouponData | null,
+): ShippingOption[] {
   if (!coupon || coupon.type !== "FREE_SHIPPING") return options;
-  return options.map((option) => (couponCoversOption(coupon, option) ? { ...option, priceCents: 0, isFree: true } : option));
+  return options.map((option) =>
+    couponCoversOption(coupon, option) ? { ...option, priceCents: 0, isFree: true } : option,
+  );
 }
 
 /**
@@ -31,8 +40,16 @@ export async function quoteShipping(input: {
   now?: Date;
 }): Promise<ShippingQuote> {
   const now = input.now ?? new Date();
-  const quoteInput = { cep: input.cep, items: input.items, subtotalCents: input.subtotalCents, now };
-  const [options, rules] = await Promise.all([getShippingProvider().quote(quoteInput), loadShippingRules()]);
+  const quoteInput = {
+    cep: input.cep,
+    items: input.items,
+    subtotalCents: input.subtotalCents,
+    now,
+  };
+  const [options, rules] = await Promise.all([
+    getShippingProvider().quote(quoteInput),
+    loadShippingRules(),
+  ]);
   const blockedByLocalOnly = isBlockedByLocalOnly(quoteInput, rules);
 
   return {

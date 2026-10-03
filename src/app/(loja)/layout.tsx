@@ -23,30 +23,30 @@ export default async function StoreLayout({ children }: LayoutProps<"/">) {
 
   return (
     <CartProvider initialCount={cartCount}>
-    <div className="flex min-h-dvh flex-col">
-      <JsonLd data={[organizationJsonLd(settings), websiteJsonLd(settings)]} />
-      <a
-        href="#conteudo"
-        className="sr-only z-50 rounded-control bg-white px-4 py-3 text-moss-700 focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
-      >
-        Pular para o conteúdo
-      </a>
-      <TopBar messages={messages} />
-      <Header
-        settings={settings}
-        navigation={navigation}
-        cartCount={cartCount}
-        cart={<CartButton />}
-        wishlistCount={0}
-        search={<SearchBox className="w-full lg:max-w-[560px]" />}
-      />
-      <main id="conteudo" tabIndex={-1} className="flex-1 outline-none">
-        {children}
-      </main>
-      <Footer settings={settings} navigation={navigation} />
-      <FloatingWhatsApp number={settings.whatsapp} storeName={settings.name} />
-      <Toaster />
-    </div>
+      <div className="flex min-h-dvh flex-col">
+        <JsonLd data={[organizationJsonLd(settings), websiteJsonLd(settings)]} />
+        <a
+          href="#conteudo"
+          className="sr-only z-50 rounded-control bg-white px-4 py-3 text-moss-700 focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+        >
+          Pular para o conteúdo
+        </a>
+        <TopBar messages={messages} />
+        <Header
+          settings={settings}
+          navigation={navigation}
+          cartCount={cartCount}
+          cart={<CartButton />}
+          wishlistCount={0}
+          search={<SearchBox className="w-full lg:max-w-[560px]" />}
+        />
+        <main id="conteudo" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </main>
+        <Footer settings={settings} navigation={navigation} />
+        <FloatingWhatsApp number={settings.whatsapp} storeName={settings.name} />
+        <Toaster />
+      </div>
     </CartProvider>
   );
 }

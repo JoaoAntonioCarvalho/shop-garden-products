@@ -410,7 +410,9 @@ export function ProductView({
     if (!variant) return;
     startAdd(async () => {
       const result = await addItem(variant.id, quantity);
-      setMessage(result.ok ? null : (result.message ?? "Não foi possível adicionar. Tente de novo."));
+      setMessage(
+        result.ok ? null : (result.message ?? "Não foi possível adicionar. Tente de novo."),
+      );
     });
   }
 
@@ -419,18 +421,13 @@ export function ProductView({
     startBuy(async () => {
       // Em caso de sucesso a ação redireciona para o checkout e não retorna.
       const result = await buyNowAction(variant.id, quantity);
-      if (result && !result.ok) setMessage(result.message ?? "Não foi possível continuar. Tente de novo.");
+      if (result && !result.ok)
+        setMessage(result.message ?? "Não foi possível continuar. Tente de novo.");
     });
   }
 
   const addButton = (className?: string) => (
-    <Button
-      size="lg"
-      className={className}
-      loading={pendingAdd}
-      disabled={soldOut}
-      onClick={add}
-    >
+    <Button size="lg" className={className} loading={pendingAdd} disabled={soldOut} onClick={add}>
       Adicionar à sacola
     </Button>
   );
@@ -519,12 +516,7 @@ export function ProductView({
               />
               {addButton("flex-1")}
             </div>
-            <Button
-              size="lg"
-              variant="secondary"
-              loading={pendingBuy}
-              onClick={buy}
-            >
+            <Button size="lg" variant="secondary" loading={pendingBuy} onClick={buy}>
               Comprar agora
             </Button>
             {message ? (
@@ -563,11 +555,7 @@ export function ProductView({
               {formatBRL(variant.price.pixCents)} no Pix
             </span>
           </p>
-          <Button
-            loading={pendingAdd}
-            tabIndex={barVisible ? 0 : -1}
-            onClick={add}
-          >
+          <Button loading={pendingAdd} tabIndex={barVisible ? 0 : -1} onClick={add}>
             Adicionar à sacola
           </Button>
         </div>

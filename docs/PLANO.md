@@ -158,3 +158,12 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 - [ ] Eventos de analytics, UTM em pedidos e leads, vendas por origem
 - [ ] Pedido manual com origem WhatsApp
 - [ ] LGPD: consentimento, exportação, exclusão, logs de exportação
+
+## Estado em 2026-10-03 (sessão interrompida pelo limite de uso)
+
+Fases 0 a 3 concluídas. Fase 4 em andamento:
+
+- Feito e testado (133 testes): cupons, totais, frete simulado, máquina de estados, estoque com concorrência.
+- Escrito, com lint e typecheck passando, mas ainda NÃO verificado no navegador: sacola e mini-carrinho, checkout em 4 etapas, criação do pedido, pagamento simulado, webhook, simulador, confirmação, boleto, e-mails.
+- Próximo passo: rodar o fluxo de compra de ponta a ponta (o roteiro de teste parou no seletor ambíguo do campo "E-mail"; usar `getByRole("textbox", { name: "E-mail" })`), corrigir o que aparecer, escrever os testes de integração de pedido e pagamento e os de renderização de e-mail, marcar a fase 4 e fazer o commit final dela.
+- Pendente do dono: consentimento para `pnpm db:reset` (ver `docs/PENDENCIAS-DO-DONO.md`).

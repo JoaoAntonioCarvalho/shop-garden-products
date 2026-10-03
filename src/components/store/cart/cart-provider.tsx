@@ -4,7 +4,15 @@ import { ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useMemo, useState, useTransition, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react";
 import { FreeShippingProgress } from "@/components/store/free-shipping-progress";
 import { ProductCard } from "@/components/store/product-card";
 import { buttonClasses } from "@/components/ui/button";
@@ -37,7 +45,13 @@ const CartContext = createContext<CartContextValue>({
 
 export const useCart = () => useContext(CartContext);
 
-export function CartProvider({ initialCount, children }: { initialCount: number; children: ReactNode }) {
+export function CartProvider({
+  initialCount,
+  children,
+}: {
+  initialCount: number;
+  children: ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const [count, setCount] = useState(initialCount);
@@ -89,7 +103,11 @@ export function CartProvider({ initialCount, children }: { initialCount: number;
       const result = await addToCartAction(variantId, quantity);
       if (!result.ok || !result.cart) return { ok: false, message: result.message };
       if (result.added) {
-        track("add_to_cart", { currency: "BRL", value: result.added.price * result.added.quantity, items: [result.added] });
+        track("add_to_cart", {
+          currency: "BRL",
+          value: result.added.price * result.added.quantity,
+          items: [result.added],
+        });
       }
       apply(result.cart);
       show(true);
@@ -113,7 +131,12 @@ export function CartProvider({ initialCount, children }: { initialCount: number;
       apply(result.cart);
       const removed = result.removed;
       if (!removed) return;
-      if (removed.item) track("remove_from_cart", { currency: "BRL", value: removed.item.price * removed.item.quantity, items: [removed.item] });
+      if (removed.item)
+        track("remove_from_cart", {
+          currency: "BRL",
+          value: removed.item.price * removed.item.quantity,
+          items: [removed.item],
+        });
       toast(`${removed.name} saiu da sacola`, {
         duration: 5000,
         action: {
@@ -148,7 +171,9 @@ export function CartProvider({ initialCount, children }: { initialCount: number;
                 {data.totalWithPixCents < data.subtotalCents ? (
                   <div className="flex justify-between type-small text-moss-700">
                     <dt>No Pix</dt>
-                    <dd className="font-medium tabular-nums">{formatBRL(data.totalWithPixCents)}</dd>
+                    <dd className="font-medium tabular-nums">
+                      {formatBRL(data.totalWithPixCents)}
+                    </dd>
                   </div>
                 ) : null}
               </dl>
@@ -163,7 +188,13 @@ export function CartProvider({ initialCount, children }: { initialCount: number;
                     track("begin_checkout", {
                       currency: "BRL",
                       value: centsToReais(data.subtotalCents),
-                      items: data.lines.map((line) => ({ item_id: line.sku, item_name: line.name, item_variant: line.variantName ?? undefined, price: centsToReais(line.unitPriceCents), quantity: line.quantity })),
+                      items: data.lines.map((line) => ({
+                        item_id: line.sku,
+                        item_name: line.name,
+                        item_variant: line.variantName ?? undefined,
+                        price: centsToReais(line.unitPriceCents),
+                        quantity: line.quantity,
+                      })),
                     })
                   }
                 >
@@ -174,7 +205,10 @@ export function CartProvider({ initialCount, children }: { initialCount: number;
           ) : undefined
         }
       >
-        <div aria-busy={pending || undefined} className={pending ? "opacity-70 transition-opacity" : "transition-opacity"}>
+        <div
+          aria-busy={pending || undefined}
+          className={pending ? "opacity-70 transition-opacity" : "transition-opacity"}
+        >
           {data === null ? (
             <p role="status" className="type-body text-ink-muted">
               Carregando a sacola
@@ -199,21 +233,51 @@ export function CartProvider({ initialCount, children }: { initialCount: number;
                   {notice}
                 </Alert>
               ))}
-              <FreeShippingProgress subtotalCents={data.subtotalCents} thresholdCents={data.freeShippingThresholdCents} className="mb-5" />
+              <FreeShippingProgress
+                subtotalCents={data.subtotalCents}
+                thresholdCents={data.freeShippingThresholdCents}
+                className="mb-5"
+              />
               <ul className="divide-y divide-line border-y border-line">
                 {data.lines.map((line) => (
                   <li key={line.itemId} className="flex gap-3 py-4">
-                    <Link href={`/produto/${line.slug}`} className="relative aspect-4/5 w-16 flex-none overflow-hidden rounded-photo bg-white" tabIndex={-1} aria-hidden="true">
-                      {line.image ? <Image src={line.image.url} alt="" fill sizes="64px" className="object-cover" /> : null}
+                    <Link
+                      href={`/produto/${line.slug}`}
+                      className="relative aspect-4/5 w-16 flex-none overflow-hidden rounded-photo bg-white"
+                      tabIndex={-1}
+                      aria-hidden="true"
+                    >
+                      {line.image ? (
+                        <Image
+                          src={line.image.url}
+                          alt=""
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                        />
+                      ) : null}
                     </Link>
                     <div className="min-w-0 flex-1">
-                      <Link href={`/produto/${line.slug}`} className="line-clamp-2 type-small font-medium text-ink underline-offset-3 hover:underline">
+                      <Link
+                        href={`/produto/${line.slug}`}
+                        className="line-clamp-2 type-small font-medium text-ink underline-offset-3 hover:underline"
+                      >
                         {line.name}
                       </Link>
-                      {line.variantName ? <p className="type-caption text-ink-muted">{line.variantName}</p> : null}
+                      {line.variantName ? (
+                        <p className="type-caption text-ink-muted">{line.variantName}</p>
+                      ) : null}
                       <div className="mt-2 flex items-center justify-between gap-2">
-                        <QuantityStepper size="sm" value={line.quantity} max={line.available} label={line.name} onChange={(quantity) => changeQuantity(line.itemId, quantity)} />
-                        <p className="type-small font-medium text-ink tabular-nums">{formatBRL(line.lineTotalCents)}</p>
+                        <QuantityStepper
+                          size="sm"
+                          value={line.quantity}
+                          max={line.available}
+                          label={line.name}
+                          onChange={(quantity) => changeQuantity(line.itemId, quantity)}
+                        />
+                        <p className="type-small font-medium text-ink tabular-nums">
+                          {formatBRL(line.lineTotalCents)}
+                        </p>
                       </div>
                       <button
                         type="button"
@@ -251,7 +315,10 @@ export function CartProvider({ initialCount, children }: { initialCount: number;
 /** Ícone de sacola do cabeçalho, com o contador em vinho. Abre o mini-carrinho. */
 export function CartButton() {
   const { count, openCart } = useCart();
-  const label = count === 0 ? "Abrir sacola, vazia" : `Abrir sacola, ${count} ${count === 1 ? "item" : "itens"}`;
+  const label =
+    count === 0
+      ? "Abrir sacola, vazia"
+      : `Abrir sacola, ${count} ${count === 1 ? "item" : "itens"}`;
   return (
     <button
       type="button"
@@ -261,7 +328,10 @@ export function CartButton() {
     >
       <ShoppingBag aria-hidden="true" strokeWidth={1.5} className="size-[22px]" />
       {count > 0 ? (
-        <span aria-hidden="true" className="absolute top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-wine-700 px-1 text-[11px] leading-none font-semibold text-white tabular-nums">
+        <span
+          aria-hidden="true"
+          className="absolute top-1 right-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-wine-700 px-1 text-[11px] leading-none font-semibold text-white tabular-nums"
+        >
           {count > 99 ? "99+" : count}
         </span>
       ) : null}

@@ -19,7 +19,17 @@ import {
 } from "@/server/actions/cart";
 
 /** Quantidade e remover de uma linha da sacola. */
-export function CartLineControls({ itemId, name, quantity, available }: { itemId: string; name: string; quantity: number; available: number }) {
+export function CartLineControls({
+  itemId,
+  name,
+  quantity,
+  available,
+}: {
+  itemId: string;
+  name: string;
+  quantity: number;
+  available: number;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
@@ -48,7 +58,12 @@ export function CartLineControls({ itemId, name, quantity, available }: { itemId
             router.refresh();
             const removed = result.removed;
             if (!removed) return;
-            if (removed.item) track("remove_from_cart", { currency: "BRL", value: removed.item.price * removed.item.quantity, items: [removed.item] });
+            if (removed.item)
+              track("remove_from_cart", {
+                currency: "BRL",
+                value: removed.item.price * removed.item.quantity,
+                items: [removed.item],
+              });
             toast(`${removed.name} saiu da sacola`, {
               duration: 5000,
               action: {
@@ -72,7 +87,15 @@ export function CartLineControls({ itemId, name, quantity, available }: { itemId
 const MESSAGE_LIMIT = 240;
 
 /** Cartão com mensagem (gratuito) e embalagem para presente. Salva ao sair do campo e ao marcar. */
-export function GiftOptions({ giftMessage, giftWrap, giftWrapPriceCents }: { giftMessage: string | null; giftWrap: boolean; giftWrapPriceCents: number }) {
+export function GiftOptions({
+  giftMessage,
+  giftWrap,
+  giftWrapPriceCents,
+}: {
+  giftMessage: string | null;
+  giftWrap: boolean;
+  giftWrapPriceCents: number;
+}) {
   const router = useRouter();
   const [withCard, setWithCard] = useState(Boolean(giftMessage));
   const [message, setMessage] = useState(giftMessage ?? "");
@@ -89,7 +112,9 @@ export function GiftOptions({ giftMessage, giftWrap, giftWrapPriceCents }: { gif
 
   return (
     <fieldset className="border-t border-line pt-5" aria-busy={pending || undefined}>
-      <legend className="float-left mb-2 w-full type-body font-semibold text-ink">É um presente?</legend>
+      <legend className="float-left mb-2 w-full type-body font-semibold text-ink">
+        É um presente?
+      </legend>
       <div className="clear-both">
         <label className="flex min-h-11 cursor-pointer items-start gap-3 py-2.5">
           <input
@@ -139,7 +164,9 @@ export function GiftOptions({ giftMessage, giftWrap, giftWrapPriceCents }: { gif
           />
           <span className="type-small text-ink">
             Embalagem para presente
-            <span className="block text-ink-muted tabular-nums">{formatBRL(giftWrapPriceCents)}</span>
+            <span className="block text-ink-muted tabular-nums">
+              {formatBRL(giftWrapPriceCents)}
+            </span>
           </span>
         </label>
       </div>

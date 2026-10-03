@@ -2,7 +2,13 @@ import { ShoppingBag } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { CartCoupon, CartLineControls, CartShipping, GiftOptions, ViewCartTracker } from "@/components/store/cart/cart-page-controls";
+import {
+  CartCoupon,
+  CartLineControls,
+  CartShipping,
+  GiftOptions,
+  ViewCartTracker,
+} from "@/components/store/cart/cart-page-controls";
 import { CategoryLinks } from "@/components/store/category-links";
 import { FreeShippingProgress } from "@/components/store/free-shipping-progress";
 import { ProductGrid } from "@/components/store/product-card";
@@ -11,7 +17,12 @@ import { Alert, EmptyState } from "@/components/ui/feedback";
 import { Price } from "@/components/ui/price";
 import { centsToReais, formatBRL } from "@/lib/money";
 import { formatCep } from "@/lib/validators/cep";
-import { buildCartView, getCart, getCartSuggestionIds, revalidateCartStock } from "@/server/services/cart";
+import {
+  buildCartView,
+  getCart,
+  getCartSuggestionIds,
+  revalidateCartStock,
+} from "@/server/services/cart";
 import { getCards, getNavigation } from "@/server/services/catalog";
 import { getStoreSettings } from "@/server/services/settings";
 
@@ -74,27 +85,55 @@ export default async function CartPage() {
             </Alert>
           ))}
 
-          <FreeShippingProgress subtotalCents={view.subtotalCents} thresholdCents={settings.freeShippingThresholdCents} className="mb-6" />
+          <FreeShippingProgress
+            subtotalCents={view.subtotalCents}
+            thresholdCents={settings.freeShippingThresholdCents}
+            className="mb-6"
+          />
 
           <ul className="divide-y divide-line border-y border-line">
             {view.lines.map((line) => (
               <li key={line.itemId} className="flex gap-4 py-5">
-                <Link href={`/produto/${line.productSlug}`} tabIndex={-1} aria-hidden="true" className="relative aspect-4/5 w-20 flex-none overflow-hidden rounded-photo bg-white md:w-28">
-                  {line.image ? <Image src={line.image.url} alt="" fill sizes="112px" className="object-cover" /> : null}
+                <Link
+                  href={`/produto/${line.productSlug}`}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className="relative aspect-4/5 w-20 flex-none overflow-hidden rounded-photo bg-white md:w-28"
+                >
+                  {line.image ? (
+                    <Image
+                      src={line.image.url}
+                      alt=""
+                      fill
+                      sizes="112px"
+                      className="object-cover"
+                    />
+                  ) : null}
                 </Link>
                 <div className="flex min-w-0 flex-1 flex-col gap-2 md:flex-row md:justify-between md:gap-6">
                   <div className="min-w-0">
                     <h2 className="type-body font-medium text-ink">
-                      <Link href={`/produto/${line.productSlug}`} className="underline-offset-3 hover:underline">
+                      <Link
+                        href={`/produto/${line.productSlug}`}
+                        className="underline-offset-3 hover:underline"
+                      >
                         {line.name}
                       </Link>
                     </h2>
-                    {line.variantName ? <p className="type-small text-ink-muted">{line.variantName}</p> : null}
+                    {line.variantName ? (
+                      <p className="type-small text-ink-muted">{line.variantName}</p>
+                    ) : null}
                     <p className="mt-1 type-small">
-                      <Price price={line.price} size="line" /> <span className="text-ink-muted">cada</span>
+                      <Price price={line.price} size="line" />{" "}
+                      <span className="text-ink-muted">cada</span>
                     </p>
                     <div className="mt-2">
-                      <CartLineControls itemId={line.itemId} name={line.name} quantity={line.quantity} available={line.available} />
+                      <CartLineControls
+                        itemId={line.itemId}
+                        name={line.name}
+                        quantity={line.quantity}
+                        available={line.available}
+                      />
                     </div>
                   </div>
                   <p className="type-body font-semibold whitespace-nowrap text-ink tabular-nums md:text-right">
@@ -107,17 +146,26 @@ export default async function CartPage() {
           </ul>
 
           <div className="mt-6">
-            <GiftOptions giftMessage={view.giftMessage} giftWrap={view.giftWrap} giftWrapPriceCents={settings.giftWrapPriceCents} />
+            <GiftOptions
+              giftMessage={view.giftMessage}
+              giftWrap={view.giftWrap}
+              giftWrapPriceCents={settings.giftWrapPriceCents}
+            />
           </div>
         </div>
 
-        <aside aria-labelledby="resumo-sacola" className="self-start rounded-photo bg-cream-100 p-6 lg:sticky lg:top-24">
+        <aside
+          aria-labelledby="resumo-sacola"
+          className="self-start rounded-photo bg-cream-100 p-6 lg:sticky lg:top-24"
+        >
           <h2 id="resumo-sacola" className="type-h3 text-moss-900">
             Resumo
           </h2>
 
           <div className="mt-5 flex flex-col gap-5">
-            <CartCoupon applied={coupon?.ok ? { code: coupon.code, summary: coupon.summary } : null} />
+            <CartCoupon
+              applied={coupon?.ok ? { code: coupon.code, summary: coupon.summary } : null}
+            />
             {coupon && !coupon.ok ? (
               <Alert tone="warning" live>
                 O cupom {coupon.code} não vale mais para esta sacola. {coupon.error}
