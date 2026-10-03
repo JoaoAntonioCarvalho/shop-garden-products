@@ -2,11 +2,17 @@
 
 Loja online de plantas naturais, orquídeas, arranjos, vasos, cachepots, flores artificiais, decoração e jardinagem. Parceira oficial de e-commerce do Shopping Garden (São Paulo, desde 1999). Substitui o site legado (FastCommerce/ASP).
 
-A especificação completa do projeto foi entregue pelo dono no início do trabalho (22 seções). As referências "seção N" neste repositório apontam para ela. O que foi decidido a partir dela está em `docs/`.
+A especificação completa foi entregue pelo dono no início do trabalho (22 seções) e só existia na conversa. Está transcrita, de forma condensada e sem perder valores, em `docs/especificacao/`:
+
+- `01-negocio-design-dados.md`: seções 1, 5, 6, 7 (negócio, configuração, design system, modelo de dados)
+- `02-categorias-regras-loja.md`: seções 8, 9, 10, 11 (categorias e URLs antigas, regras de negócio, páginas da loja, conta)
+- `03-admin-seed-qualidade.md`: seções 12 a 21 (admin, seed, SEO, analytics, segurança, testes, entrega)
+
+As referências "seção N" neste repositório apontam para ela. Leia a parte da fase em que estiver antes de codar.
 
 ## Se o contexto foi compactado ou a sessão foi retomada
 
-Releia, nesta ordem: este arquivo, `docs/PLANO.md` (o que já foi feito) e `docs/DECISOES.md` (por quê). Continue da primeira caixa `[ ]` do plano.
+Releia, nesta ordem: este arquivo, `docs/PLANO.md` (o que já foi feito), `docs/DECISOES.md` (por quê) e a parte de `docs/especificacao/` da fase atual. Continue da primeira caixa `[ ]` do plano.
 
 ## Stack
 
