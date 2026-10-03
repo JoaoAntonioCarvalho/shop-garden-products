@@ -34,6 +34,8 @@ import {
   getSimilarCards,
   toImage,
 } from "@/server/services/catalog";
+import { isStaff } from "@/lib/permissions";
+import { getCurrentUser } from "@/lib/session";
 import { getPriceDisplay } from "@/server/services/pricing";
 import { getStoreSettings } from "@/server/services/settings";
 
@@ -58,8 +60,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const [{ slug }, query] = await Promise.all([params, searchParams]);
   const [product, settings] = await Promise.all([getProductBySlug(slug), getStoreSettings()]);
 
-  // Rascunho não existe para o público. A pré-visualização do admin fica em /admin/produtos.
-  if (!product || product.status === "DRAFT") notFound();
+  if (!product) notFound();
+  // Rascunho não existe para o público. A equipe vê a prévia pelo botão "Ver prévia" do painel.
+  if (product.status === "DRAFT") {
+    const viewer = query.previa === "1" ? await getCurrentUser() : null;
+    if (!isStaff(viewer)) notFound();
+  }
 
   if (product.status === "ARCHIVED") {
     const similar = await getSimilarCards(product.primaryCategoryId, product.id, settings);

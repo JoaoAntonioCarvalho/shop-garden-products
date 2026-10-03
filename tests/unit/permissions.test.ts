@@ -19,7 +19,13 @@ describe("matriz de permissões (seção 12.2)", () => {
   });
 
   it("STAFF em pedidos: vê, altera status, rastreio, notas, imprime e cria pedido manual; sem estorno", () => {
-    for (const permission of ["orders.view", "orders.update_status", "orders.notes", "orders.print", "orders.create_manual"] as const) {
+    for (const permission of [
+      "orders.view",
+      "orders.update_status",
+      "orders.notes",
+      "orders.print",
+      "orders.create_manual",
+    ] as const) {
       expect(can(staff, permission), permission).toBe(true);
     }
     expect(can(staff, "orders.refund")).toBe(false);
@@ -31,7 +37,15 @@ describe("matriz de permissões (seção 12.2)", () => {
     expect(can(staff, "products.view")).toBe(true);
     expect(can(staff, "products.edit_images")).toBe(true);
     expect(can(staff, "inventory.adjust")).toBe(true);
-    for (const permission of ["products.edit", "products.edit_price", "products.delete", "products.view_cost", "products.remove_samples", "categories.edit", "media.delete"] as const) {
+    for (const permission of [
+      "products.edit",
+      "products.edit_price",
+      "products.delete",
+      "products.view_cost",
+      "products.remove_samples",
+      "categories.edit",
+      "media.delete",
+    ] as const) {
       expect(can(staff, permission), permission).toBe(false);
     }
   });
@@ -44,18 +58,34 @@ describe("matriz de permissões (seção 12.2)", () => {
   it("STAFF em clientes: vê e adiciona notas; sem exportar, editar nem anonimizar", () => {
     expect(can(staff, "customers.view")).toBe(true);
     expect(can(staff, "customers.notes")).toBe(true);
-    for (const permission of ["customers.export", "customers.edit", "customers.anonymize"] as const) expect(can(staff, permission)).toBe(false);
+    for (const permission of ["customers.export", "customers.edit", "customers.anonymize"] as const)
+      expect(can(staff, permission)).toBe(false);
   });
 
   it("STAFF em marketing: avaliações, solicitações e leads (sem exportar); sem cupons, banners, home e páginas", () => {
     expect(can(staff, "reviews.manage")).toBe(true);
     expect(can(staff, "requests.manage")).toBe(true);
     expect(can(staff, "leads.view")).toBe(true);
-    for (const permission of ["leads.export", "coupons.manage", "banners.manage", "home.manage", "pages.manage"] as const) expect(can(staff, permission)).toBe(false);
+    for (const permission of [
+      "leads.export",
+      "coupons.manage",
+      "banners.manage",
+      "home.manage",
+      "pages.manage",
+    ] as const)
+      expect(can(staff, permission)).toBe(false);
   });
 
   it("STAFF não acessa frete, configurações, usuários, redirecionamentos, auditoria e e-mails", () => {
-    for (const permission of ["shipping.manage", "settings.manage", "users.manage", "redirects.manage", "audit.view", "emails.view", "jobs.manage"] as const) {
+    for (const permission of [
+      "shipping.manage",
+      "settings.manage",
+      "users.manage",
+      "redirects.manage",
+      "audit.view",
+      "emails.view",
+      "jobs.manage",
+    ] as const) {
       expect(can(staff, permission), permission).toBe(false);
     }
   });

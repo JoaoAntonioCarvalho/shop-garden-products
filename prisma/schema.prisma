@@ -328,6 +328,8 @@ model Product {
   minPriceCents  Int   @default(0)
   /// Soma do disponível das variantes ativas.
   totalAvailable Int   @default(0)
+  /// Qualidade de cadastro, de 0 a 100 (src/lib/product-quality.ts). Recalculada a cada alteração.
+  qualityScore   Int   @default(0)
 
   /// Texto de busca sem acento e em minúsculas (nome, nome científico, nome popular, tags, SKU, categoria).
   /// Mantido pelo serviço de catálogo; indexado com pg_trgm.
@@ -357,6 +359,7 @@ model Product {
   @@index([productType])
   @@index([isSample])
   @@index([isFeatured])
+  @@index([qualityScore])
   @@index([tags], type: Gin)
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
 }

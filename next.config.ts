@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
     // senhas (login, cadastro) e dados pessoais (checkout), então fica desligado.
     serverFunctions: false,
   },
+  experimental: {
+    // A importação de produtos envia o CSV do site antigo por server action.
+    serverActions: { bodySizeLimit: "12mb" },
+  },
 };
 
 export default nextConfig;

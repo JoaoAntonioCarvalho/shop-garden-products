@@ -46,8 +46,17 @@ export type DataRow = { id: string; cells: Record<string, ReactNode> };
 
 export type BulkAction = {
   label: string;
-  /** Server action que recebe os ids selecionados. */
-  action: (ids: string[]) => Promise<AdminResult<unknown>>;
+  /** Server action que recebe os ids selecionados (e o valor digitado, quando a ação pede um). */
+  action: (ids: string[], value?: string) => Promise<AdminResult<unknown>>;
+  /** Campo pedido antes de executar: categoria, coleção, tags, porcentagem... */
+  input?: {
+    label: string;
+    type: "select" | "text";
+    options?: Array<{ value: string; label: string }>;
+    placeholder?: string;
+  };
+  /** Prévia calculada no servidor a partir da seleção e do valor. */
+  preview?: (ids: string[], value?: string) => Promise<string[]>;
   /** Pede confirmação antes de executar. */
   confirm?: string;
   destructive?: boolean;
@@ -98,6 +107,8 @@ export function DataTable({
   const urlFor = useListUrl();
   const [selection, setSelection] = useState<Record<string, true>>({});
   const [confirming, setConfirming] = useState<BulkAction | null>(null);
+  const [value, setValue] = useState("");
+  const [preview, setPreview] = useState<string[] | null>(null);
   const [pending, startTransition] = useTransition();
   const selectable = bulkActions.length > 0;
 
@@ -122,7 +133,7 @@ export function DataTable({
 
   function run(action: BulkAction) {
     startTransition(async () => {
-      const result = await action.action(selectedIds);
+      const result = await action.action(selectedIds, action.input ? value : undefined);
       if (result.ok) {
         toast(result.message);
         setSelection({});
@@ -151,7 +162,12 @@ export function DataTable({
               size="sm"
               variant={action.destructive ? "destructive" : "outline"}
               disabled={pending}
-              onClick={() => (action.confirm ? setConfirming(action) : run(action))}
+              onClick={() => {
+                setValue(action.input?.options?.[0]?.value ?? "");
+                setPreview(null);
+                if (action.confirm || action.input) setConfirming(action);
+                else run(action);
+              }}
             >
               {action.label}
             </Button>
@@ -295,6 +311,56 @@ export function DataTable({
               {selectedIds.length === 1 ? "item selecionado" : "itens selecionados"})
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {confirming?.input ? (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="acao-em-massa-valor" className="text-sm font-medium">
+                {confirming.input.label}
+              </label>
+              {confirming.input.type === "select" ? (
+                <select
+                  id="acao-em-massa-valor"
+                  value={value}
+                  onChange={(event) => setValue(event.target.value)}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                >
+                  {confirming.input.options?.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id="acao-em-massa-valor"
+                  value={value}
+                  placeholder={confirming.input.placeholder}
+                  onChange={(event) => setValue(event.target.value)}
+                  className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                />
+              )}
+              {confirming.preview ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="self-start"
+                  onClick={async () => setPreview(await confirming.preview!(selectedIds, value))}
+                >
+                  Ver prévia
+                </Button>
+              ) : null}
+              {preview ? (
+                <ul
+                  aria-live="polite"
+                  className="max-h-48 overflow-y-auto text-sm text-muted-foreground"
+                >
+                  {preview.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
           <AlertDialogFooter>
             <AlertDialogCancel>Voltar</AlertDialogCancel>
             <AlertDialogAction disabled={pending} onClick={() => confirming && run(confirming)}>

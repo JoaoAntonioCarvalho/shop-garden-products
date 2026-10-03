@@ -1,3 +1,4 @@
+import { productQuality } from "../../src/lib/product-quality";
 import { randomBytes } from "node:crypto";
 import type { LeadSource, Prisma } from "../../src/generated/prisma/client";
 import { normalizeText } from "../../src/lib/slug";
@@ -253,4 +254,28 @@ export async function recomputeAggregates() {
           FROM "ProductVariant" WHERE "isActive" GROUP BY "productId") v
     WHERE v."productId" = p.id`);
   log("Agregados dos produtos", "ok");
+}
+
+/** Nota de qualidade de cadastro de cada produto (a mesma conta do painel). */
+export async function recomputeQualityScores() {
+  const products = await db.product.findMany({
+    include: {
+      images: { select: { media: { select: { alt: true } } } },
+      variants: { where: { isActive: true }, select: { weightGrams: true } },
+    },
+  });
+  let changed = 0;
+  for (const product of products) {
+    const { score } = productQuality({
+      ...product,
+      descriptionText: (product.description ?? "").replace(/<[^>]+>/g, " "),
+      images: product.images.map((image) => ({ alt: image.media.alt })),
+      variantWeights: product.variants.map((variant) => variant.weightGrams),
+    });
+    if (score !== product.qualityScore) {
+      await db.product.update({ where: { id: product.id }, data: { qualityScore: score } });
+      changed++;
+    }
+  }
+  console.log(`  qualidade de cadastro: ${changed} produtos atualizados`);
 }

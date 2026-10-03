@@ -4,7 +4,7 @@
  */
 import { seedCustomers, seedUsers, TEST_CUSTOMER, TEST_STAFF } from "./customers";
 import { db } from "./helpers";
-import { recomputeAggregates, seedMarketing } from "./marketing";
+import { recomputeAggregates, recomputeQualityScores, seedMarketing } from "./marketing";
 import { seedOrders } from "./orders";
 import { seedPages } from "./pages";
 import { seedCategoryTree, seedCollections, seedProducts } from "./products";
@@ -30,6 +30,7 @@ async function main() {
   await seedPages();
   await seedMarketing(customers, variants);
   await recomputeAggregates();
+  await recomputeQualityScores();
 
   console.log(`\nConcluído em ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
   console.log(`  Admin:   ${process.env.ADMIN_EMAIL} (senha em ADMIN_PASSWORD no .env)`);

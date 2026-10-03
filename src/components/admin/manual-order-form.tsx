@@ -2,7 +2,8 @@
 
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { SearchPicker } from "@/components/admin/search-picker";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
@@ -45,67 +46,6 @@ const paymentOptions: Array<[PaymentKey, string]> = [
   ["CASH", "Dinheiro"],
   ["PAYMENT_LINK", "Link de pagamento"],
 ];
-
-/** Busca com resultados em lista, usada para clientes e produtos. */
-function SearchPicker<T>({
-  id,
-  label,
-  placeholder,
-  search,
-  render,
-  onPick,
-}: {
-  id: string;
-  label: string;
-  placeholder: string;
-  search: (query: string) => Promise<T[]>;
-  render: (hit: T) => string;
-  onPick: (hit: T) => void;
-}) {
-  const [query, setQuery] = useState("");
-  const [hits, setHits] = useState<T[]>([]);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        value={query}
-        placeholder={placeholder}
-        autoComplete="off"
-        onChange={(event) => {
-          const value = event.target.value;
-          setQuery(value);
-          clearTimeout(timer.current);
-          timer.current = setTimeout(
-            async () => setHits(value.trim().length >= 2 ? await search(value) : []),
-            300,
-          );
-        }}
-      />
-      {hits.length > 0 ? (
-        <ul className="max-h-56 overflow-y-auto rounded-md border border-border bg-background">
-          {hits.map((hit, index) => (
-            <li key={index}>
-              <button
-                type="button"
-                className="flex min-h-9 w-full items-center px-3 text-left text-sm hover:bg-accent"
-                onClick={() => {
-                  onPick(hit);
-                  setHits([]);
-                  setQuery("");
-                }}
-              >
-                {render(hit)}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  );
-}
 
 export function ManualOrderForm({ canOverridePrice }: { canOverridePrice: boolean }) {
   const router = useRouter();

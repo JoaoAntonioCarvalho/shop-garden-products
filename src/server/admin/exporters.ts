@@ -1,5 +1,5 @@
 import "server-only";
-import { formatDateTime } from "@/lib/dates";
+import { formatDate, formatDateTime } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { formatCentsPlain } from "@/lib/money";
 import type { Permission } from "@/lib/permissions";
@@ -8,7 +8,11 @@ import {
   paymentMethodLabels,
   paymentStatusLabels,
 } from "@/server/services/order-status";
+import { stripHtml } from "@/lib/sanitize";
 import type { ListParams } from "./list";
+import { IMPORT_FIELDS } from "./product-import";
+import { productWhere } from "./product-queries";
+import { productTypeLabels } from "./products";
 import { channelLabels, orderWhere, sourceLabel } from "./orders";
 
 export type Exporter = {
@@ -75,6 +79,58 @@ export const exporters: Record<string, Exporter> = {
           sourceLabel(order),
           order.couponCode,
         ]),
+      };
+    },
+  },
+  produtos: {
+    permission: "products.export",
+    auditEntity: "products",
+    build: async (params) => {
+      const products = await db.product.findMany({
+        where: await productWhere(params),
+        orderBy: { name: "asc" },
+        take: EXPORT_LIMIT,
+        include: {
+          primaryCategory: { select: { name: true, parent: { select: { name: true } } } },
+          variants: { orderBy: { position: "asc" } },
+        },
+      });
+      // Mesmo formato do modelo de importação: uma linha por variação.
+      return {
+        headers: IMPORT_FIELDS.map((field) => field.column),
+        rows: products.flatMap((product) =>
+          product.variants.map((variant) => [
+            product.sku,
+            product.name,
+            product.primaryCategory
+              ? [product.primaryCategory.parent?.name, product.primaryCategory.name]
+                  .filter(Boolean)
+                  .join(" > ")
+              : "",
+            productTypeLabels[product.productType],
+            product.status === "ACTIVE"
+              ? "publicado"
+              : product.status === "DRAFT"
+                ? "rascunho"
+                : "arquivado",
+            product.brand,
+            product.tags.join(", "),
+            product.shortDescription,
+            stripHtml(product.description),
+            "",
+            variant.sku,
+            variant.name,
+            formatCentsPlain(variant.priceCents),
+            variant.compareAtPriceCents == null
+              ? ""
+              : formatCentsPlain(variant.compareAtPriceCents),
+            variant.promoPriceCents == null ? "" : formatCentsPlain(variant.promoPriceCents),
+            variant.promoStartsAt ? formatDate(variant.promoStartsAt) : "",
+            variant.promoEndsAt ? formatDate(variant.promoEndsAt) : "",
+            variant.stockOnHand,
+            variant.weightGrams,
+          ]),
+        ),
       };
     },
   },
