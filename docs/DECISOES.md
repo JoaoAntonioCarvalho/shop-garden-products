@@ -197,3 +197,14 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **`SortableList` guarda só a ordem dos ids**, e o conteúdo de cada item vem sempre das props. Antes, qualquer nova renderização do componente pai desfazia a ordem otimista.
 - **Ainda não feito, para lembrar:** etiquetas e rastreio automático dependem da escolha da transportadora ou do serviço de frete (item em `docs/PENDENCIAS-DO-DONO.md`). A posição de banner "Faixa secundária da home" existe no painel, mas a loja ainda não tem a seção que a exibe.
 - **Testes:** 217 no Vitest e 20 no Playwright.
+
+## 2026-10-03 — Integração com os Correios
+
+- **Escrita a partir da descrição OpenAPI oficial** (`api.correios.com.br/{token,preco,prazo,srorastro}/v3/api-docs`): token por cartão de postagem (Basic com usuário e código de acesso), preço e prazo em lote (`POST /preco/v1/nacional`, `POST /prazo/v1/nacional`) e rastro (`GET /srorastro/v1/objetos/{codigo}`). **Não foi testada com credenciais reais**: não há contrato disponível. Os 17 testes usam `fetch` simulado. A única chamada real feita foi ao endpoint de token com credenciais inválidas, que respondeu 401 como esperado.
+- **Os Correios trocam só preço e prazo das modalidades nacionais.** As regras do painel continuam decidindo onde cada modalidade existe, a entrega local, o frete grátis e os itens só locais. Assim o provider novo não duplica regra de negócio.
+- **Falha dos Correios não para o checkout:** rede, tempo esgotado (8 s) ou autenticação recusada fazem valer a tabela do painel, com registro no log. Erro por serviço (`txErro`) tira a modalidade, porque oferecer um envio que os Correios não fazem seria pior.
+- **Pacote estimado**, não cadastrado: base da maior caixa, altura pelo volume somado, 4 cm de folga. Não há campo de dimensões de embalagem no produto; se a estimativa se mostrar ruim na prática, o caminho é criar esses campos.
+- **Cache em memória** de 10 minutos para cotação e 15 para rastreio, e token guardado em memória até perto de vencer. Em hospedagem com várias instâncias cada uma tem o seu; funciona, só consulta mais.
+- **Entrega automática** pela tarefa `rastreio-correios`: evento BDE, BDI ou BDR com tipo 00 ou 01. Passa por `transitionOrder`, então grava histórico e manda o e-mail.
+- **Códigos de serviço padrão** `03298` (PAC) e `03220` (SEDEX) vieram de memória, não da documentação consultada. São configuráveis e precisam ser conferidos no contrato.
+- **Não feito:** pré-postagem (etiqueta e geração do código de rastreio).

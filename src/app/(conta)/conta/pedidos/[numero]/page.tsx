@@ -1,3 +1,4 @@
+import { CarrierTracking } from "@/components/store/carrier-tracking";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -168,6 +169,7 @@ export default async function AccountOrderPage({ params }: PageProps<"/conta/ped
                 <strong className="font-semibold">{order.trackingCode}</strong>
               </p>
             ) : null}
+            <CarrierTracking code={order.trackingCode} />
           </section>
           <section
             aria-labelledby="entrega"

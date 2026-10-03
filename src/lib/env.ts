@@ -29,20 +29,60 @@ const serverEnvSchema = z.object({
   S3_SECRET_KEY: optionalString,
   S3_PUBLIC_URL: optionalString,
   PAYMENT_PROVIDER: z.enum(["mock"]).default("mock"),
-  SHIPPING_PROVIDER: z.enum(["mock"]).default("mock"),
+  SHIPPING_PROVIDER: z.enum(["mock", "correios"]).default("mock"),
+  // Correios (contrato): usuário do Meu Correios, código de acesso às APIs e cartão de postagem.
+  CORREIOS_USER: optionalString,
+  CORREIOS_ACCESS_CODE: optionalString,
+  CORREIOS_POSTING_CARD: optionalString,
+  CORREIOS_CONTRACT: optionalString,
+  CORREIOS_DR: z.preprocess(emptyToUndefined, z.coerce.number().int().optional()),
+  CORREIOS_ORIGIN_CEP: optionalString,
+  CORREIOS_BASE_URL: z.url().default("https://api.correios.com.br"),
+  CORREIOS_SERVICE_ECONOMY: z.string().default("03298"),
+  CORREIOS_SERVICE_EXPRESS: z.string().default("03220"),
+  CORREIOS_HANDLING_DAYS: z.coerce.number().int().min(0).max(10).default(1),
   ENABLE_PAYMENT_SIMULATOR: booleanFlag(false),
   CRON_SECRET: optionalString,
   VIACEP_ENABLED: booleanFlag(true),
 });
 
+const CORREIOS_REQUIRED = [
+  "CORREIOS_USER",
+  "CORREIOS_ACCESS_CODE",
+  "CORREIOS_POSTING_CARD",
+  "CORREIOS_ORIGIN_CEP",
+] as const;
+
+const checkedEnvSchema = serverEnvSchema.superRefine((env, context) => {
+  if (env.SHIPPING_PROVIDER !== "correios") return;
+  for (const key of CORREIOS_REQUIRED) {
+    if (!env[key])
+      context.addIssue({
+        code: "custom",
+        path: [key],
+        message: "obrigatória quando SHIPPING_PROVIDER=correios",
+      });
+  }
+  if (env.CORREIOS_ORIGIN_CEP && !/^\d{5}-?\d{3}$/.test(env.CORREIOS_ORIGIN_CEP))
+    context.addIssue({
+      code: "custom",
+      path: ["CORREIOS_ORIGIN_CEP"],
+      message: "CEP de origem inválido",
+    });
+});
+
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
+
+/** Valida um conjunto de variáveis sem guardar o resultado (usado nos testes). */
+export const parseEnv = (source: Record<string, string | undefined>) =>
+  checkedEnvSchema.safeParse(source);
 
 let cached: ServerEnv | undefined;
 
 /** Variáveis de ambiente do servidor, validadas na primeira leitura. Nunca importar em Client Components. */
 export function getEnv(): ServerEnv {
   if (cached) return cached;
-  const parsed = serverEnvSchema.safeParse(process.env);
+  const parsed = checkedEnvSchema.safeParse(process.env);
   if (!parsed.success) {
     const issues = parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`);
     throw new Error(`Variáveis de ambiente inválidas:\n${issues.join("\n")}`);

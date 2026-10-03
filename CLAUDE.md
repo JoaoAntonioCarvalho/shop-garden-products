@@ -103,6 +103,7 @@ Atualizado ao longo do projeto.
 | Sacola (cookie, itens, visão calculada)  | `src/server/services/cart.ts`, `src/components/store/cart/`                                                   |
 | Cupons e totais (puros)                  | `src/server/services/coupons.ts`, `totals.ts`                                                                 |
 | Frete                                    | `src/server/services/shipping.ts`, `src/server/providers/shipping/`                                           |
+| Correios (preço, prazo, rastreio)        | `src/server/providers/shipping/correios/`, `src/server/services/tracking.ts`                                  |
 | Estoque (reserva, baixa, liberação)      | `src/server/services/inventory.ts`                                                                            |
 | Estados do pedido                        | `order-status.ts` (puro) e `orders.ts` (`transitionOrder`)                                                    |
 | Criação do pedido                        | `src/server/services/checkout.ts` (`placeOrder`)                                                              |

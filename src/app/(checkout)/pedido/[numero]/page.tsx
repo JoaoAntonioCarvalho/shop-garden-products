@@ -1,3 +1,4 @@
+import { CarrierTracking } from "@/components/store/carrier-tracking";
 import { CircleCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -269,6 +270,7 @@ export default async function OrderPage({ params, searchParams }: Props) {
                 <strong className="font-semibold">{order.trackingCode}</strong>
               </p>
             ) : null}
+            <CarrierTracking code={order.trackingCode} />
           </section>
 
           <section aria-labelledby="entrega-pedido" className="rounded-photo bg-white p-6">

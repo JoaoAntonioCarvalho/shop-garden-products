@@ -4,6 +4,7 @@ import { refreshAllQualityScores } from "@/server/admin/products";
 import { invalidate } from "@/server/cache";
 import { sendInternalEmail } from "@/server/services/emails";
 import { expireOverduePayments } from "@/server/services/payments";
+import { syncCarrierDeliveries } from "@/server/services/tracking";
 
 export type Job = {
   key: string;
@@ -103,6 +104,18 @@ export const JOBS: Job[] = [
         .deleteMany({ where: { windowStart: { lt: new Date(Date.now() - 2 * 86_400_000) } } })
         .catch(() => undefined);
       return `${carts.count} ${carts.count === 1 ? "carrinho apagado" : "carrinhos apagados"}`;
+    },
+  },
+  {
+    key: "rastreio-correios",
+    label: "Conferir entregas nos Correios",
+    description:
+      "Consulta o rastreio dos pedidos enviados pelos Correios e marca como entregues os que já chegaram. Só funciona com a integração dos Correios ligada.",
+    schedule: "A cada 2 horas",
+    run: async () => {
+      const result = await syncCarrierDeliveries();
+      if (!result.enabled) return "Integração dos Correios desligada";
+      return `${result.checked} pedidos conferidos, ${result.delivered} marcados como entregues`;
     },
   },
 ];

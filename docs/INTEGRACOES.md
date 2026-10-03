@@ -22,16 +22,44 @@ O simulador de pagamento some sozinho em produção.
 
 ## 2. Frete por transportadora
 
-**Hoje:** `SHIPPING_PROVIDER=mock`. As opções vêm das regras de **Frete e entrega** do painel (faixa de CEP, valor por peso, prazo). A entrega local (hoje e agendada) continua por essas regras mesmo com uma transportadora ligada.
+**Padrão:** `SHIPPING_PROVIDER=mock`. As opções vêm das regras de **Frete e entrega** do painel (faixa de CEP, valor por peso, prazo).
 
 **Interface:** `src/server/providers/shipping/types.ts` (`ShippingProvider.quote`).
 
-**Para ligar (Melhor Envio, Correios, Frenet...):**
+### Correios (pronto, falta ligar)
 
-1. Crie o provider implementando `quote()`: recebe CEP, itens (peso, dimensões) e subtotal, e devolve as opções.
-2. Registre em `src/server/providers/shipping/index.ts`. `src/server/services/shipping.ts` continua aplicando frete grátis, itens só locais e feriados.
-3. Cadastre peso e dimensões reais nos produtos: a nota de qualidade do cadastro aponta os que faltam.
-4. Etiquetas e rastreio automático ainda não foram feitos (pendência registrada em `docs/PENDENCIAS-DO-DONO.md`). Hoje o código de rastreio é digitado no pedido. Se a nota fiscal for pelo Bling, a etiqueta e o rastreio podem vir de lá (seção 5).
+`SHIPPING_PROVIDER=correios` liga preço, prazo e rastreio pelas APIs dos Correios (`api.correios.com.br`: token, preço, prazo e rastro). O código está em `src/server/providers/shipping/correios/` e foi escrito a partir da descrição oficial das APIs (`/token/v3/api-docs`, `/preco/v3/api-docs`, `/prazo/v3/api-docs`, `/srorastro/v3/api-docs`). **Ainda não rodou com credenciais reais**: os testes usam respostas simuladas. A primeira ligação deve ser feita em homologação (`CORREIOS_BASE_URL=https://apihom.correios.com.br`).
+
+**O que é preciso ter:**
+
+1. Contrato com os Correios, com cartão de postagem. Sem contrato, estas APIs não autorizam preço nem rastreio.
+2. Usuário do Meu Correios e um código de acesso às APIs, gerado no portal Correios API (cws.correios.com.br). Não é a senha de login.
+3. As APIs de preço, prazo e rastro liberadas para o cartão de postagem.
+4. Os códigos de serviço do contrato. Os padrões são `03298` (PAC) e `03220` (SEDEX); confira no contrato e ajuste `CORREIOS_SERVICE_ECONOMY` e `CORREIOS_SERVICE_EXPRESS` se forem outros.
+
+As variáveis estão em `.env.example` (`CORREIOS_*`). Com `SHIPPING_PROVIDER=correios`, usuário, código de acesso, cartão de postagem e CEP de origem são obrigatórios e a aplicação não sobe sem eles.
+
+**Como funciona:**
+
+- As regras de **Frete e entrega** continuam mandando no que é da loja: onde cada modalidade é oferecida, entrega hoje, entrega agendada, retirada, frete grátis e itens só locais.
+- Nas modalidades nacionais, o valor e o prazo da regra são trocados pelos dos Correios: "econômico" usa o PAC e "expresso" usa o SEDEX. Ao prazo dos Correios soma-se `CORREIOS_HANDLING_DAYS` (dias úteis para separar e postar).
+- Frete grátis continua sendo decisão da loja: o cliente paga zero e o valor dos Correios fica como valor original.
+- O pacote é estimado pelo peso da variação e pelas medidas do produto (largura, profundidade, altura), com 4 cm de folga. Sem medidas, usa 20 × 20 × 20 cm; sem peso, 300 g. **Cadastre peso e medidas reais**, senão a cotação sai errada.
+- Se os Correios estiverem fora do ar ou a autenticação falhar, vale a tabela do painel, para o checkout não parar. Mantenha a tabela com valores realistas.
+- Se os Correios responderem que o serviço não atende o envio (CEP, peso, medidas acima de 100 cm por lado ou 200 cm na soma), a modalidade não é oferecida.
+- A mesma cotação é reaproveitada por 10 minutos, na memória do servidor.
+
+**Rastreio:**
+
+- Quando o código de rastreio do pedido é dos Correios (duas letras, nove dígitos, duas letras), a movimentação aparece na página do pedido, na área do cliente e no painel.
+- A tarefa agendada `rastreio-correios` (a cada 2 horas, em `/api/cron/rastreio-correios`) confere os pedidos enviados e marca como entregues os que têm o evento de entrega. O cliente recebe o e-mail de pedido entregue.
+
+**O que ainda não faz:** gerar a etiqueta e o código de rastreio (API de pré-postagem). Hoje a equipe posta pelo sistema dos Correios e digita o código ao marcar o pedido como enviado.
+
+### Outra transportadora (Melhor Envio, Frenet...)
+
+1. Crie o provider implementando `quote()`, no modelo do `CorreiosShippingProvider`.
+2. Registre em `src/server/providers/shipping/index.ts` e acrescente o nome em `SHIPPING_PROVIDER` (`src/lib/env.ts`).
 
 ## 3. E-mail
 

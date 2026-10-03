@@ -84,26 +84,38 @@ Todos os valores abaixo são exemplos.
 
 ## Integrações a contratar
 
-| Integração               | Situação hoje                           | O que falta                                                 |
-| ------------------------ | --------------------------------------- | ----------------------------------------------------------- |
-| Gateway de pagamento     | Simulado (Pix, cartão, boleto)          | Escolher o gateway e implementar o provider                 |
-| Transportadora           | Simulada, pelas regras de Admin > Frete | Contratar (Melhor Envio, Correios) e implementar o provider |
-| E-mail transacional      | SMTP local (Mailpit)                    | Contratar um SMTP e configurar o domínio                    |
-| Armazenamento de imagens | Pasta local                             | Bucket S3 ou R2 em produção                                 |
-| Nota fiscal              | Não há                                  | Ligar ao Bling, que a loja já usa (ver abaixo)              |
-| Etiquetas e rastreio     | Código de rastreio digitado no pedido   | Depende da transportadora ou do Bling (ver abaixo)          |
-| WhatsApp Business API    | Links e mensagens copiadas à mão        | Só se quiser mensagens automáticas                          |
+| Integração               | Situação hoje                         | O que falta                                                  |
+| ------------------------ | ------------------------------------- | ------------------------------------------------------------ |
+| Gateway de pagamento     | Simulado (Pix, cartão, boleto)        | Escolher o gateway e implementar o provider                  |
+| Transportadora           | Correios pronto, desligado            | Contrato, cartão de postagem e código de acesso (ver abaixo) |
+| E-mail transacional      | SMTP local (Mailpit)                  | Contratar um SMTP e configurar o domínio                     |
+| Armazenamento de imagens | Pasta local                           | Bucket S3 ou R2 em produção                                  |
+| Nota fiscal              | Não há                                | Ligar ao Bling, que a loja já usa (ver abaixo)               |
+| Etiquetas e rastreio     | Código de rastreio digitado no pedido | Depende da transportadora ou do Bling (ver abaixo)           |
+| WhatsApp Business API    | Links e mensagens copiadas à mão      | Só se quiser mensagens automáticas                           |
 
 O passo a passo de cada uma está em `docs/INTEGRACOES.md`.
 
+### Para ligar os Correios
+
+A integração de preço, prazo e rastreio está escrita e testada com respostas simuladas, mas nunca rodou com credenciais reais. Para ligar:
+
+- [ ] Contrato com os Correios e número do cartão de postagem.
+- [ ] Usuário do Meu Correios e código de acesso às APIs (gerado no portal Correios API).
+- [ ] Liberar as APIs de preço, prazo e rastro para o cartão de postagem.
+- [ ] Confirmar os códigos do PAC e do SEDEX do contrato (padrões: `03298` e `03220`).
+- [ ] CEP de onde os pedidos são postados.
+- [ ] Peso e medidas reais nos produtos (a cotação usa esses dados).
+- [ ] Primeiro teste em homologação, depois produção. Passo a passo em `docs/INTEGRACOES.md`, seção 2.
+
 ### Para lembrar: etiquetas e rastreio automático
 
-É o único item da especificação que continua sem fazer. Hoje a equipe digita a transportadora e o código de rastreio ao marcar o pedido como enviado, e a etiqueta impressa pelo painel é só de endereço, sem postagem. Para automatizar é preciso decidir por onde as etiquetas vão sair:
+O rastreio automático está feito para os Correios (movimentação no pedido e baixa automática de entregue), e entra em uso quando a integração for ligada. Continua faltando gerar a etiqueta: hoje a equipe posta pelo sistema dos Correios e digita o código de rastreio ao marcar o pedido como enviado. Para automatizar é preciso decidir por onde as etiquetas vão sair:
 
 - [ ] Pelo Bling (se a nota fiscal for por ele, a logística do Bling gera a etiqueta e devolve o rastreio), ou
-- [ ] Por um serviço de frete ligado direto à loja (Melhor Envio, Frenet, Correios).
+- [ ] Pela API de pré-postagem dos Correios, ligada direto à loja, ou por outro serviço de frete (Melhor Envio, Frenet).
 
-Depois da escolha, o trabalho é: gerar a etiqueta ao iniciar a preparação, gravar o código de rastreio no pedido sozinho e atualizar o status quando a transportadora avisar a entrega.
+Depois da escolha, o trabalho é gerar a etiqueta ao iniciar a preparação e gravar o código de rastreio no pedido sozinho.
 
 ### Para lembrar: nota fiscal pelo Bling
 

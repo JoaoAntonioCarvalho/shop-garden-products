@@ -1,3 +1,4 @@
+import { CarrierTracking } from "@/components/store/carrier-tracking";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -322,6 +323,7 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/pedid
                 <strong>{order.trackingCode}</strong>
               </p>
             ) : null}
+            <CarrierTracking code={order.trackingCode} variant="admin" />
             <div className="mt-3 flex flex-wrap gap-2">
               <CopyButton value={addressLines.join(", ")} label="Copiar endereço" />
               <Button asChild size="sm" variant="outline">
