@@ -37,6 +37,7 @@ pnpm dev                  # http://localhost:3100
 pnpm lint && pnpm typecheck && pnpm test && pnpm build   # rodar ao final de cada fase, nesta ordem
 pnpm test:e2e
 pnpm db:migrate | db:deploy | db:seed | db:reset | db:studio
+# db:reset apaga o banco: o Prisma só deixa um agente rodar com consentimento explícito do dono
 pnpm images:placeholders
 ```
 
@@ -69,23 +70,28 @@ pnpm images:placeholders
 
 Atualizado ao longo do projeto.
 
-| O quê                             | Onde                                                      |
-| --------------------------------- | --------------------------------------------------------- |
-| Proxy (antigo middleware do Next) | `src/proxy.ts`                                            |
-| Variáveis de ambiente validadas   | `src/lib/env.ts`                                          |
-| Cliente Prisma                    | `src/lib/db.ts` (config em `prisma7.config.ts`)           |
-| Configuração central da loja      | `src/config/store.config.ts`                              |
-| Tokens do design system           | `src/app/globals.css` (`@theme`) e `src/lib/color.ts`     |
-| Primitivas da loja                | `src/components/ui/`                                      |
-| Componentes da loja               | `src/components/store/`                                   |
-| Página de design system           | `/dev/design-system` (fora de produção)                   |
-| Árvore de categorias e menu       | `src/config/category-tree.ts`, `src/config/navigation.ts` |
-| Cálculo de preço                  | `src/server/services/pricing.ts` (`getPriceDisplay`)      |
-| Validadores e máscaras            | `src/lib/validators/`                                     |
-| Eventos de analytics              | `src/lib/analytics/events.ts` (`track`)                   |
-| Screenshots para revisão visual   | `pnpm tsx scripts/screenshots.ts <pasta> /caminho`        |
-| Plano e progresso                 | `docs/PLANO.md`                                           |
-| Decisões                          | `docs/DECISOES.md`                                        |
-| Pendências do dono                | `docs/PENDENCIAS-DO-DONO.md`                              |
+| O quê                             | Onde                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------- |
+| Proxy (antigo middleware do Next) | `src/proxy.ts`                                                                          |
+| Variáveis de ambiente validadas   | `src/lib/env.ts`                                                                        |
+| Cliente Prisma                    | `src/lib/db.ts` (config em `prisma7.config.ts`)                                         |
+| Configuração central da loja      | `src/config/store.config.ts`                                                            |
+| Tokens do design system           | `src/app/globals.css` (`@theme`) e `src/lib/color.ts`                                   |
+| Primitivas da loja                | `src/components/ui/`                                                                    |
+| Componentes da loja               | `src/components/store/`                                                                 |
+| Página de design system           | `/dev/design-system` (fora de produção)                                                 |
+| Árvore de categorias e menu       | `src/config/category-tree.ts`, `src/config/navigation.ts`                               |
+| Cálculo de preço                  | `src/server/services/pricing.ts` (`getPriceDisplay`)                                    |
+| Validadores e máscaras            | `src/lib/validators/`                                                                   |
+| Eventos de analytics              | `src/lib/analytics/events.ts` (`track`)                                                 |
+| Screenshots para revisão visual   | `pnpm tsx scripts/screenshots.ts <pasta> /caminho`                                      |
+| Schema e migrações                | `prisma/schema.prisma`, `prisma/migrations/`                                            |
+| Seed                              | `prisma/seed/` (`index.ts` orquestra; `product-data.ts` é o catálogo de teste)          |
+| Imagens placeholder               | `scripts/generate-placeholders.ts`                                                      |
+| Armazenamento e imagens           | `src/server/providers/storage/`, `src/server/services/media.ts`, rota `/media/[...key]` |
+| Normalização de URLs antigas      | `src/lib/redirects.ts`                                                                  |
+| Plano e progresso                 | `docs/PLANO.md`                                                                         |
+| Decisões                          | `docs/DECISOES.md`                                                                      |
+| Pendências do dono                | `docs/PENDENCIAS-DO-DONO.md`                                                            |
 
 @AGENTS.md

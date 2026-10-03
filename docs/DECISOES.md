@@ -48,3 +48,22 @@ Conferidas no registro do npm antes do setup.
 - **`scripts/screenshots.ts`** tira screenshots em 390, 768 e 1440 px e avisa de estouro horizontal e erros no console. Usado nas revisões visuais.
 - **`pnpm typecheck` roda `next typegen` antes do `tsc`**, porque o Next 16 gera os tipos de rota (`LayoutProps`, `PageProps`).
 - **Prettier com `tailwindStylesheet`** apontando para `globals.css`, para o plugin do Tailwind ordenar as classes conhecendo os tokens da marca.
+
+## 2026-10-03 — Fase 2
+
+- **`prisma migrate reset` exige consentimento explícito do dono.** O Prisma detecta que foi chamado por um agente e recusa a ação destrutiva. Não contornei. O seed foi validado com `pnpm db:seed` em banco recém-migrado e vazio (20s) e rodado de novo para conferir a idempotência (1,3s, nada duplicado). `pnpm db:reset` continua sendo o comando documentado para humanos.
+- **Campos acrescentados ao modelo da especificação**, todos para cumprir requisitos de outras seções:
+  - `Product.searchText` (texto de busca sem acento, com índice `pg_trgm`), `minPriceCents` e `totalAvailable` (desnormalizados para ordenar e filtrar listagens com poucas consultas), `subtype`, `includesPot`, `cleaningCare` (filtros e ficha técnica de artificiais).
+  - `Order.shippingCity`/`shippingState` (relatório por região), `costCents` e `OrderItem.unitCostCents` (margem), `manualPaymentLabel` (pedido manual), `purchaseTrackedAt` (evento `purchase` uma única vez), `cartId`.
+  - `OrderNote` (notas internas com autor e data), `NotFoundLog`, `SearchLog`, `RateLimitHit`.
+  - `Lead.productId`/`variantId`/`notifiedAt` e origem `BACK_IN_STOCK` ("Avise-me"), `confirmTokenHash` e `unsubscribeToken` (double opt-in e descadastro em um clique).
+  - `Cart.checkoutData` (dados do checkout em andamento, nunca cartão), `shippingCep`, `contactedAt`, `recoveryEmailSentAt`.
+  - `Banner` com segundo botão e legenda científica; `HomeSection.key` e `body`, e tipos `FEATURED_CATEGORIES`, `BENEFITS`, `ABOUT` (a home da seção 10.2 tem essas seções); `Collection.content` e `legacyPaths`; `Coupon.appliesToSameDay` e `batch`; `ShippingRule.usesStoreFreeThreshold` e `description`; `User.isActive`; `EmailVerificationToken.newEmail`.
+- **Garantias no banco, por SQL na migração:** `stockOnHand >= 0`, `stockReserved >= 0` e `stockReserved <= stockOnHand`; nota da avaliação entre 1 e 5; quantidade do item do carrinho maior que zero. Mesmo com um erro na aplicação, o banco recusa estoque negativo.
+- **Função `f_unaccent`** (versão imutável de `unaccent`) e sequência `order_number_seq` criadas na migração inicial.
+- **Textos com `{{marcadores}}`** (`{{corte}}`, `{{descontoPix}}`, `{{freteGratis}}`, `{{telefone}}`...) em páginas, FAQ, banners e seções da home. São preenchidos na exibição com a configuração da loja, para que nenhum prazo, desconto ou contato fique escrito no conteúdo.
+- **Marcas fictícias nos produtos de jardinagem de teste** (Verdejar, Terra Viva, Folha Nova), para não atribuir produtos inventados a fabricantes reais. L'Envie, Linha Conceito e Linha Carol Costa vêm da especificação.
+- **Storage S3 sem SDK:** `src/server/providers/storage/s3.ts` assina as requisições com SigV4 usando só `node:crypto` e `fetch`. Funciona com S3, R2 e MinIO e não acrescenta dependência.
+- **Imagens placeholder em `uploads/amostra/`**, geradas uma vez e reaproveitadas nas execuções seguintes do seed. O `next/image` usa a versão de 1600 px como origem.
+- **Logins de teste:** `cliente@example.com` / `Cliente@123` e `expedicao@example.com` / `Equipe@123`. O admin usa `ADMIN_EMAIL` e `ADMIN_PASSWORD` do `.env`; a senha só é gravada na criação.
+- **Seed não sobrescreve o que já existe** (categorias, páginas, cupons, regras de frete usam `upsert` com `update: {}`), para não desfazer edições do admin.

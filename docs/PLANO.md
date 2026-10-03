@@ -30,14 +30,14 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 
 ## Fase 2 — Banco e seed
 
-- [ ] Schema Prisma completo (seção 7) com índices
-- [ ] Migração com `unaccent`, `pg_trgm` e sequência do número do pedido
-- [ ] `scripts/generate-placeholders.ts`
-- [ ] Seed: configurações, usuários, categorias (com SEO e FAQ), coleções, redirecionamentos, frete, feriados
-- [ ] Seed: ~150 produtos de teste com variantes, imagens e estoque variado
-- [ ] Seed: clientes, pedidos, movimentos de estoque, avaliações, depoimentos, cupons
-- [ ] Seed: banners, seções da home, ocasiões, páginas, FAQ, leads, solicitações, contatos, carrinhos, buscas
-- [ ] `pnpm db:reset` recria tudo sem erro; seed idempotente e abaixo de 2 minutos
+- [x] Schema Prisma completo (seção 7) com índices
+- [x] Migração com `unaccent`, `pg_trgm` e sequência do número do pedido
+- [x] `scripts/generate-placeholders.ts`
+- [x] Seed: configurações, usuários, categorias (com SEO e FAQ), coleções, redirecionamentos, frete, feriados
+- [x] Seed: ~150 produtos de teste com variantes, imagens e estoque variado
+- [x] Seed: clientes, pedidos, movimentos de estoque, avaliações, depoimentos, cupons
+- [x] Seed: banners, seções da home, ocasiões, páginas, FAQ, leads, solicitações, contatos, carrinhos, buscas
+- [ ] `pnpm db:reset` recria tudo sem erro (aguarda consentimento do dono: o Prisma bloqueia `migrate reset` executado por agente). Já verificado: seed em banco vazio roda em 20s e é idempotente (segunda execução em 1,3s, sem duplicar)
 
 ## Fase 3 — Catálogo
 

@@ -42,11 +42,26 @@ Todos os valores abaixo são exemplos.
 
 - Slogan e texto da parceria com o Shopping Garden (`tagline`, `partnerClaim`): confirmar se continuam válidos.
 
+## Textos a revisar (rascunhos criados no seed)
+
+- **Texto de SEO e FAQ de cada categoria principal** (`prisma/seed/categories.ts`, ou Admin > Categorias): rascunhos escritos para pessoas, sem listas de palavras-chave. Revisar o conteúdo e o tom.
+- **Páginas institucionais** (`prisma/seed/pages.ts`, ou Admin > Páginas): Sobre, Entrega e prazos, Pagamentos.
+- **MODELO: revisar com advogado** antes de publicar: Trocas e devoluções, Política de privacidade, Política de cookies, Termos de uso. Na política de privacidade falta o nome do encarregado de dados.
+- **Perguntas frequentes da página de Ajuda** (Admin > Ajuda).
+- **Texto "Sobre a Net Shop Garden" da home** (Admin > Home).
+- **Linha Carol Costa:** confirmar a descrição da coleção e quais produtos fazem parte dela.
+
 ## Logo e fotos
 
 - Logo definitivo: hoje é um logotipo em texto. Trocar `public/brand/logo.svg` e o componente `Logo`.
+- **Fotos reais dos produtos: é a melhoria de maior impacto visual.** Hoje todas as imagens são ilustrações de teste geradas pelo seed. Padrão recomendado: fundo branco, luz natural, proporção 4:5, e uma foto em ambiente para cada produto de destaque. Enviar por Admin > Produtos > Imagens.
+- Fotos do hero (2400 × 1050 no desktop e 1200 × 1500 no celular), das categorias e das ocasiões de presente.
 
 ## Decisões de negócio
+
+- **Confirmar a execução do `pnpm db:reset`.** O comando apaga e recria o banco de desenvolvimento. O Prisma não deixa um agente rodá-lo sem o seu consentimento explícito. O seed já foi validado sem ele, mas duas correções do seed (30% dos produtos com variações e descrições com no mínimo 300 caracteres) só entram quando o banco for recriado.
+- Cupom `FRETEGRATIS`: hoje vale para a entrega agendada na Grande SP, acima de R$ 150. Confirmar.
+- Preços, prazos e faixas de CEP de todas as regras de frete são exemplos (`prisma/seed/settings.ts`, ou Admin > Frete).
 
 ## Integrações a contratar
 
