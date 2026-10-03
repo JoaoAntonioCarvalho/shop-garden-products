@@ -24,7 +24,7 @@ import {
 import type { SeededVariant } from "./products";
 
 const WINDOW_DAYS = 120;
-const TOTAL_ORDERS = 220; // com o arredondamento por dia e os pedidos recentes, resulta em cerca de 250
+const TOTAL_ORDERS = 250;
 
 /** Datas comemorativas: os 6 dias anteriores têm mais pedidos. */
 function commemorativeDates(year: number): Date[] {
@@ -140,8 +140,13 @@ export async function seedOrders(customers: SeededCustomer[], variants: SeededVa
     ["BOLETO", 5],
   ] as const;
 
+  // Arredondamento acumulado: a soma dos dias dá exatamente o total, sem depender de como cada dia arredonda.
+  let cumulativeWeight = 0;
+  let assigned = 0;
   days.forEach((day, dayIndex) => {
-    const count = Math.round((weights[dayIndex] / totalWeight) * (TOTAL_ORDERS - 8));
+    cumulativeWeight += weights[dayIndex];
+    const count = Math.round((cumulativeWeight / totalWeight) * (TOTAL_ORDERS - 8)) - assigned;
+    assigned += count;
     for (let i = 0; i < count; i++) {
       const createdAt = new Date(
         day.getFullYear(),

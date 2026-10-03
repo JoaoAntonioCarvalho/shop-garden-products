@@ -59,7 +59,7 @@ Todos os valores abaixo são exemplos.
 
 ## Decisões de negócio
 
-- **Confirmar a execução do `pnpm db:reset`.** O comando apaga e recria o banco de desenvolvimento. O Prisma não deixa um agente rodá-lo sem o seu consentimento explícito. O seed já foi validado sem ele, mas duas correções do seed (30% dos produtos com variações e descrições com no mínimo 300 caracteres) só entram quando o banco for recriado.
+- **Rodar `pnpm db:reset` no banco de desenvolvimento.** O comando apaga e recria o banco local. O Prisma não deixa um agente rodá-lo sem o seu consentimento explícito, então ele ficou para você. Migrações e seed foram validados do zero em um banco descartável (2,4 s; 160 produtos, 250 pedidos). O banco de desenvolvimento atual ainda tem os dados do seed anterior (285 pedidos e algumas descrições curtas), que só mudam quando ele for recriado.
 - Cupom `FRETEGRATIS`: hoje vale para a entrega agendada na Grande SP, acima de R$ 150. Confirmar.
 - Preços, prazos e faixas de CEP de todas as regras de frete são exemplos (`prisma/seed/settings.ts`, ou Admin > Frete).
 

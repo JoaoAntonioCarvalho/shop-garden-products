@@ -326,7 +326,7 @@ function bodyFor(raw: RawProduct, d: Defaults, index: number): string {
   // A descrição precisa ter de 300 a 600 caracteres: completa com informações úteis do tipo de produto.
   const extras = extrasFor(d.type);
   let extraIndex = index;
-  while (raw.t.length + parts.join(" ").length + 1 < 300 && extraIndex < index + extras.length) {
+  while (raw.t.length + parts.join(" ").length + 1 <= 310 && extraIndex < index + extras.length) {
     parts.push(extras[extraIndex++ % extras.length]);
   }
   return parts.join(" ");
