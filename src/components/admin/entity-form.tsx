@@ -470,3 +470,77 @@ export function EntityForm({
     </form>
   );
 }
+
+type MiniFormProps = {
+  fields: FieldDef[];
+  initial: FormValues;
+  action: (values: FormValues) => Promise<AdminResult<unknown>>;
+  submitLabel: string;
+  /** Limpa os campos depois de enviar (notas, respostas). */
+  resetOnDone?: boolean;
+  variant?: "default" | "outline" | "destructive";
+};
+
+/** Formulário pequeno, dentro de um cartão ou de uma linha: nota interna, resposta, status. */
+export function MiniForm({
+  fields,
+  initial,
+  action,
+  submitLabel,
+  resetOnDone,
+  variant = "outline",
+}: MiniFormProps) {
+  const router = useRouter();
+  const [values, setValues] = useState<FormValues>(initial);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  return (
+    <form
+      noValidate
+      className="grid gap-3 md:grid-cols-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        startTransition(async () => {
+          const result = await action(serializeValues(fields, values));
+          if (result.ok) {
+            toast(result.message);
+            setErrors({});
+            setFormError(null);
+            if (resetOnDone) setValues(initial);
+            router.refresh();
+          } else {
+            setErrors(result.fieldErrors ?? {});
+            setFormError(result.fieldErrors ? null : result.error);
+          }
+        });
+      }}
+    >
+      {fields.map((field) => (
+        <FieldControl
+          key={field.name}
+          field={field}
+          value={values[field.name]}
+          error={errors[field.name]}
+          onChange={(value) => setValues((current) => ({ ...current, [field.name]: value }))}
+        />
+      ))}
+      {formError ? (
+        <p role="alert" className="text-sm text-destructive md:col-span-2">
+          {formError}
+        </p>
+      ) : null}
+      <div className="md:col-span-2">
+        <Button
+          type="submit"
+          size="sm"
+          variant={variant}
+          disabled={pending}
+          aria-busy={pending || undefined}
+        >
+          {submitLabel}
+        </Button>
+      </div>
+    </form>
+  );
+}

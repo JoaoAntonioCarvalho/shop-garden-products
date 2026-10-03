@@ -9,7 +9,9 @@ import {
   paymentStatusLabels,
 } from "@/server/services/order-status";
 import { stripHtml } from "@/lib/sanitize";
+import { listCustomers } from "./customers";
 import { movementLabels, movementWhere } from "./inventory";
+import { leadSourceLabels, leadWhere } from "./leads";
 import type { ListParams } from "./list";
 import { IMPORT_FIELDS } from "./product-import";
 import { productWhere } from "./product-queries";
@@ -233,6 +235,75 @@ export const exporters: Record<string, Exporter> = {
           movement.stockReservedAfter,
           movement.reason,
           movement.order?.number,
+        ]),
+      };
+    },
+  },
+  clientes: {
+    permission: "customers.export",
+    auditEntity: "customers",
+    build: async (params) => {
+      const { rows } = await listCustomers(params, { all: true });
+      return {
+        headers: [
+          "Nome",
+          "E-mail",
+          "Telefone",
+          "Cidade",
+          "UF",
+          "Pedidos pagos",
+          "Total gasto",
+          "Último pedido",
+          "Aceita e-mail",
+          "Aceita WhatsApp",
+          "Cadastro",
+        ],
+        rows: rows.map((customer) => [
+          customer.name,
+          customer.email,
+          customer.phone,
+          customer.city,
+          customer.state,
+          customer.orders,
+          formatCentsPlain(customer.totalCents),
+          customer.lastOrderAt ? formatDate(customer.lastOrderAt) : "",
+          customer.marketingEmailOptIn ? "sim" : "não",
+          customer.marketingWhatsappOptIn ? "sim" : "não",
+          formatDate(customer.createdAt),
+        ]),
+      };
+    },
+  },
+  leads: {
+    permission: "leads.export",
+    auditEntity: "leads",
+    build: async (params) => {
+      // Só quem deu consentimento e não se descadastrou pode ir para uma lista de envio.
+      const leads = await db.lead.findMany({
+        where: { AND: [leadWhere(params), { consentAt: { not: null }, unsubscribedAt: null }] },
+        orderBy: { createdAt: "desc" },
+        take: EXPORT_LIMIT,
+      });
+      return {
+        headers: [
+          "E-mail",
+          "Nome",
+          "WhatsApp",
+          "Origem",
+          "Consentimento em",
+          "Confirmado em",
+          "Cupom",
+          "Cadastro",
+        ],
+        rows: leads.map((lead) => [
+          lead.email,
+          lead.name,
+          lead.whatsapp,
+          leadSourceLabels[lead.source],
+          lead.consentAt ? formatDateTime(lead.consentAt) : "",
+          lead.confirmedAt ? formatDateTime(lead.confirmedAt) : "",
+          lead.couponIssued,
+          formatDateTime(lead.createdAt),
         ]),
       };
     },
