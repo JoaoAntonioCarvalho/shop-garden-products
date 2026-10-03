@@ -8,7 +8,7 @@ import { normalizeRedirectInput } from "@/lib/redirects";
 import { normalizeCep } from "@/lib/validators/cep";
 import { AdminError, runAdmin, type AdminResult } from "@/server/admin/action";
 import { decodeCsvBuffer, parseCsv } from "@/server/admin/list";
-import { assertRedirectIsSafe } from "@/server/admin/resources/system";
+import { assertRedirectIsSafe } from "@/server/admin/redirect-rules";
 import { invalidate } from "@/server/cache";
 import type { ShippingOption } from "@/server/providers/shipping/types";
 import { quoteShipping } from "@/server/services/shipping";

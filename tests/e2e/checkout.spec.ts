@@ -12,8 +12,10 @@ import {
   RIO,
   SAO_PAULO,
   uniqueEmail,
+  restockTestProducts,
 } from "./helpers";
 
+test.beforeAll(() => restockTestProducts());
 test.afterAll(() => db.$disconnect());
 
 test("convidado compra com Pix, entrega hoje, paga pelo simulador e recebe os e-mails", async ({

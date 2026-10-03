@@ -26,7 +26,7 @@ type FilterBarProps = {
 };
 
 const controlClass =
-  "h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground";
+  "h-9 max-w-full rounded-md border border-input bg-background px-2 text-sm text-foreground";
 
 /** Busca e filtros das listas. Tudo vai para a URL, então a lista filtrada pode ser compartilhada. */
 export function FilterBar({ searchPlaceholder, fields = [], exportHref }: FilterBarProps) {
@@ -107,7 +107,7 @@ export function FilterBar({ searchPlaceholder, fields = [], exportHref }: Filter
           );
         }
         return (
-          <div key={field.name} className="flex flex-col gap-1">
+          <div key={field.name} className="flex max-w-full flex-col gap-1">
             <label htmlFor={id} className="text-xs text-muted-foreground">
               {field.label}
             </label>

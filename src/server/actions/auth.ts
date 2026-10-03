@@ -17,7 +17,7 @@ import {
   resetPassword,
 } from "@/server/services/accounts";
 import { CART_COOKIE } from "@/server/services/cart";
-import { rateLimit, rateLimitMessage } from "@/server/services/rate-limit";
+import { rateLimit, rateLimitMessage, resetRateLimit } from "@/server/services/rate-limit";
 import { getStoreSettings } from "@/server/services/settings";
 
 export type AuthResult =
@@ -61,6 +61,8 @@ export async function loginAction(input: {
       error: "E-mail ou senha incorretos. Confira os dados ou redefina a senha.",
     };
 
+  // Só as tentativas erradas contam para o limite.
+  await resetRateLimit("login", `${ipHash}:${parsed.data.email}`);
   try {
     await completeLogin(parsed.data.email, parsed.data.password, user.id);
   } catch (error) {

@@ -112,15 +112,15 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
       <DataTable
         label="Estoque por variação"
         columns={[
-          { key: "product", header: "Produto" },
-          { key: "sku", header: "SKU", sortable: true },
-          { key: "stockOnHand", header: "Em estoque", sortable: true, align: "right" },
-          { key: "stockReserved", header: "Reservado", sortable: true, align: "right" },
+          { key: "product", header: "Produto", className: "min-w-44 whitespace-normal" },
           { key: "available", header: "Disponível", align: "right" },
+          { key: "stockOnHand", header: "Em estoque", sortable: true, align: "right" },
+          ...(canAdjust ? [{ key: "action", header: "Ação" }] : []),
+          { key: "stockReserved", header: "Reservado", sortable: true, align: "right" },
           { key: "threshold", header: "Alerta", align: "right" },
           { key: "status", header: "Situação" },
+          { key: "sku", header: "SKU", sortable: true },
           { key: "last", header: "Última movimentação" },
-          ...(canAdjust ? [{ key: "action", header: "Ação", align: "right" as const }] : []),
         ]}
         total={total}
         page={params.page}

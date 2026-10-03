@@ -7,8 +7,10 @@ import {
   mailTo,
   reviewAndPlaceOrder,
   uniqueEmail,
+  restockTestProducts,
 } from "./helpers";
 
+test.beforeAll(() => restockTestProducts());
 test.afterAll(() => db.$disconnect());
 
 test("cliente cria conta, entra com a sacola mesclada, salva endereço, compra, vê o pedido e baixa os dados", async ({

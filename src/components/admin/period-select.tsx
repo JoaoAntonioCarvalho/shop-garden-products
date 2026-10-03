@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { PERIOD_PRESETS } from "@/server/admin/periods";
 
-const controlClass = "h-9 rounded-md border border-input bg-background px-2 text-sm";
+const controlClass = "h-9 max-w-full rounded-md border border-input bg-background px-2 text-sm";
 
 /** Seletor de período do dashboard e dos relatórios. O período fica na URL. */
 export function PeriodSelect({ preset, from, to }: { preset: string; from: string; to: string }) {

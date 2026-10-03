@@ -123,7 +123,7 @@ Conferidas no registro do npm antes do setup.
 - **"Mover para favoritos" na sacola não foi feito**: o coração do produto cobre o caso. Pode entrar depois se fizer falta.
 - **`verifyCredentials` fica em `src/lib/credentials.ts`**, separado do Auth.js, para ser testável.
 
-## 2026-10-03 — Fase 6 (em andamento)
+## 2026-10-03 — Fase 6
 
 - **Log de argumentos das server actions desligado** (`logging.serverFunctions: false` no `next.config.ts`). Em desenvolvimento o Next registrava os argumentos de cada ação, o que incluía senhas do login e do cadastro e dados pessoais do checkout.
 - **shadcn/ui só no admin**, em `src/components/admin/ui`, com os tokens do shadcn (`primary`, `muted`, `destructive`...) mapeados para as cores da marca no `@theme`: musgo como cor principal, vinho só em ações destrutivas e alertas.
@@ -131,3 +131,21 @@ Conferidas no registro do npm antes do setup.
 - **Toda server action do admin passa por `runAdmin`** (`src/server/admin/action.ts`): confere a permissão no servidor, valida com Zod e entrega um `audit()` já com usuário, IP em hash e navegador.
 - **Cancelar ou devolver pedido pago com estorno exige ADMIN.** A equipe (STAFF) altera os demais status.
 - **Gráficos sem animação e com uma tabela equivalente para leitores de tela.**
+- **Cadastros simples em um kit genérico.** Cupons, banners, depoimentos, ocasiões, páginas, FAQ, seções da home, regras de frete, feriados, redirecionamentos, categorias e coleções são definições em `src/server/admin/resources/` (campos, validação, colunas da lista). As páginas (`src/app/admin/[recurso]`) e as ações (`src/server/actions/admin/resources.ts`) são as mesmas para todos: salvar, excluir, ligar e desligar, ordenar, auditar e invalidar o cache. Módulos com fluxo próprio (pedidos, produtos, estoque, mídia, clientes, avaliações, relatórios) têm páginas próprias.
+- **`Product.qualityScore`** (nova coluna, migração `product_quality_score`): a nota de qualidade é gravada a cada alteração, para a lista filtrar e o relatório ordenar sem recalcular tudo. A conta fica em `src/lib/product-quality.ts` e é a mesma no indicador ao vivo do formulário. Pesos: 3 imagens 20, texto alternativo 10, descrição 20, descrição curta 10, ficha 15, peso e dimensões 10, SEO 10, categoria 5.
+- **Estoque alterado pelo cadastro do produto ou pela importação vira movimento** (`ADJUSTMENT` ou `IN`), como qualquer ajuste: o histórico nunca fica com buracos.
+- **Variação já vendida ou com reserva não é apagada**, fica inativa. Produto com pedidos, na exclusão em massa, é arquivado.
+- **Mudar o slug de produto, categoria ou coleção publicados** cria o redirecionamento 301 do endereço antigo, atualiza os redirecionamentos que apontavam para ele (sem cadeias) e remove um eventual redirecionamento que sairia do endereço novo (sem loops). Na categoria, vale também para as subcategorias.
+- **Categoria pai muda pelo formulário, não por arrastar.** Arrastar reordena dentro do mesmo nível (principais entre si, subcategorias entre si). Mover entre níveis por arrastar é fácil de acionar sem querer e muda URLs.
+- **Importação de produtos:** o arquivo é lido no servidor (UTF-8 ou ISO-8859-1, vírgula ou ponto e vírgula), as linhas voltam para o navegador para o mapeamento e a gravação acontece em lotes de 50 produtos, cada lote em uma transação. No formato do site antigo o peso é lido em quilos; no formato próprio, em gramas. O tipo do produto, quando o arquivo não traz, é deduzido da categoria. Limite de 5.000 linhas e 10 MB por arquivo (`serverActions.bodySizeLimit` em 12 MB).
+- **"Remover todos os produtos de teste"** apaga, em uma transação, produtos, variações, movimentos, avaliações, depoimentos, pedidos, carrinhos, leads, solicitações, contatos e clientes `isSample`. Imagens de teste que ainda ilustram categorias, coleções, banners ou ocasiões ficam até serem trocadas; usuários da equipe nunca são apagados.
+- **Prévia do banner é a do banner salvo**, abaixo do formulário. O texto fica sempre sobre um painel creme sólido, então o contraste não depende da foto e o aviso de contraste baixo não se aplica.
+- **Gerador de cupons em lote** copia as regras de um cupom modelo e cria códigos de um uso só (`PREFIXO-XXXXXX`, sem caracteres ambíguos), agrupados em um lote exportável.
+- **Carrinho abandonado:** o e-mail de recuperação leva a `/carrinho/recuperar/[token]`, que devolve a sacola ao navegador. Quem se descadastrou não recebe.
+- **Editar avaliação é só para erros de digitação**, e o texto anterior fica na auditoria.
+- **Auditoria de clientes registra quais campos mudaram, sem copiar os dados pessoais.**
+- **Login: só as tentativas erradas contam para o limite.** Um login correto zera o contador; antes, quem entrava e saía várias vezes era bloqueado.
+- **Modo manutenção** cobre a loja (home, catálogo, sacola). Login, área do cliente, acompanhamento de pedido e painel continuam no ar, e a equipe logada vê a loja normalmente.
+- **Tarefas agendadas** (`src/server/jobs.ts`): cada uma roda por `/api/cron/[tarefa]` com `Authorization: Bearer CRON_SECRET` ou pelo botão do painel, e grava `JobRun`. Sem `CRON_SECRET`, a rota responde 503.
+- **Relatórios em um registro único** (`src/server/admin/reports.ts`): cada relatório devolve colunas e linhas; a tela, o gráfico e o CSV são genéricos. Venda é pedido pago que não foi cancelado, expirado nem devolvido.
+- **Visualizar e-mail enviado:** o conteúdo é montado de novo a partir do modelo e dos dados gravados no `EmailLog`, em um `iframe` com `sandbox`. E-mails com link de uso único (senha, verificação, convite) não são reenviados.

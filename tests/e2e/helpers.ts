@@ -118,3 +118,38 @@ export async function availableStock(sku: string): Promise<number> {
   });
   return variant.stockOnHand - variant.stockReserved;
 }
+
+/**
+ * Os testes compram produtos de verdade no banco de desenvolvimento. Antes de cada arquivo, os
+ * produtos usados voltam a ter estoque, com o movimento registrado como qualquer entrada.
+ */
+export async function restockTestProducts(minimum = 20) {
+  const slugs = [
+    "vaso-esmaltado-azul",
+    "vaso-de-cimento-cilindrico",
+    "orquidea-phalaenopsis-branca-2-hastes",
+  ];
+  const variants = await db.productVariant.findMany({
+    where: { product: { slug: { in: slugs } } },
+  });
+  for (const variant of variants) {
+    const available = variant.stockOnHand - variant.stockReserved;
+    if (available >= minimum) continue;
+    const stockOnHand = variant.stockReserved + minimum;
+    await db.productVariant.update({ where: { id: variant.id }, data: { stockOnHand } });
+    await db.inventoryMovement.create({
+      data: {
+        variantId: variant.id,
+        type: "IN",
+        quantity: stockOnHand - variant.stockOnHand,
+        stockOnHandAfter: stockOnHand,
+        stockReservedAfter: variant.stockReserved,
+        reason: "Reposição para os testes e2e",
+      },
+    });
+  }
+  await db.$executeRaw`
+    UPDATE "Product" p SET "totalAvailable" = v.available
+    FROM (SELECT "productId", SUM(GREATEST("stockOnHand" - "stockReserved", 0))::int AS available FROM "ProductVariant" WHERE "isActive" GROUP BY 1) v
+    WHERE v."productId" = p.id AND p.slug = ANY(${slugs})`;
+}

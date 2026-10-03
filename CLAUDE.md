@@ -115,6 +115,14 @@ Atualizado ao longo do projeto.
 | Estrutura comum da loja                  | `src/components/store/store-shell.tsx`                                                                        |
 | Área do cliente                          | `src/app/(conta)/`, `src/components/store/account/`                                                           |
 | Testes                                   | `tests/unit`, `tests/integration` (Postgres de teste), `tests/e2e` (Playwright, usa o servidor de dev)        |
+| Admin: ações com permissão e auditoria   | `src/server/admin/action.ts` (`runAdmin`), `src/server/actions/admin/`                                        |
+| Admin: cadastros genéricos               | `src/server/admin/resources/` + `src/app/admin/[recurso]/` (cupons, banners, páginas, frete, categorias...)   |
+| Admin: produtos, importação, qualidade   | `src/server/admin/products.ts`, `product-import.ts`, `src/lib/product-quality.ts`                             |
+| Admin: listas, filtros e CSV             | `src/server/admin/list.ts`, `exporters.ts`, `src/components/admin/data-table.tsx`, `filter-bar.tsx`           |
+| Admin: formulários                       | `src/components/admin/entity-form.tsx` (`EntityForm`, `MiniForm`), `product-form.tsx`                         |
+| Relatórios                               | `src/server/admin/reports.ts`                                                                                 |
+| Tarefas agendadas                        | `src/server/jobs.ts`, `/api/cron/[tarefa]`                                                                    |
+| Screenshots do painel                    | `pnpm tsx scripts/admin-shots.ts <pasta> [largura] /admin/...`                                                |
 | Plano e progresso                        | `docs/PLANO.md`                                                                                               |
 | Decisões                                 | `docs/DECISOES.md`                                                                                            |
 | Pendências do dono                       | `docs/PENDENCIAS-DO-DONO.md`                                                                                  |

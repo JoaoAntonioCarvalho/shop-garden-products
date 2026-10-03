@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { parseBRLToCents } from "@/lib/money";
 import { sanitizeRichText } from "@/lib/sanitize";
+import { normalizeText } from "@/lib/slug";
 import { adjustStock } from "@/server/services/inventory";
 import type { AdminContext } from "./action";
 import {
@@ -143,7 +144,8 @@ const typeByLabel = new Map(
 
 /** Tipo do produto a partir do caminho da categoria, quando o arquivo não informa. */
 export function inferProductType(categoryPath: string): string {
-  const path = categoryPath.toLowerCase();
+  // Sem acentos: o arquivo traz "Orquídeas", o caminho da loja traz "orquideas".
+  const path = normalizeText(categoryPath);
   if (path.includes("orquidea")) return "ORCHID";
   if (path.includes("artificia") || path.includes("buque")) return "ARTIFICIAL";
   if (path.includes("arranjo")) return "ARRANGEMENT";

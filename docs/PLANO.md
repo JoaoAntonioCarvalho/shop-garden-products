@@ -75,26 +75,26 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 
 ## Fase 6 — Admin
 
-- [ ] Layout, busca global, matriz de permissões, auditoria
-- [ ] Dashboard
-- [ ] Pedidos (lista, detalhe, impressões, pedido manual)
-- [ ] Produtos (lista, formulário em abas, qualidade de cadastro, importação e exportação CSV, remover testes)
-- [ ] Categorias e coleções
-- [ ] Estoque (ajustes, lote, inventário, histórico, valor)
-- [ ] Mídia
-- [ ] Clientes
-- [ ] Carrinhos abandonados
-- [ ] Cupons
-- [ ] Avaliações e depoimentos
-- [ ] Marketing e conteúdo (banners, home, barra superior, ocasiões, páginas, FAQ, leads, solicitações, contatos, avise-me)
-- [ ] Frete e simulador
-- [ ] Configurações
-- [ ] Usuários da equipe
-- [ ] Redirecionamentos e 404
-- [ ] Relatórios
-- [ ] Auditoria, e-mails enviados, tarefas agendadas e `/api/cron/[tarefa]`
-- [ ] `docs/ADMIN-MANUAL.md`
-- [ ] Revisão visual em 390, 768 e 1440 px
+- [x] Layout, busca global, matriz de permissões, auditoria
+- [x] Dashboard
+- [x] Pedidos (lista, detalhe, impressões, pedido manual)
+- [x] Produtos (lista, formulário em abas, qualidade de cadastro, importação e exportação CSV, remover testes)
+- [x] Categorias e coleções
+- [x] Estoque (ajustes, lote, inventário, histórico, valor)
+- [x] Mídia
+- [x] Clientes
+- [x] Carrinhos abandonados
+- [x] Cupons
+- [x] Avaliações e depoimentos
+- [x] Marketing e conteúdo (banners, home, barra superior, ocasiões, páginas, FAQ, leads, solicitações, contatos, avise-me)
+- [x] Frete e simulador
+- [x] Configurações
+- [x] Usuários da equipe
+- [x] Redirecionamentos e 404
+- [x] Relatórios
+- [x] Auditoria, e-mails enviados, tarefas agendadas e `/api/cron/[tarefa]`
+- [x] `docs/ADMIN-MANUAL.md`
+- [x] Revisão visual em 390, 768 e 1440 px
 
 ## Fase 7 — Institucional, leads, SEO e analytics
 

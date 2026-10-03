@@ -22,7 +22,7 @@ export const metadata: Metadata = { title: "Produtos" };
 
 const columns: DataColumn[] = [
   { key: "photo", header: "Foto", className: "w-14" },
-  { key: "name", header: "Nome", sortable: true },
+  { key: "name", header: "Nome", sortable: true, className: "min-w-44 whitespace-normal" },
   { key: "category", header: "Categoria" },
   { key: "minPriceCents", header: "Preço", sortable: true, align: "right" },
   { key: "totalAvailable", header: "Estoque", sortable: true, align: "right" },

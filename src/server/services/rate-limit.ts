@@ -55,6 +55,14 @@ export async function rateLimit(
 }
 
 /** "Muitas tentativas. Tente de novo em 12 minutos." */
+/** Zera o contador (depois de um login correto, para só as tentativas erradas contarem). */
+export async function resetRateLimit(
+  action: keyof typeof RATE_LIMITS,
+  identifier: string,
+): Promise<void> {
+  await db.rateLimitHit.deleteMany({ where: { key: `${action}:${identifier}` } });
+}
+
 export function rateLimitMessage(result: RateLimitResult): string {
   const minutes = Math.max(1, Math.ceil(result.retryAfterSeconds / 60));
   return `Muitas tentativas. Tente de novo em ${minutes} ${minutes === 1 ? "minuto" : "minutos"}.`;

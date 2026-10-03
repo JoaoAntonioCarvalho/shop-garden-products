@@ -240,7 +240,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
         ) : null}
       </section>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 gap-4 *:min-w-0 xl:grid-cols-3">
         <Panel title="Entregas de hoje" className="xl:col-span-2">
           {data.deliveries.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhuma entrega para hoje.</p>
@@ -327,7 +327,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/admin"
         </Panel>
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-4 *:min-w-0 xl:grid-cols-2">
         <Panel title="Faturamento por dia" className="xl:col-span-2">
           <RevenueLineChart data={data.series} />
         </Panel>
