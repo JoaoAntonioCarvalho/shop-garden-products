@@ -777,7 +777,7 @@ export const emailTemplates = {
           `${item.name} (${item.sku})`,
           item.available === 0 ? "zerado" : `${item.available} disponíveis`,
         ])}
-        button={{ label: "Abrir o estoque", url: `${store.url}/admin/estoque?status=baixo` }}
+        button={{ label: "Abrir o estoque", url: `${store.url}/admin/estoque?status=low` }}
       />
     ),
   },

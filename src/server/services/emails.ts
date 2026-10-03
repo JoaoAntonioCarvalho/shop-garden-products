@@ -17,7 +17,7 @@ import { getEmailProvider } from "@/server/providers/email";
 import { orderStatusLabels, paymentMethodLabels } from "./order-status";
 import { getStoreSettings } from "./settings";
 
-async function emailStore(): Promise<EmailStore & { notificationEmail: string }> {
+export async function emailStore(): Promise<EmailStore & { notificationEmail: string }> {
   const settings = await getStoreSettings();
   return {
     name: settings.name,
