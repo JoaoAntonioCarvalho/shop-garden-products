@@ -106,3 +106,19 @@ Conferidas no registro do npm antes do setup.
 - **Relógio fixável nos testes e2e:** fora de produção, o cookie `nsg_test_now` fixa o horário das cotações e do pedido, para testar a entrega no mesmo dia antes do corte. Em produção é ignorado (`src/server/clock.ts`).
 - **Testes de integração** rodam contra o banco `netshopgarden_test` (migrações aplicadas por `migrate deploy` no início) e substituem `next/cache` e `server-only` por módulos vazios.
 - **Login dentro do checkout e "Mover para favoritos"** entram na fase 5, com a autenticação. Hoje o checkout avisa quando o e-mail já tem conta e oferece o link para entrar.
+
+## 2026-10-03 — Fase 5
+
+- **Sessão em JWT com o papel, mas o papel é conferido no banco a cada requisição** (`getCurrentUser`). Rebaixar ou desativar um usuário vale na hora, sem esperar o token expirar.
+- **Proteção em três camadas:** `src/proxy.ts` barra `/conta` e `/admin` sem sessão; cada página chama `requireAccountUser`; cada server action chama `requireUser`.
+- **Pedidos feitos como convidado só entram na conta depois de o e-mail ser confirmado** (ou depois de redefinir a senha pelo link do e-mail). Sem isso, alguém poderia criar uma conta com o e-mail de outra pessoa e ver os pedidos dela.
+- **Mensagens que não revelam se um e-mail tem conta:** login ("E-mail ou senha incorretos"), esqueci a senha, troca de e-mail. O tempo de resposta do login também é igual, com um hash de comparação quando o e-mail não existe.
+- **Login limitado a 5 tentativas por e-mail e IP a cada 15 minutos.**
+- **Tokens de verificação (24h) e de redefinição (1h) guardados só como hash SHA-256**, de uso único. Usar um link de redefinição invalida os demais.
+- **Ao sair, o cookie do carrinho é apagado**, para o carrinho da conta não ficar no navegador. Ao entrar, o carrinho anônimo é somado ao da conta, respeitando o estoque.
+- **Exclusão de conta é um pedido (`DataRequest`)** que o admin processa na fase 6. A anonimização apaga dados pessoais, endereços, favoritos, tokens e leads, e mantém os pedidos sem identificação.
+- **"Baixar meus dados" grava auditoria** (`customer.self_export`).
+- **Avaliação pelo link do e-mail** funciona sem login (número e token do pedido). O nome exibido é o primeiro nome e a inicial do sobrenome. Uma avaliação por produto por cliente.
+- **Checkout de cliente logado** vem com nome, e-mail, CPF, celular e endereço padrão preenchidos, e um seletor de endereços salvos. O login dentro do checkout é um link para `/entrar` que volta ao checkout.
+- **"Mover para favoritos" na sacola não foi feito**: o coração do produto cobre o caso. Pode entrar depois se fizer falta.
+- **`verifyCredentials` fica em `src/lib/credentials.ts`**, separado do Auth.js, para ser testável.

@@ -2,44 +2,42 @@
 
 import { Heart } from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { buttonClasses } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { track } from "@/lib/analytics/events";
 import { cn } from "@/lib/cn";
 import { useCart } from "./cart/cart-provider";
-
-type ActionResult = { ok: boolean; message?: string };
-
-/** Ação de favoritar, registrada pelo layout da loja quando a conta do cliente existe (fase 5). */
-let toggleWishlistAction: ((productId: string, next: boolean) => Promise<ActionResult>) | undefined;
-
-export function registerWishlistAction(action: typeof toggleWishlistAction) {
-  toggleWishlistAction = action;
-}
+import { useWishlist } from "./wishlist-provider";
 
 type WishlistToggleProps = {
   productId: string;
   productName: string;
-  initial: boolean;
   className?: string;
 };
 
-export function WishlistToggle({
-  productId,
-  productName,
-  initial,
-  className,
-}: WishlistToggleProps) {
-  const [pressed, setPressed] = useState(initial);
+export function WishlistToggle({ productId, productName, className }: WishlistToggleProps) {
+  const router = useRouter();
+  const { has, toggle } = useWishlist();
   const [pending, startTransition] = useTransition();
+  const pressed = has(productId);
 
-  function toggle() {
-    const next = !pressed;
-    setPressed(next);
+  function handleClick() {
     startTransition(async () => {
-      const result = await toggleWishlistAction?.(productId, next);
-      if (result && !result.ok) setPressed(!next);
+      const result = await toggle(productId, !pressed);
+      if (result.needsLogin) {
+        router.push(`/entrar?voltar=${encodeURIComponent(window.location.pathname)}`);
+      } else if (!result.ok && result.message) {
+        toast(result.message, { tone: "error" });
+      } else if (result.ok && !pressed) {
+        track("add_to_wishlist", {
+          currency: "BRL",
+          value: 0,
+          items: [{ item_id: productId, item_name: productName, price: 0, quantity: 1 }],
+        });
+      }
     });
   }
 
@@ -51,7 +49,7 @@ export function WishlistToggle({
         pressed ? `Remover ${productName} dos favoritos` : `Adicionar ${productName} aos favoritos`
       }
       disabled={pending}
-      onClick={toggle}
+      onClick={handleClick}
       className={cn(
         "flex size-11 items-center justify-center rounded-full text-moss-700 transition-colors hover:text-moss-900",
         className,

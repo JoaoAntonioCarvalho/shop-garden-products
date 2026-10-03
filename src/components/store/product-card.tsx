@@ -101,7 +101,6 @@ export function ProductCard({
       <WishlistToggle
         productId={product.id}
         productName={product.name}
-        initial={product.wishlisted ?? false}
         className="absolute top-1 right-1 z-10"
       />
 

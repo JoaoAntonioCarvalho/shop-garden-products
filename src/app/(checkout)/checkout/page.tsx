@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CheckoutFlow } from "@/components/store/checkout/checkout-flow";
+import { db } from "@/lib/db";
 import { centsToReais } from "@/lib/money";
+import { getCurrentUser } from "@/lib/session";
 import type { CheckoutDraft } from "@/lib/validators/checkout";
 import { buildCartView, getCart, revalidateCartStock } from "@/server/services/cart";
 import { getStoreSettings } from "@/server/services/settings";
@@ -19,7 +21,47 @@ export default async function CheckoutPage() {
   const { cart, notices } = await revalidateCartStock(found);
   if (cart.items.length === 0) redirect("/carrinho");
 
-  const draft = (cart.checkoutData ?? {}) as CheckoutDraft;
+  const stored = (cart.checkoutData ?? {}) as CheckoutDraft;
+  // Cliente logado: os dados da conta e o endereço padrão já vêm preenchidos.
+  const user = await getCurrentUser();
+  const account = user
+    ? await db.user.findUnique({
+        where: { id: user.id },
+        select: {
+          name: true,
+          email: true,
+          cpf: true,
+          phone: true,
+          addresses: { orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }] },
+        },
+      })
+    : null;
+  const defaultAddress = account?.addresses[0];
+  const draft: CheckoutDraft = {
+    ...stored,
+    identification: {
+      email: account?.email,
+      name: account?.name,
+      cpf: account?.cpf ?? undefined,
+      phone: account?.phone ?? undefined,
+      ...stored.identification,
+    },
+    address: {
+      ...(defaultAddress
+        ? {
+            cep: defaultAddress.cep,
+            street: defaultAddress.street,
+            number: defaultAddress.number,
+            complement: defaultAddress.complement ?? "",
+            district: defaultAddress.district,
+            city: defaultAddress.city,
+            state: defaultAddress.state as never,
+            reference: defaultAddress.reference ?? "",
+          }
+        : {}),
+      ...stored.address,
+    },
+  };
   const view = await buildCartView(cart, settings, { paymentMethod: draft.paymentMethod ?? "PIX" });
 
   return (
@@ -56,6 +98,18 @@ export default async function CheckoutPage() {
         giftMessage={view.giftMessage}
         pixDiscountPercent={settings.pixDiscountPercent}
         showTestCards={process.env.NODE_ENV !== "production"}
+        savedAddresses={(account?.addresses ?? []).map((a) => ({
+          id: a.id,
+          label: a.label || `${a.street}, ${a.number}`,
+          cep: a.cep,
+          street: a.street,
+          number: a.number,
+          complement: a.complement ?? "",
+          district: a.district,
+          city: a.city,
+          state: a.state,
+          reference: a.reference ?? "",
+        }))}
         initialNotices={[
           ...notices,
           ...(view.coupon && !view.coupon.ok

@@ -10,6 +10,7 @@ import { buttonClasses } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
 import { db } from "@/lib/db";
 import { formatDateOnly } from "@/lib/dates";
+import { getCurrentUser } from "@/lib/session";
 import { centsToReais, formatBRL } from "@/lib/money";
 import { cardBrandLabels, type CardBrand } from "@/lib/validators/card";
 import { shippingKindOf } from "@/server/services/checkout-rules";
@@ -41,11 +42,12 @@ export default async function OrderPage({ params, searchParams }: Props) {
     searchParams,
     getStoreSettings(),
   ]);
-  const token = (Array.isArray(query.token) ? query.token[0] : query.token) ?? null;
-  let order = await getOrderForViewer(numero, { token });
+  const queryToken = (Array.isArray(query.token) ? query.token[0] : query.token) ?? null;
+  const viewer = await getCurrentUser();
+  let order = await getOrderForViewer(numero, { token: queryToken, userId: viewer?.id });
 
-  // Sem token válido, pede o e-mail do pedido.
-  if (!order || !token) {
+  // Sem o link do e-mail e sem ser o dono logado, pede o número e o e-mail do pedido.
+  if (!order) {
     return (
       <div className="container-store py-12">
         <div className="mx-auto max-w-md rounded-photo bg-white p-6">
@@ -60,8 +62,10 @@ export default async function OrderPage({ params, searchParams }: Props) {
   }
 
   if (order.status === "PENDING_PAYMENT" && (await expireOverduePayments(order.id)) > 0) {
-    order = (await getOrderForViewer(numero, { token })) ?? order;
+    order = (await getOrderForViewer(numero, { token: order.accessToken })) ?? order;
   }
+
+  const token = order.accessToken;
 
   // O evento purchase é disparado uma única vez por pedido: na primeira exibição da confirmação.
   const firstView = !order.purchaseTrackedAt;

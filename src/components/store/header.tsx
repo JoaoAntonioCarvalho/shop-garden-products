@@ -60,6 +60,7 @@ type HeaderProps = {
   search?: ReactNode;
   account?: ReactNode;
   cart?: ReactNode;
+  loggedIn?: boolean;
 };
 
 export function Header({
@@ -70,6 +71,7 @@ export function Header({
   search,
   account,
   cart,
+  loggedIn = false,
 }: HeaderProps) {
   const cartLabel =
     cartCount === 0
@@ -84,7 +86,10 @@ export function Header({
           <MobileMenu
             items={navigation.main}
             secondaryLinks={[
-              { label: "Minha conta", href: "/conta" },
+              {
+                label: loggedIn ? "Minha conta" : "Entrar ou criar conta",
+                href: loggedIn ? "/conta" : "/entrar",
+              },
               { label: "Rastrear pedido", href: "/rastreio" },
               { label: "Ajuda", href: "/ajuda" },
             ]}

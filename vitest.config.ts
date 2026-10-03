@@ -24,5 +24,7 @@ export default defineConfig({
     globalSetup: ["tests/integration/global-setup.ts"],
     // Os testes de integração compartilham o banco de teste: um arquivo por vez.
     fileParallelism: false,
+    // O next-auth importa "next/server" sem extensão; processado pelo Vite, o import resolve.
+    server: { deps: { inline: ["next-auth", "@auth/core"] } },
   },
 });

@@ -67,11 +67,11 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 
 ## Fase 5 — Conta do cliente
 
-- [ ] Auth.js com credenciais, limite de tentativas, verificação de e-mail, redefinição de senha
-- [ ] Mescla de carrinho anônimo no login
-- [ ] Área do cliente: visão geral, pedidos, endereços, favoritos, dados, senha, comunicação, privacidade
-- [ ] Rastreio sem login com limite por IP
-- [ ] Exportação de dados e pedido de exclusão (LGPD)
+- [x] Auth.js com credenciais, limite de tentativas, verificação de e-mail, redefinição de senha
+- [x] Mescla de carrinho anônimo no login
+- [x] Área do cliente: visão geral, pedidos, endereços, favoritos, dados, senha, comunicação, privacidade
+- [x] Rastreio sem login com limite por IP
+- [x] Exportação de dados e pedido de exclusão (LGPD)
 
 ## Fase 6 — Admin
 

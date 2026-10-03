@@ -66,6 +66,20 @@ type CheckoutFlowProps = {
   pixDiscountPercent: number;
   showTestCards: boolean;
   initialNotices: string[];
+  savedAddresses?: SavedCheckoutAddress[];
+};
+
+export type SavedCheckoutAddress = {
+  id: string;
+  label: string;
+  cep: string;
+  street: string;
+  number: string;
+  complement: string;
+  district: string;
+  city: string;
+  state: string;
+  reference: string;
 };
 
 const deliverySchema = z.object({ address: addressSchema, recipient: recipientSchema });
@@ -228,6 +242,7 @@ export function CheckoutFlow({
   pixDiscountPercent,
   showTestCards,
   initialNotices,
+  savedAddresses = [],
 }: CheckoutFlowProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -644,6 +659,47 @@ export function CheckoutFlow({
             </Alert>
           ) : null}
           <form onSubmit={submitDelivery} noValidate className="flex flex-col gap-4">
+            {savedAddresses.length > 0 ? (
+              <Field label="Usar um endereço salvo">
+                <Select
+                  defaultValue=""
+                  onChange={(event) => {
+                    const saved = savedAddresses.find((item) => item.id === event.target.value);
+                    if (!saved) return;
+                    for (const key of [
+                      "street",
+                      "number",
+                      "complement",
+                      "district",
+                      "city",
+                      "reference",
+                    ] as const) {
+                      deliveryForm.setValue(`address.${key}`, saved[key], {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      });
+                    }
+                    deliveryForm.setValue(
+                      "address.state",
+                      saved.state as DeliveryForm["address"]["state"],
+                      { shouldDirty: true },
+                    );
+                    deliveryForm.setValue("address.cep", formatCep(saved.cep), {
+                      shouldDirty: true,
+                    });
+                    refreshQuote(saved.cep, { code: "" });
+                    setShipping({ code: "" });
+                  }}
+                >
+                  <option value="">Escolher endereço</option>
+                  {savedAddresses.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.label}, {item.district}, {item.city}/{item.state}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+            ) : null}
             <Field
               label="CEP"
               error={deliveryForm.formState.errors.address?.cep?.message}

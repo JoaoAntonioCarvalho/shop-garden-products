@@ -5,6 +5,7 @@ import type { ProductImageData } from "@/components/store/product-card";
 import type { StoreSettings } from "@/config/store.config";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/session";
 import { availableOf, toImage } from "./catalog";
 import { COUPON_NOT_FOUND, validateCoupon, type CouponData, type CouponResult } from "./coupons";
 import { getPriceDisplay, type PriceDisplay } from "./pricing";
@@ -99,8 +100,10 @@ export async function ensureCart(
   if (existing) return existing;
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + settings.cartExpirationDays * 86_400_000);
+  // Carrinho criado por quem está logado já nasce ligado à conta.
+  const userId = extra.userId ?? (await getCurrentUser())?.id ?? null;
   const cart = await db.cart.create({
-    data: { token, expiresAt, userId: extra.userId ?? null, utm: extra.utm },
+    data: { token, expiresAt, userId, utm: extra.utm },
     include: cartInclude,
   });
   await setCartCookie(token, expiresAt);
