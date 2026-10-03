@@ -31,7 +31,7 @@ O simulador de pagamento some sozinho em produção.
 1. Crie o provider implementando `quote()`: recebe CEP, itens (peso, dimensões) e subtotal, e devolve as opções.
 2. Registre em `src/server/providers/shipping/index.ts`. `src/server/services/shipping.ts` continua aplicando frete grátis, itens só locais e feriados.
 3. Cadastre peso e dimensões reais nos produtos: a nota de qualidade do cadastro aponta os que faltam.
-4. Etiquetas e rastreio automático ficam fora desta versão. Hoje o código de rastreio é digitado no pedido.
+4. Etiquetas e rastreio automático ainda não foram feitos (pendência registrada em `docs/PENDENCIAS-DO-DONO.md`). Hoje o código de rastreio é digitado no pedido. Se a nota fiscal for pelo Bling, a etiqueta e o rastreio podem vir de lá (seção 5).
 
 ## 3. E-mail
 
@@ -49,7 +49,18 @@ Ao migrar de `local` para `s3`, copie a pasta `uploads/` para o bucket mantendo 
 
 ## 5. Nota fiscal
 
-Fora do escopo. O ponto de encaixe é a transição para `PAID` em `src/server/services/orders.ts` (depois do commit, junto dos e-mails): chamar o emissor (Bling, Tiny, NFe.io, eNotas) com os dados do pedido. O pedido já guarda CPF, endereço, itens com SKU e valores em centavos. Faltaria cadastrar NCM e origem nos produtos.
+Ainda não há emissão. A loja antiga emitia pelo Bling, e o caminho recomendado é continuar com ele: a configuração fiscal, o certificado digital e o cadastro com NCM já estão lá, e a contabilidade já conhece. A loja não emite nota; ela manda o pedido para o Bling, que emite.
+
+**Como ligar ao Bling (API v3, OAuth 2):**
+
+1. Cadastre um aplicativo na conta do Bling para obter client id e client secret. Guarde em variáveis de servidor (nunca `NEXT_PUBLIC_`) e guarde o refresh token no banco, renovando o access token quando vencer.
+2. Crie um provider de nota fiscal atrás de uma interface (como os de pagamento e frete), com `sendOrder(order)` e `getInvoice(orderId)`.
+3. Ponto de encaixe: a transição para `PAID` em `src/server/services/orders.ts`, depois do commit, junto dos e-mails. Envie o pedido de venda ao Bling com cliente (nome, CPF, endereço), itens por SKU, frete e desconto, em centavos convertidos para reais. Falha no envio não pode desfazer o pagamento: registre e tente de novo por uma tarefa agendada (`src/server/jobs.ts`).
+4. A emissão da nota pode ser automática no Bling ou por um clique da equipe lá. Receba o retorno (webhook do Bling ou consulta periódica) e grave no pedido o número da nota, a chave e o link do DANFE, para mostrar no painel e na área do cliente.
+5. Os SKUs das variações da loja precisam ser os mesmos códigos dos produtos no Bling. Decida qual dos dois manda no estoque; se for o Bling, some uma sincronização de saldo.
+6. Etiquetas: a logística do Bling (Correios, Melhor Envio e outras) gera a etiqueta e o código de rastreio a partir do mesmo pedido. Trazer esse código de volta resolve a pendência de etiquetas e rastreio automático.
+
+Confira na documentação atual do Bling os nomes dos endpoints, os limites de requisição e se o plano contratado inclui a API. Alternativas, se a loja sair do Bling: Tiny (Olist), que é um ERP parecido, ou um emissor puro por API (NFe.io, eNotas, Focus NFe), que exige cadastrar NCM, origem e regras fiscais na própria loja.
 
 ## 6. WhatsApp Business API
 

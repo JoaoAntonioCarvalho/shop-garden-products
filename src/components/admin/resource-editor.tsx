@@ -59,6 +59,7 @@ export async function ResourceEditor({
         describe={
           resource.form.describe ? describeResourceAction.bind(null, resource.key) : undefined
         }
+        preview={resource.form.livePreview}
         seo={
           resource.form.seoUrl
             ? {

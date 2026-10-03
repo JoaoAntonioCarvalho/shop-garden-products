@@ -159,3 +159,57 @@ test("área do cliente exige login e volta para a página pedida", async ({ page
   await page.goto("/admin");
   await expect(page).toHaveURL("/conta");
 });
+
+test("sacola: mover para favoritos pede login, tira o item da sacola e dá para desfazer", async ({
+  page,
+}) => {
+  const slug = "vaso-esmaltado-azul";
+  const product = await db.product.findUniqueOrThrow({ where: { slug }, select: { id: true } });
+  const customer = await db.user.findUniqueOrThrow({
+    where: { email: "cliente@example.com" },
+    select: { id: true },
+  });
+  const inWishlist = () =>
+    db.wishlist.count({ where: { userId: customer.id, productId: product.id } });
+  await db.wishlist.deleteMany({ where: { userId: customer.id, productId: product.id } });
+
+  try {
+    await addToCart(page, slug);
+    await page.goto("/carrinho");
+    const move = page.getByRole("button", { name: /Mover Vaso esmaltado azul para favoritos/ });
+
+    // Sem login, vai para a entrada e volta para a sacola com o item ainda lá.
+    await move.click();
+    await expect(page).toHaveURL(/\/entrar\?voltar=%2Fcarrinho/);
+    await page
+      .getByRole("main")
+      .getByRole("textbox", { name: "E-mail" })
+      .fill("cliente@example.com");
+    await page.getByRole("textbox", { name: "Senha" }).fill("Cliente@123");
+    await page.getByRole("button", { name: "Entrar", exact: true }).click();
+    await expect(page).toHaveURL("/carrinho");
+
+    const line = page.getByRole("main").getByRole("link", { name: "Vaso esmaltado azul" });
+    await expect(line.first()).toBeVisible();
+    await page
+      .getByRole("button", { name: /Mover Vaso esmaltado azul para favoritos/ })
+      .first()
+      .click();
+    await expect(
+      page.getByText("Vaso esmaltado azul foi para os favoritos", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /Mover Vaso esmaltado azul para favoritos/ }),
+    ).toHaveCount(0);
+    expect(await inWishlist()).toBe(1);
+
+    await page.getByRole("button", { name: "Desfazer" }).click();
+    await expect(
+      page.getByRole("button", { name: /Mover Vaso esmaltado azul para favoritos/ }),
+    ).toHaveCount(1);
+    await expect.poll(inWishlist).toBe(0);
+  } finally {
+    await db.wishlist.deleteMany({ where: { userId: customer.id, productId: product.id } });
+    await db.cartItem.deleteMany({ where: { cart: { userId: customer.id } } });
+  }
+});

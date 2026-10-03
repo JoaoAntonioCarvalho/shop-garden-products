@@ -130,6 +130,7 @@ export default async function CartPage() {
                     <div className="mt-2">
                       <CartLineControls
                         itemId={line.itemId}
+                        productId={line.productId}
                         name={line.name}
                         quantity={line.quantity}
                         available={line.available}

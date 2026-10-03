@@ -4,6 +4,7 @@ import { Plus, Trash2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { BannerPreview } from "@/components/admin/banner-preview";
 import { MediaField, type PickedImage } from "@/components/admin/media-picker";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
@@ -339,6 +340,8 @@ type EntityFormProps = {
   };
   /** Texto calculado no servidor a partir dos valores (por exemplo, a prévia do cupom). */
   describe?: (values: FormValues) => Promise<string>;
+  /** Prévia ao vivo desenhada com os valores digitados. */
+  preview?: "banner";
   children?: ReactNode;
 };
 
@@ -350,6 +353,7 @@ export function EntityForm({
   submitLabel = "Salvar",
   seo,
   describe,
+  preview,
   children,
 }: EntityFormProps) {
   const router = useRouter();
@@ -458,6 +462,7 @@ export function EntityForm({
           description={String(values[seo.descriptionField ?? "seoDescription"] ?? "")}
         />
       ) : null}
+      {preview === "banner" ? <BannerPreview values={values} /> : null}
       {children}
       <div className="sticky bottom-0 z-20 -mx-4 flex items-center justify-end gap-3 border-t border-border bg-background px-4 py-3 print:hidden">
         {dirty ? (

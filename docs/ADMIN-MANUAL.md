@@ -63,7 +63,7 @@ A loja vem com produtos, pedidos e clientes de teste, marcados com o selo **Test
 
 ## Categorias e coleções
 
-- **Categorias**: arraste para mudar a ordem. Os interruptores ligam e desligam na hora (ativa, no menu, na home). Abra a categoria para editar texto de SEO, perguntas frequentes, filtros e categoria pai.
+- **Categorias**: arraste para mudar a ordem. Para mudar a categoria pai, arraste até um dos destinos tracejados que aparecem durante o arrasto ("mover para dentro de" ou "virar categoria principal") e confirme: o endereço muda e o antigo passa a redirecionar. Os interruptores ligam e desligam na hora (ativa, no menu, na home). Abra a categoria para editar texto de SEO, perguntas frequentes, filtros e, se preferir, a categoria pai.
 - **Coleções**: vitrines. A **manual** tem produtos escolhidos e ordenados por você; a **por regra** se atualiza sozinha (novidades, mais vendidos, promoção, tag ou categoria).
 
 ## Estoque
@@ -102,7 +102,7 @@ O formulário mostra uma **prévia em linguagem simples** ("10% de desconto, vá
 
 ## Marketing e conteúdo
 
-- **Banners**: destaque da home, faixa secundária, topo de categoria e barra superior. O texto é sempre texto de verdade sobre um painel, nunca dentro da imagem. Dá para agendar início e fim.
+- **Banners**: destaque da home, faixa secundária, topo de categoria e barra superior. O texto é sempre texto de verdade sobre um painel, nunca dentro da imagem. Dá para agendar início e fim. A prévia no fim do formulário acompanha o que você digita, em computador e celular, e avisa quando a foto do destaque é clara demais atrás do painel de texto.
 - **Home**: arraste as seções para mudar a ordem e ligue ou desligue cada uma.
 - **Ocasiões**, **Páginas** e **Ajuda (FAQ)**: cadastros simples. Nos textos, marcadores como `{{telefone}}`, `{{freteGratis}}`, `{{corte}}` e `{{descontoPix}}` são trocados pelos valores das Configurações.
 - **Leads**: contatos captados com consentimento. A exportação traz só quem tem consentimento ativo.

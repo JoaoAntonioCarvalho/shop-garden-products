@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { allowedTextPairs, colors, contrastRatio } from "@/lib/color";
+import { allowedTextPairs, colors, contrastRatio, rgbToHex, surfaceBlendsIn } from "@/lib/color";
 
 describe("contraste das combinações de cor permitidas", () => {
   it.each(allowedTextPairs)(
@@ -28,5 +28,22 @@ describe("contraste das combinações de cor permitidas", () => {
     for (const [name, hex] of Object.entries(colors)) {
       expect(css).toContain(`--color-${name}: ${hex.toLowerCase()};`);
     }
+  });
+});
+
+describe("aviso de contraste do painel do banner sobre a foto", () => {
+  it("avisa quando a foto atrás do painel creme é quase branca", () => {
+    expect(surfaceBlendsIn(colors["cream-50"], "#F4F1EA")).toBe(true);
+    expect(surfaceBlendsIn(colors["cream-50"], colors.white)).toBe(true);
+  });
+
+  it("não avisa com foto escura ou de cor média", () => {
+    expect(surfaceBlendsIn(colors["cream-50"], colors["moss-700"])).toBe(false);
+    expect(surfaceBlendsIn(colors["cream-50"], "#B9B39F")).toBe(false);
+  });
+
+  it("converte a cor média da foto para hexadecimal", () => {
+    expect(rgbToHex(251.4, 248, 242)).toBe("#fbf8f2");
+    expect(rgbToHex(-3, 300, 0)).toBe("#00ff00");
   });
 });

@@ -90,10 +90,30 @@ Todos os valores abaixo são exemplos.
 | Transportadora           | Simulada, pelas regras de Admin > Frete | Contratar (Melhor Envio, Correios) e implementar o provider |
 | E-mail transacional      | SMTP local (Mailpit)                    | Contratar um SMTP e configurar o domínio                    |
 | Armazenamento de imagens | Pasta local                             | Bucket S3 ou R2 em produção                                 |
-| Nota fiscal              | Não há                                  | Emissor (Bling, Tiny, NFe.io) e NCM dos produtos            |
+| Nota fiscal              | Não há                                  | Ligar ao Bling, que a loja já usa (ver abaixo)              |
+| Etiquetas e rastreio     | Código de rastreio digitado no pedido   | Depende da transportadora ou do Bling (ver abaixo)          |
 | WhatsApp Business API    | Links e mensagens copiadas à mão        | Só se quiser mensagens automáticas                          |
 
 O passo a passo de cada uma está em `docs/INTEGRACOES.md`.
+
+### Para lembrar: etiquetas e rastreio automático
+
+É o único item da especificação que continua sem fazer. Hoje a equipe digita a transportadora e o código de rastreio ao marcar o pedido como enviado, e a etiqueta impressa pelo painel é só de endereço, sem postagem. Para automatizar é preciso decidir por onde as etiquetas vão sair:
+
+- [ ] Pelo Bling (se a nota fiscal for por ele, a logística do Bling gera a etiqueta e devolve o rastreio), ou
+- [ ] Por um serviço de frete ligado direto à loja (Melhor Envio, Frenet, Correios).
+
+Depois da escolha, o trabalho é: gerar a etiqueta ao iniciar a preparação, gravar o código de rastreio no pedido sozinho e atualizar o status quando a transportadora avisar a entrega.
+
+### Para lembrar: nota fiscal pelo Bling
+
+A loja antiga já emitia pelo Bling. O caminho recomendado é manter o Bling como emissor e ligar a loja nova a ele (roteiro em `docs/INTEGRACOES.md`, seção 5). Para isso o dono precisa trazer:
+
+- [ ] Acesso à conta do Bling e confirmação de que o plano inclui a API.
+- [ ] Cadastro do aplicativo no Bling (gera o client id e o client secret).
+- [ ] Confirmar com a contabilidade que o certificado digital e a configuração fiscal no Bling estão em dia.
+- [ ] Decidir quem manda no cadastro de produtos e no estoque: o Bling ou a loja. Os SKUs precisam ser iguais nos dois.
+- [ ] NCM e origem de cada produto (se o Bling já tem, basta manter os SKUs iguais).
 
 ## Dados da base antiga
 

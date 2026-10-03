@@ -120,7 +120,7 @@ Conferidas no registro do npm antes do setup.
 - **"Baixar meus dados" grava auditoria** (`customer.self_export`).
 - **Avaliação pelo link do e-mail** funciona sem login (número e token do pedido). O nome exibido é o primeiro nome e a inicial do sobrenome. Uma avaliação por produto por cliente.
 - **Checkout de cliente logado** vem com nome, e-mail, CPF, celular e endereço padrão preenchidos, e um seletor de endereços salvos. O login dentro do checkout é um link para `/entrar` que volta ao checkout.
-- **"Mover para favoritos" na sacola não foi feito**: o coração do produto cobre o caso. Pode entrar depois se fizer falta.
+- **"Mover para favoritos" na sacola** entrou depois da fase 8 (ver "Depois da entrega").
 - **`verifyCredentials` fica em `src/lib/credentials.ts`**, separado do Auth.js, para ser testável.
 
 ## 2026-10-03 — Fase 6
@@ -136,10 +136,10 @@ Conferidas no registro do npm antes do setup.
 - **Estoque alterado pelo cadastro do produto ou pela importação vira movimento** (`ADJUSTMENT` ou `IN`), como qualquer ajuste: o histórico nunca fica com buracos.
 - **Variação já vendida ou com reserva não é apagada**, fica inativa. Produto com pedidos, na exclusão em massa, é arquivado.
 - **Mudar o slug de produto, categoria ou coleção publicados** cria o redirecionamento 301 do endereço antigo, atualiza os redirecionamentos que apontavam para ele (sem cadeias) e remove um eventual redirecionamento que sairia do endereço novo (sem loops). Na categoria, vale também para as subcategorias.
-- **Categoria pai muda pelo formulário, não por arrastar.** Arrastar reordena dentro do mesmo nível (principais entre si, subcategorias entre si). Mover entre níveis por arrastar é fácil de acionar sem querer e muda URLs.
+- **Arrastar dentro da lista só reordena** (principais entre si, subcategorias entre si). Mudar a categoria pai por arrastar entrou depois da fase 8, com destinos próprios e confirmação (ver "Depois da entrega").
 - **Importação de produtos:** o arquivo é lido no servidor (UTF-8 ou ISO-8859-1, vírgula ou ponto e vírgula), as linhas voltam para o navegador para o mapeamento e a gravação acontece em lotes de 50 produtos, cada lote em uma transação. No formato do site antigo o peso é lido em quilos; no formato próprio, em gramas. O tipo do produto, quando o arquivo não traz, é deduzido da categoria. Limite de 5.000 linhas e 10 MB por arquivo (`serverActions.bodySizeLimit` em 12 MB).
 - **"Remover todos os produtos de teste"** apaga, em uma transação, produtos, variações, movimentos, avaliações, depoimentos, pedidos, carrinhos, leads, solicitações, contatos e clientes `isSample`. Imagens de teste que ainda ilustram categorias, coleções, banners ou ocasiões ficam até serem trocadas; usuários da equipe nunca são apagados.
-- **Prévia do banner é a do banner salvo**, abaixo do formulário. O texto fica sempre sobre um painel creme sólido, então o contraste não depende da foto e o aviso de contraste baixo não se aplica.
+- **O texto do banner fica sempre sobre um painel creme sólido**, então a leitura não depende da foto. A prévia ao vivo e o aviso de contraste entraram depois da fase 8 (ver "Depois da entrega").
 - **Gerador de cupons em lote** copia as regras de um cupom modelo e cria códigos de um uso só (`PREFIXO-XXXXXX`, sem caracteres ambíguos), agrupados em um lote exportável.
 - **Carrinho abandonado:** o e-mail de recuperação leva a `/carrinho/recuperar/[token]`, que devolve a sacola ao navegador. Quem se descadastrou não recebe.
 - **Editar avaliação é só para erros de digitação**, e o texto anterior fica na auditoria.
@@ -184,5 +184,16 @@ Conferidas no registro do npm antes do setup.
 - **Os testes e2e usam o banco de desenvolvimento** e reabastecem os produtos de teste antes de cada arquivo; o produto criado pelo teste do painel é apagado no fim.
 - **Gráficos do painel com `inert`:** além de `aria-hidden`, para os elementos internos do gráfico não receberem foco (apontado pelo axe).
 - **Conferência final:** os 127 redirecionamentos do site antigo respondem 301 para o destino certo; as 42 categorias têm produtos de teste (mínimo de 4) e abrem; buscas por "Net Shopping", "NetShop", caixa alta, setas em botões, pontos médios, gradientes, carrossel automático e telefone, e-mail ou valores fixos em componentes não encontraram nada.
-- **Não feito:** `pnpm db:reset` (o Prisma exige o consentimento do dono para um agente apagar o banco); "Mover para favoritos" na sacola; arrastar categoria para outro nível; etiquetas e rastreio automático; aviso de contraste na prévia do banner (o texto fica sempre sobre painel sólido).
+- **Não feito na fase 8:** `pnpm db:reset` (o Prisma exige o consentimento do dono para um agente apagar o banco) e etiquetas e rastreio automático. "Mover para favoritos", arrastar categoria para outro nível e o aviso de contraste do banner foram feitos depois (ver "Depois da entrega").
 - **Seed validado do zero em um banco descartável** (`netshopgarden_verificacao`, criado e apagado em seguida): migrações mais seed em 2,4 s, segunda execução em 1,3 s sem duplicar. 160 produtos, 44 com variações (27%), nenhuma descrição com menos de 300 caracteres, 250 pedidos (o total por dia passou a usar arredondamento acumulado, para a soma ser exata).
+
+## 2026-10-03 — Depois da entrega
+
+Três itens da especificação que tinham ficado de fora, feitos a pedido do dono.
+
+- **"Mover para favoritos" na sacola.** Primeiro guarda nos favoritos e só depois tira da sacola; se guardar falhar, o item fica onde está. Sem login, leva para `/entrar` e volta para a sacola com o item ainda lá. O aviso tem "Desfazer" por 5 segundos, que devolve o item à sacola e tira dos favoritos.
+- **Arrastar categoria para outro nível.** Durante o arrasto aparecem destinos tracejados: "mover para dentro de" em cada categoria principal e "virar categoria principal" no topo. Soltar em um destino abre uma confirmação com o endereço antigo e o novo; só então grava. Soltar sobre outra linha continua só reordenando, então não dá para mudar o pai sem querer. O endereço antigo passa a redirecionar (301), a categoria entra no fim da nova lista e a ação gera auditoria (`category.move`). A árvore continua com dois níveis: principal que tem subcategorias não vira subcategoria. A regra está em `src/server/admin/categories.ts` (`moveCategory`). Pelo teclado, o caminho continua sendo o campo "Categoria pai" do formulário.
+- **Prévia ao vivo do banner com aviso de contraste.** A prévia usa o que está digitado, antes de salvar, nas versões de computador e celular. Como o texto fica sempre sobre painel sólido, o contraste do texto é fixo e já é coberto pelo teste de cores; o que varia com a foto é o painel se destacar ou não da imagem. O aviso mede isso: calcula no navegador a cor média da foto na área atrás do painel (mesmo corte 16:7 da loja) e avisa quando o contraste com o creme do painel fica abaixo de 1,3:1 (`MIN_SURFACE_CONTRAST` em `src/lib/color.ts`). Vale só para o destaque da home, que é onde o painel fica sobre a foto. Se a imagem vier de outro domínio sem permissão de leitura, a prévia diz que não conseguiu medir.
+- **`SortableList` guarda só a ordem dos ids**, e o conteúdo de cada item vem sempre das props. Antes, qualquer nova renderização do componente pai desfazia a ordem otimista.
+- **Ainda não feito, para lembrar:** etiquetas e rastreio automático dependem da escolha da transportadora ou do serviço de frete (item em `docs/PENDENCIAS-DO-DONO.md`). A posição de banner "Faixa secundária da home" existe no painel, mas a loja ainda não tem a seção que a exibe.
+- **Testes:** 217 no Vitest e 20 no Playwright.

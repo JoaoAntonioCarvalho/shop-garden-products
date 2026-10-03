@@ -8,6 +8,7 @@ import { normalizeRedirectInput } from "@/lib/redirects";
 import { normalizeCep } from "@/lib/validators/cep";
 import { AdminError, runAdmin, type AdminResult } from "@/server/admin/action";
 import { decodeCsvBuffer, parseCsv } from "@/server/admin/list";
+import { moveCategory } from "@/server/admin/categories";
 import { assertRedirectIsSafe } from "@/server/admin/redirect-rules";
 import { invalidate } from "@/server/cache";
 import type { ShippingOption } from "@/server/providers/shipping/types";
@@ -25,6 +26,26 @@ export async function reorderCategoriesAction(ids: string[]): Promise<AdminResul
     await audit({ action: "category.reorder", entityType: "Category", diff: { ordem: data.ids } });
     invalidate("categories", "home");
     return { message: "Ordem das categorias salva" };
+  });
+}
+
+const moveSchema = z.object({
+  id: z.string().max(40),
+  parentId: z.string().max(40).nullable(),
+});
+
+/**
+ * Muda a categoria de nível (arrastar na árvore): vira subcategoria de uma principal ou volta a ser
+ * principal. O endereço muda, então o antigo passa a redirecionar. Entra no fim da nova lista.
+ */
+export async function moveCategoryAction(
+  id: string,
+  parentId: string | null,
+): Promise<AdminResult> {
+  return runAdmin("categories.edit", moveSchema, { id, parentId }, async (data, context) => {
+    const message = await moveCategory(data, context);
+    invalidate("categories", "catalog", "home");
+    return { message };
   });
 }
 

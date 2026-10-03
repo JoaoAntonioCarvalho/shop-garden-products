@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { CouponField } from "@/components/store/coupon-field";
 import { ShippingCalculator } from "@/components/store/shipping-calculator";
+import { useWishlist } from "@/components/store/wishlist-provider";
 import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { toast } from "@/components/ui/toast";
 import { track, type AnalyticsItem } from "@/lib/analytics/events";
@@ -18,20 +19,25 @@ import {
   setGiftOptionsAction,
 } from "@/server/actions/cart";
 
-/** Quantidade e remover de uma linha da sacola. */
+/** Quantidade, mover para favoritos e remover de uma linha da sacola. */
 export function CartLineControls({
   itemId,
+  productId,
   name,
   quantity,
   available,
 }: {
   itemId: string;
+  productId: string;
   name: string;
   quantity: number;
   available: number;
 }) {
   const router = useRouter();
+  const { toggle } = useWishlist();
   const [pending, startTransition] = useTransition();
+  const linkClass =
+    "min-h-11 type-small text-moss-700 underline underline-offset-3 hover:text-moss-900";
 
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1" aria-busy={pending || undefined}>
@@ -49,6 +55,54 @@ export function CartLineControls({
           })
         }
       />
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() =>
+          startTransition(async () => {
+            // Só sai da sacola depois de guardado nos favoritos.
+            const saved = await toggle(productId, true);
+            if (saved.needsLogin) {
+              router.push(`/entrar?voltar=${encodeURIComponent("/carrinho")}`);
+              return;
+            }
+            if (!saved.ok) {
+              toast(saved.message ?? "Não foi possível guardar nos favoritos.", { tone: "error" });
+              return;
+            }
+            const result = await removeCartItemAction(itemId);
+            router.refresh();
+            const removed = result.removed;
+            track("add_to_wishlist", {
+              currency: "BRL",
+              value: 0,
+              items: [{ item_id: productId, item_name: name, price: 0, quantity: 1 }],
+            });
+            if (removed?.item)
+              track("remove_from_cart", {
+                currency: "BRL",
+                value: removed.item.price * removed.item.quantity,
+                items: [removed.item],
+              });
+            toast(`${name} foi para os favoritos`, {
+              duration: 5000,
+              action: removed
+                ? {
+                    label: "Desfazer",
+                    onClick: async () => {
+                      await addToCartAction(removed.variantId, removed.quantity);
+                      await toggle(productId, false);
+                      router.refresh();
+                    },
+                  }
+                : undefined,
+            });
+          })
+        }
+        className={linkClass}
+      >
+        Mover<span className="sr-only"> {name}</span> para favoritos
+      </button>
       <button
         type="button"
         disabled={pending}
@@ -76,7 +130,7 @@ export function CartLineControls({
             });
           })
         }
-        className="min-h-11 type-small text-moss-700 underline underline-offset-3 hover:text-moss-900"
+        className={linkClass}
       >
         Remover<span className="sr-only"> {name} da sacola</span>
       </button>

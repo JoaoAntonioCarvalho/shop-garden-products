@@ -658,53 +658,12 @@ export const bannerResource = defineResource<BannerRecord>({
       utmCampaign: banner?.utmCampaign ?? "",
       isActive: banner?.isActive ?? true,
     }),
+    livePreview: "banner",
     below: (banner) => (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Prévia do banner salvo</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid overflow-hidden rounded-md border border-border md:grid-cols-[2fr_3fr]">
-            <div className="bg-cream-100 p-5">
-              <p className="font-serif text-[26px] leading-tight font-semibold text-moss-900">
-                {banner.title}
-              </p>
-              {banner.subtitle ? <p className="mt-2 text-sm text-ink">{banner.subtitle}</p> : null}
-              <p className="mt-3 flex flex-wrap gap-2 text-sm">
-                {banner.ctaLabel ? (
-                  <span className="rounded-sm bg-moss-700 px-3 py-1.5 text-white">
-                    {banner.ctaLabel}
-                  </span>
-                ) : null}
-                {banner.secondaryCtaLabel ? (
-                  <span className="rounded-sm border border-moss-700 px-3 py-1.5 text-moss-900">
-                    {banner.secondaryCtaLabel}
-                  </span>
-                ) : null}
-              </p>
-            </div>
-            {banner.imageDesktop ? (
-              <Image
-                src={toMediaItem(banner.imageDesktop).url}
-                alt={banner.imageDesktop.alt}
-                width={720}
-                height={315}
-                unoptimized
-                className="h-full max-h-64 w-full object-cover"
-              />
-            ) : (
-              <div className="flex min-h-32 items-center justify-center text-sm text-muted-foreground">
-                Sem imagem
-              </div>
-            )}
-          </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            O texto fica sempre sobre o painel creme, então o contraste não depende da foto.{" "}
-            {periodText(banner.startsAt, banner.endsAt)}. Última alteração em{" "}
-            {formatDateTime(banner.updatedAt)}.
-          </p>
-        </CardContent>
-      </Card>
+      <p className="text-xs text-muted-foreground">
+        {periodText(banner.startsAt, banner.endsAt)}. Última alteração em{" "}
+        {formatDateTime(banner.updatedAt)}.
+      </p>
     ),
   },
   toggles: [{ field: "isActive", label: "Ativo" }],

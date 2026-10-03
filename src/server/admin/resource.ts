@@ -57,6 +57,8 @@ export type Resource<R extends AnyRecord = AnyRecord> = {
     /** Texto de prévia calculado no servidor a partir dos valores digitados. */
     describe?(values: FormValues): Promise<string> | string;
     seoUrl?(values: FormValues): string;
+    /** Prévia ao vivo, desenhada no navegador com os valores digitados. */
+    livePreview?: "banner";
     /** Conteúdo abaixo do formulário de edição (relatórios, prévia, itens). */
     below?(record: R, user: CurrentUser): Promise<ReactNode> | ReactNode;
   };

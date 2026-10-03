@@ -3,6 +3,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import type { AdminContext } from "@/server/admin/action";
 import { AdminError } from "@/server/admin/action";
+import { moveCategory } from "@/server/admin/categories";
 import { decodeCsvBuffer, parseCsv, toCsv } from "@/server/admin/list";
 import { detectFormat, importSchema, runImport } from "@/server/admin/product-import";
 import {
@@ -349,5 +350,65 @@ describe.skipIf(!hasTestDatabase)("admin: redirecionamentos e dados de teste", (
     expect(audits).toContain("samples.remove");
     await db.product.delete({ where: { id: real.id } });
     await db.user.delete({ where: { id: keeper.id } });
+  });
+});
+
+describe.skipIf(!hasTestDatabase)("admin: mover categoria de nível", () => {
+  const slugs: string[] = [];
+  const make = async (parentId: string | null = null, parentPath = "") => {
+    const slug = uniqueKey("cat").toLowerCase();
+    slugs.push(slug);
+    return db.category.create({
+      data: { name: `Categoria ${slug}`, slug, path: `${parentPath}${slug}`, parentId },
+    });
+  };
+
+  afterAll(async () => {
+    await db.redirect.deleteMany({
+      where: { OR: slugs.map((slug) => ({ fromPath: { contains: slug } })) },
+    });
+    await db.category.deleteMany({ where: { slug: { in: slugs }, parentId: { not: null } } });
+    await db.category.deleteMany({ where: { slug: { in: slugs } } });
+  });
+
+  it("vira subcategoria, muda o endereço, redireciona o antigo e volta a ser principal", async () => {
+    const [parent, moved] = [await make(), await make()];
+    audits.length = 0;
+
+    const message = await moveCategory({ id: moved.id, parentId: parent.id }, context);
+    expect(message).toContain("agora fica dentro de");
+    const nested = await db.category.findUniqueOrThrow({ where: { id: moved.id } });
+    expect(nested.parentId).toBe(parent.id);
+    expect(nested.path).toBe(`${parent.slug}/${moved.slug}`);
+    const redirect = await db.redirect.findUnique({
+      where: { fromPath: `/categoria/${moved.slug}` },
+    });
+    expect(redirect?.toPath).toBe(`/categoria/${parent.slug}/${moved.slug}`);
+    expect(audits).toEqual(["category.move"]);
+
+    await moveCategory({ id: moved.id, parentId: null }, context);
+    const root = await db.category.findUniqueOrThrow({ where: { id: moved.id } });
+    expect(root.parentId).toBeNull();
+    expect(root.path).toBe(moved.slug);
+    // O endereço voltou a valer: não pode sobrar redirecionamento saindo dele.
+    expect(
+      await db.redirect.findUnique({ where: { fromPath: `/categoria/${moved.slug}` } }),
+    ).toBeNull();
+  });
+
+  it("recusa mover para dentro de subcategoria e mover principal que tem subcategorias", async () => {
+    const parent = await make();
+    const child = await make(parent.id, `${parent.slug}/`);
+    const other = await make();
+
+    await expect(moveCategory({ id: other.id, parentId: child.id }, context)).rejects.toThrow(
+      AdminError,
+    );
+    await expect(moveCategory({ id: parent.id, parentId: other.id }, context)).rejects.toThrow(
+      "tem subcategorias",
+    );
+    await expect(moveCategory({ id: child.id, parentId: parent.id }, context)).rejects.toThrow(
+      "já está neste lugar",
+    );
   });
 });

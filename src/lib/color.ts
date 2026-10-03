@@ -70,3 +70,22 @@ export function contrastRatio(foreground: string, background: string): number {
   const [lighter, darker] = a > b ? [a, b] : [b, a];
   return (lighter + 0.05) / (darker + 0.05);
 }
+
+/**
+ * Abaixo disto, um painel sólido quase não se distingue da foto atrás dele. Não é o contraste do
+ * texto (esse é fixo, texto escuro sobre painel creme): é o do painel contra a imagem.
+ */
+export const MIN_SURFACE_CONTRAST = 1.3;
+
+/** O painel (ou a legenda) se confunde com a foto quando a área atrás dele é quase da mesma cor. */
+export function surfaceBlendsIn(surfaceHex: string, behindHex: string): boolean {
+  return contrastRatio(surfaceHex, behindHex) < MIN_SURFACE_CONTRAST;
+}
+
+export function rgbToHex(r: number, g: number, b: number): string {
+  const part = (value: number) =>
+    Math.max(0, Math.min(255, Math.round(value)))
+      .toString(16)
+      .padStart(2, "0");
+  return `#${part(r)}${part(g)}${part(b)}`;
+}

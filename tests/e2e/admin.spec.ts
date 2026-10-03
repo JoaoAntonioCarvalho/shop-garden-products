@@ -226,3 +226,75 @@ test("equipe (STAFF) não acessa configurações nem exporta clientes, na interf
   await page.getByRole("tab", { name: "Variações" }).click();
   await expect(page.getByRole("columnheader", { name: "Custo (R$)" })).toHaveCount(0);
 });
+
+test("categorias: arrastar para o destino tracejado muda a categoria pai, com confirmação e redirecionamento", async ({
+  page,
+}) => {
+  const key = Date.now().toString(36);
+  const make = (name: string, position: number) =>
+    db.category.create({
+      data: {
+        name: `E2E ${name} ${key}`,
+        slug: `e2e-${name}-${key}`,
+        path: `e2e-${name}-${key}`,
+        position,
+        isActive: false,
+        showInMenu: false,
+      },
+    });
+  const parent = await make("pai", -2);
+  const moved = await make("filha", -1);
+
+  try {
+    await loginAdmin(page);
+    await page.goto("/admin/categorias");
+    const source = page.getByRole("listitem").filter({ hasText: moved.name }).first();
+    await source.scrollIntoViewIfNeeded();
+    const box = (await source.boundingBox())!;
+    await page.mouse.move(box.x + 14, box.y + 18);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 30, box.y + 40, { steps: 5 });
+    const zone = page.getByText(
+      `Solte aqui para mover ${moved.name} para dentro de ${parent.name}`,
+    );
+    await expect(zone).toBeVisible();
+    await zone.hover();
+    await zone.hover();
+    await page.mouse.up();
+
+    const dialog = page.getByRole("alertdialog");
+    await expect(dialog).toContainText(`/categoria/${parent.slug}/${moved.slug}`);
+    await dialog.getByRole("button", { name: "Mover" }).click();
+    await expect(
+      page.getByText(`${moved.name} agora fica dentro de ${parent.name}`).first(),
+    ).toBeVisible();
+
+    const after = await db.category.findUniqueOrThrow({ where: { id: moved.id } });
+    expect(after.parentId).toBe(parent.id);
+    expect(after.path).toBe(`${parent.slug}/${moved.slug}`);
+    const redirect = await db.redirect.findUnique({
+      where: { fromPath: `/categoria/${moved.slug}` },
+    });
+    expect(redirect?.toPath).toBe(`/categoria/${parent.slug}/${moved.slug}`);
+    expect(
+      await db.auditLog.count({ where: { action: "category.move", entityId: moved.id } }),
+    ).toBe(1);
+  } finally {
+    await db.redirect.deleteMany({ where: { fromPath: { contains: `-${key}` } } });
+    await db.category.deleteMany({ where: { id: moved.id } });
+    await db.category.deleteMany({ where: { id: parent.id } });
+  }
+});
+
+test("banner: a prévia acompanha o que é digitado, antes de salvar", async ({ page }) => {
+  await loginAdmin(page);
+  await page.goto("/admin/banners/novo");
+  await page.getByLabel("Título", { exact: true }).fill("Orquídeas para o dia das mães");
+  await page.getByLabel("Texto do botão").first().fill("Ver orquídeas");
+  const preview = page.locator("form").getByText("Prévia", { exact: true }).locator("../..");
+  await expect(preview.getByText("Orquídeas para o dia das mães").first()).toBeVisible();
+  await expect(preview.getByText("Ver orquídeas").first()).toBeVisible();
+  await expect(
+    preview.getByText("Escolha a imagem para computador para conferir o contraste"),
+  ).toBeVisible();
+});
