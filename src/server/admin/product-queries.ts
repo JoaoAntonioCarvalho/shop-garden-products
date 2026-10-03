@@ -24,6 +24,14 @@ export async function categoryOptions(): Promise<Array<{ value: string; label: s
   });
 }
 
+export async function deliveryAreaOptions(): Promise<Array<{ value: string; label: string }>> {
+  const areas = await db.deliveryArea.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
+  return areas.map((area) => ({ value: area.id, label: area.name }));
+}
+
 export async function collectionOptions(
   onlyManual = true,
 ): Promise<Array<{ value: string; label: string }>> {
@@ -185,6 +193,7 @@ export async function loadProductForm(id: string): Promise<ProductFormData | nul
       sameDayEligible: product.sameDayEligible,
       deliveryScope: product.deliveryScope,
       carrierRestriction: product.carrierRestriction,
+      deliveryAreaId: product.deliveryAreaId ?? "",
       fragile: product.fragile,
       perishable: product.perishable,
       seoTitle: text(product.seoTitle),
@@ -259,6 +268,7 @@ export function emptyProductForm(): ProductFormData {
       sameDayEligible: false,
       deliveryScope: "NATIONAL",
       carrierRestriction: "ANY",
+      deliveryAreaId: "",
       fragile: false,
       perishable: false,
       seoTitle: "",

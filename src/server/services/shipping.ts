@@ -1,14 +1,51 @@
 import "server-only";
+import { db } from "@/lib/db";
+import {
+  blockedCartNotice,
+  findBlockedItems,
+  readCepRanges,
+  type BlockedItem,
+  type RestrictedItem,
+} from "@/lib/delivery-areas";
+import { normalizeCep } from "@/lib/validators/cep";
 import { getShippingProvider, loadShippingRules } from "@/server/providers/shipping";
-import { isBlockedByLocalOnly, LOCAL_ONLY_NOTICE } from "@/server/providers/shipping/mock";
+import { isBlockedByLocalOnly } from "@/server/providers/shipping/mock";
 import type { ShippingOption, ShippingQuoteItem } from "@/server/providers/shipping/types";
 import type { CouponData } from "./coupons";
 
 export type ShippingQuote = {
   options: ShippingOption[];
   notice: string | null;
+  /** Há item que não pode ser entregue no CEP (área do produto ou entrega só local). */
   blockedByLocalOnly: boolean;
+  /** Quais itens, e a área em que cada um é entregue. */
+  blockedItems: BlockedItem[];
 };
+
+/** Nome, escopo e área de entrega do produto de cada item. */
+async function loadRestrictions(items: ShippingQuoteItem[]): Promise<RestrictedItem[]> {
+  const variants = await db.productVariant.findMany({
+    where: { id: { in: items.map((item) => item.variantId) } },
+    select: {
+      id: true,
+      product: {
+        select: { name: true, deliveryArea: { select: { name: true, cepRanges: true } } },
+      },
+    },
+  });
+  const byId = new Map(variants.map((variant) => [variant.id, variant.product]));
+  return items.map((item) => {
+    const product = byId.get(item.variantId);
+    return {
+      variantId: item.variantId,
+      name: product?.name ?? "Um item da sacola",
+      localOnly: item.deliveryScope === "LOCAL_ONLY",
+      area: product?.deliveryArea
+        ? { name: product.deliveryArea.name, ranges: readCepRanges(product.deliveryArea.cepRanges) }
+        : null,
+    };
+  });
+}
 
 /** Métodos em que o cupom de frete grátis vale: entregas locais; a do mesmo dia só se o cupom permitir. */
 function couponCoversOption(coupon: CouponData, option: ShippingOption): boolean {
@@ -46,18 +83,30 @@ export async function quoteShipping(input: {
     subtotalCents: input.subtotalCents,
     now,
   };
-  const [options, rules] = await Promise.all([
+  const [options, rules, restrictions] = await Promise.all([
     getShippingProvider().quote(quoteInput),
     loadShippingRules(),
+    loadRestrictions(input.items),
   ]);
-  const blockedByLocalOnly = isBlockedByLocalOnly(quoteInput, rules);
+  const cep = normalizeCep(input.cep);
+  const blockedItems = cep
+    ? findBlockedItems(cep, restrictions, !isBlockedByLocalOnly(quoteInput, rules))
+    : [];
+  // Com item que não vai para o CEP, nenhuma opção é oferecida: o pedido não pode ser fechado assim.
+  if (blockedItems.length > 0)
+    return {
+      options: [],
+      blockedByLocalOnly: true,
+      blockedItems,
+      notice: blockedCartNotice(blockedItems),
+    };
 
   return {
     options: applyFreeShippingCoupon(options, input.freeShippingCoupon ?? null),
-    blockedByLocalOnly,
-    notice: blockedByLocalOnly
-      ? LOCAL_ONLY_NOTICE
-      : options.length === 0
+    blockedByLocalOnly: false,
+    blockedItems,
+    notice:
+      options.length === 0
         ? "Não encontramos opções de entrega para este CEP. Confira os números ou fale com a gente pelo WhatsApp."
         : null,
   };

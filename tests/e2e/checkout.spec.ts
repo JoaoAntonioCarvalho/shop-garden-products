@@ -164,7 +164,7 @@ test("produto só local com CEP de outro estado mostra o aviso e bloqueia o envi
   await fillIdentification(page, uniqueEmail("local"));
   await fillAddress(page, RIO);
 
-  await expect(page.getByText(/são entregues apenas na Grande São Paulo/)).toBeVisible();
+  await expect(page.getByText(/entrega só nesta área: Grande São Paulo/)).toBeVisible();
   await expect(page.locator('input[name="entrega"]')).toHaveCount(0);
   await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
   await expect(page.getByText("Escolha uma opção de entrega.")).toBeVisible();
@@ -209,4 +209,49 @@ test("convidado compra com boleto para outro estado, vê a linha digitável e o 
   await expect
     .poll(() => mailTo(page.request, email))
     .toEqual(expect.arrayContaining([`Pagamento aprovado: pedido ${number}`]));
+});
+
+test("produto com área de entrega própria: fora da área, a loja diz qual produto não vai e oferece o WhatsApp", async ({
+  page,
+}) => {
+  const slug = "vaso-de-cimento-cilindrico";
+  const product = await db.product.findUniqueOrThrow({ where: { slug }, select: { id: true } });
+  const area = await db.deliveryArea.create({
+    data: {
+      name: "São Paulo, capital",
+      cepRanges: [
+        { start: "01000000", end: "05999999" },
+        { start: "08000000", end: "08499999" },
+      ],
+    },
+  });
+  await db.product.update({ where: { id: product.id }, data: { deliveryAreaId: area.id } });
+
+  try {
+    await page.goto(`/produto/${slug}`);
+    const cep = page.getByRole("textbox", { name: "Calcular frete e prazo" });
+
+    // Rio de Janeiro: fora da área.
+    await cep.fill("22041001");
+    await page.getByRole("button", { name: "Calcular frete" }).click();
+    await expect(
+      page.getByText(
+        "Vaso de cimento cilíndrico tem entrega só nesta área: São Paulo, capital. Para receber em outro lugar, fale com a gente pelo WhatsApp.",
+      ),
+    ).toBeVisible();
+    const whatsapp = page.getByRole("link", { name: /Falar pelo WhatsApp/ });
+    await expect(whatsapp).toBeVisible();
+    expect(decodeURIComponent((await whatsapp.getAttribute("href")) ?? "")).toContain(
+      "Quero receber Vaso de cimento cilíndrico no CEP 22041-001",
+    );
+
+    // Avenida Paulista: dentro da área, as opções aparecem e o aviso some.
+    await cep.fill("01310100");
+    await page.getByRole("button", { name: "Calcular frete" }).click();
+    await expect(page.getByText(/tem entrega só nesta área/)).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Falar pelo WhatsApp/ })).toHaveCount(0);
+  } finally {
+    await db.product.update({ where: { id: product.id }, data: { deliveryAreaId: null } });
+    await db.deliveryArea.delete({ where: { id: area.id } });
+  }
 });

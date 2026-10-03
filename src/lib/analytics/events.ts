@@ -15,7 +15,7 @@ export type AnalyticsItem = {
 };
 
 export type WhatsAppPosition =
-  "flutuante" | "produto" | "hero" | "checkout" | "pedido" | "menu" | "pagina";
+  "flutuante" | "produto" | "hero" | "checkout" | "pedido" | "menu" | "pagina" | "frete";
 
 export type AnalyticsEvents = {
   view_item_list: { item_list_name: string; items: AnalyticsItem[] };

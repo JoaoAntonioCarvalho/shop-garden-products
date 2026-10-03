@@ -111,6 +111,22 @@ O formulário mostra uma **prévia em linguagem simples** ("10% de desconto, vá
 
 Regras por faixa de CEP (valor, prazo, dias, corte), **feriados** e um **simulador**: informe um CEP e um carrinho de exemplo para ver as opções que o cliente veria.
 
+### Áreas de entrega
+
+Em **Configurações, Áreas de entrega** ficam as regiões em que um produto pode ser entregue. Cada área tem um nome, que o cliente vê, e faixas de CEP, uma por linha (por exemplo `01000-000 a 05999-999`).
+
+Para usar, abra o produto, vá à aba **Entrega** e escolha a área em "Área de entrega". A partir daí:
+
+- Quem calcula o frete com CEP fora da área vê o aviso com o nome do produto e da área ("Palmeira ráfis tem entrega só nesta área: São Paulo, capital") e um botão para falar pelo WhatsApp, com a mensagem já escrita (produto e CEP).
+- Na sacola e no checkout, o pedido não fecha enquanto o item estiver lá: o cliente pode remover o que não vai para o CEP dele ou chamar no WhatsApp.
+- A página do produto informa a área na seção "Entrega e embalagem".
+
+Produto sem área própria continua seguindo o campo "Onde entrega": todo o Brasil, ou só na Grande São Paulo (onde houver regra de entrega local).
+
+### Transportadora por produto
+
+Na mesma aba Entrega, "Transportadora no envio nacional" define se o produto pode ir por qualquer transportadora ou só pela Jadlog (volumosos e plantas que os Correios não aceitam). Com um produto só Jadlog na sacola, o pedido inteiro vai pela Jadlog. Só tem efeito com as transportadoras ligadas (ver `docs/INTEGRACOES.md`).
+
 ## Configurações
 
 Dados da loja, regras comerciais (desconto do Pix, parcelas, frete grátis), entrega hoje, analytics, e-mail interno e **modo manutenção** (a loja mostra "Voltamos em breve"; a equipe logada continua vendo a loja). Salvar atualiza a loja na hora. **Enviar e-mail de teste** confere se os e-mails estão saindo.

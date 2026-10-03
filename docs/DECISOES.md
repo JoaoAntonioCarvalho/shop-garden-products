@@ -217,3 +217,12 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Jadlog escrita pelo manual oficial 2.3**, lido do PDF. Endpoints, campos e exemplos de resposta vieram dele. Vieram de memória, e estão marcados na documentação para confirmar: códigos de modalidade, divisores de cubagem (3333 e 6000), prefixo `Bearer` e o status `ENTREGUE`. **Não foi testada com token real.**
 - **Nome da transportadora no nome da opção** ("Envio econômico (Jadlog)"): é o que fica gravado no pedido, sem mudar o schema do pedido.
 - **Tarefa renomeada** de `rastreio-correios` para `rastreio-transportadoras`.
+
+## 2026-10-03 — Áreas de entrega por produto
+
+- **`DeliveryArea`** (nome e faixas de CEP) e `Product.deliveryAreaId`, migração `delivery_areas`. Cadastro em `/admin/areas-de-entrega`; o produto escolhe a área na aba Entrega. Pedido do dono: muitos produtos não vão para todo o país, a área muda de produto para produto, e o cliente de fora precisa saber qual produto é e poder chamar no WhatsApp.
+- **A área vale por cima do escopo.** Produto com área só é vendido para CEPs dentro dela, seja o envio local ou por transportadora. Produto sem área segue como antes: nacional, ou "só Grande São Paulo" pelas regras de entrega local.
+- **O aviso diz o nome do produto e da área** e vem com botão de WhatsApp com a mensagem pronta. A frase é "X tem entrega só nesta área: Y", que funciona com qualquer nome de produto e de área sem errar gênero nem preposição. O aviso genérico de plantas (`LOCAL_ONLY_NOTICE`) saiu.
+- **Com item bloqueado, nenhuma opção de frete é devolvida** (`quoteShipping`), então `placeOrder` recusa o pedido no servidor mesmo que o navegador tente. O botão do checkout agora remove só os itens bloqueados para aquele CEP, não todos os "só locais".
+- **Regra pura em `src/lib/delivery-areas.ts`**, com testes; `quoteShipping` busca nome e área do produto pelo id da variação, para não mudar os cinco lugares que montam os itens da cotação.
+- **Sem áreas no seed:** o dono cadastra as dele. O banco de desenvolvimento não ganhou nenhuma.

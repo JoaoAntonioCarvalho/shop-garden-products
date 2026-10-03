@@ -481,6 +481,7 @@ const productDetailInclude = {
       media: { select: { ...mediaSelect, width: true, height: true } },
     },
   },
+  deliveryArea: { select: { name: true } },
   variants: { where: { isActive: true }, orderBy: { position: "asc" } },
 } satisfies Prisma.ProductInclude;
 

@@ -29,9 +29,6 @@ export type ShippingSettings = Pick<
   "sameDay" | "freeShippingThresholdCents" | "holidays" | "address"
 >;
 
-export const LOCAL_ONLY_NOTICE =
-  "Plantas naturais, orquídeas e arranjos naturais são entregues apenas na Grande São Paulo. Remova esses itens para ver opções de envio para o seu CEP.";
-
 const SCHEDULE_DAYS = 14;
 
 /**

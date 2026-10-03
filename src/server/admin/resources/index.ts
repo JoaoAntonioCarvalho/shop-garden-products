@@ -2,7 +2,12 @@ import "server-only";
 import type { Resource } from "../resource";
 import { faqResource, homeResource, pageResource } from "./content";
 import { bannerResource, couponResource, occasionResource, testimonialResource } from "./marketing";
-import { holidayResource, redirectResource, shippingRuleResource } from "./system";
+import {
+  deliveryAreaResource,
+  holidayResource,
+  redirectResource,
+  shippingRuleResource,
+} from "./system";
 import { categoryResource, collectionResource } from "./taxonomy";
 
 const all: Resource[] = [
@@ -15,6 +20,7 @@ const all: Resource[] = [
   homeResource,
   shippingRuleResource,
   holidayResource,
+  deliveryAreaResource,
   redirectResource,
   categoryResource,
   collectionResource,

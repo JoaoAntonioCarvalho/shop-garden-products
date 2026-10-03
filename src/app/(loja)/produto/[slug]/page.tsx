@@ -160,9 +160,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
         <div className="measure type-body text-ink">
           <p>{settings.packagingText}</p>
           <p className="mt-3">
-            {localOnly
-              ? "Este produto é entregue apenas na Grande São Paulo, por equipe própria."
-              : "Este produto é enviado para todo o Brasil."}{" "}
+            {product.deliveryArea
+              ? `Este produto tem entrega só nesta área: ${product.deliveryArea.name}. Para receber em outro lugar, fale com a gente pelo WhatsApp.`
+              : localOnly
+                ? "Este produto é entregue apenas na Grande São Paulo, por equipe própria."
+                : "Este produto é enviado para todo o Brasil."}{" "}
             <Link href="/entrega" className="text-moss-700 underline underline-offset-3">
               Ver entrega e prazos
             </Link>

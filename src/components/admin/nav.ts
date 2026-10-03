@@ -86,6 +86,11 @@ export const ADMIN_NAV: Array<{ group: string; items: AdminNavItem[] }> = [
     group: "Configurações",
     items: [
       { href: "/admin/frete", label: "Frete e entrega", permission: "shipping.manage" },
+      {
+        href: "/admin/areas-de-entrega",
+        label: "Áreas de entrega",
+        permission: "shipping.manage",
+      },
       { href: "/admin/configuracoes", label: "Configurações", permission: "settings.manage" },
       { href: "/admin/usuarios", label: "Usuários", permission: "users.manage" },
       {

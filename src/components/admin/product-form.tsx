@@ -81,6 +81,7 @@ type Props = {
   data: ProductFormData;
   categories: FieldOption[];
   collections: FieldOption[];
+  deliveryAreas: FieldOption[];
   typeOptions: FieldOption[];
   canEdit: boolean;
   canEditImages: boolean;
@@ -248,6 +249,7 @@ export function ProductForm({
   data,
   categories,
   collections,
+  deliveryAreas,
   typeOptions,
   canEdit,
   canEditImages,
@@ -1005,6 +1007,13 @@ export function ProductForm({
             <Card>
               <CardContent className="grid gap-4 pt-6 md:grid-cols-2">
                 {DELIVERY_FIELDS.map(field)}
+                {field({
+                  name: "deliveryAreaId",
+                  label: "Área de entrega",
+                  type: "select",
+                  options: [{ value: "", label: "Sem área própria" }, ...deliveryAreas],
+                  help: "Com uma área, o produto só é vendido para CEPs dentro dela, e o cliente de fora é avisado. As áreas ficam em Configurações, Áreas de entrega.",
+                })}
                 <p className="text-sm text-muted-foreground md:col-span-2">
                   O peso fica em cada variação, na aba Variações. Altura, largura e profundidade
                   ficam na aba Ficha e entram no cálculo do frete.

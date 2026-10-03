@@ -17,6 +17,7 @@ import { movementLabels } from "@/server/admin/inventory";
 import {
   categoryOptions,
   collectionOptions,
+  deliveryAreaOptions,
   loadProductForm,
 } from "@/server/admin/product-queries";
 import { productTypeLabels } from "@/server/admin/products";
@@ -128,6 +129,7 @@ export default async function EditProductPage({ params }: PageProps<"/admin/prod
         data={data}
         categories={categories}
         collections={collections}
+        deliveryAreas={await deliveryAreaOptions()}
         typeOptions={Object.entries(productTypeLabels).map(([value, label]) => ({ value, label }))}
         canEdit={can(user, "products.edit")}
         canEditImages={can(user, "products.edit_images")}

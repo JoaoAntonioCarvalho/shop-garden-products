@@ -12,6 +12,7 @@ import {
   describeShippingOption,
   formatDeliveryEstimate,
 } from "@/components/store/shipping-calculator";
+import { WhatsAppButton } from "@/components/store/whatsapp-button";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
 import { Field } from "@/components/ui/field";
@@ -813,18 +814,29 @@ export function CheckoutFlow({
                   <Alert tone="warning" className="mt-3">
                     {quote.notice}
                     {quote.blockedByLocalOnly ? (
-                      <div className="mt-3">
+                      <div className="mt-3 flex flex-wrap gap-2">
                         <Button
                           variant="secondary"
                           size="sm"
                           onClick={async () => {
-                            await removeLocalOnlyItemsAction();
+                            await removeLocalOnlyItemsAction(cepValue ?? "");
                             router.refresh();
                             refreshQuote(cepValue, { code: "" });
                           }}
                         >
-                          Remover esses itens da sacola
+                          Remover da sacola o que não pode ser enviado
                         </Button>
+                        {quote.contact ? (
+                          <WhatsAppButton
+                            number={quote.contact.whatsapp}
+                            message={quote.contact.message}
+                            position="frete"
+                            variant="secondary"
+                            size="sm"
+                          >
+                            Falar pelo WhatsApp
+                          </WhatsAppButton>
+                        ) : null}
                       </div>
                     ) : null}
                   </Alert>

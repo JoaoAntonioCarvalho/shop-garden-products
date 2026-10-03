@@ -293,6 +293,8 @@ model Product {
   sameDayEligible    Boolean            @default(false)
   deliveryScope      DeliveryScope      @default(NATIONAL)
   carrierRestriction CarrierRestriction @default(ANY)
+  /// Área de entrega do produto. Sem área, vale o campo deliveryScope.
+  deliveryAreaId     String?
   fragile            Boolean            @default(false)
   perishable         Boolean            @default(false)
 
@@ -357,6 +359,7 @@ model Product {
   wishlistedBy         Wishlist[]
   orderItems           OrderItem[]
   coupons              Coupon[]            @relation("CouponProducts")
+  deliveryArea         DeliveryArea?       @relation(fields: [deliveryAreaId], references: [id], onDelete: SetNull)
   leads                Lead[]
 
   @@index([status, primaryCategoryId])
@@ -1303,4 +1306,18 @@ model RateLimitHit {
 
   @@id([key, windowStart])
   @@index([windowStart])
+}
+
+/// Área em que um produto pode ser entregue, por faixas de CEP ("São Paulo, capital").
+model DeliveryArea {
+  id        String   @id @default(cuid())
+  /// Nome mostrado ao cliente: "Este produto só é enviado para {name}".
+  name      String
+  /// Lista de { start, end }, CEPs com 8 dígitos.
+  cepRanges Json     @default("[]")
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
 }

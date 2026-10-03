@@ -1,3 +1,4 @@
+import { formatCepRanges, parseCepRanges, readCepRanges } from "@/lib/delivery-areas";
 import "server-only";
 import Link from "next/link";
 import { z } from "zod";
@@ -284,6 +285,86 @@ export const holidayResource = defineResource<HolidayRecord>({
       date: holiday ? holiday.date.toISOString().slice(0, 10) : toDateInput(new Date()),
     }),
   },
+});
+
+// ───────────────────────── Áreas de entrega ─────────────────────────
+
+type DeliveryAreaRecord = Prisma.DeliveryAreaGetPayload<{
+  include: { _count: { select: { products: true } } };
+}>;
+
+export const deliveryAreaResource = defineResource<DeliveryAreaRecord>({
+  key: "areas-de-entrega",
+  singular: "Área de entrega",
+  plural: "Áreas de entrega",
+  feminine: true,
+  description:
+    "Regiões, por faixa de CEP, em que um produto pode ser entregue. Escolha a área na aba Entrega de cada produto. Fora da área, a loja avisa o cliente qual produto não vai para o CEP dele e oferece o WhatsApp.",
+  permission: "shipping.manage",
+  model: "deliveryArea",
+  entityType: "DeliveryArea",
+  tags: ["catalog"],
+  nameOf: (area) => area.name,
+  include: { _count: { select: { products: true } } },
+  list: {
+    columns: [
+      { key: "name", header: "Área" },
+      { key: "ranges", header: "Faixas de CEP" },
+      { key: "products", header: "Produtos" },
+    ],
+    orderBy: { name: "asc" },
+    row: (area) => ({
+      name: area.name,
+      ranges: muted(formatCepRanges(readCepRanges(area.cepRanges)).split("\n").join("; ")),
+      products: area._count.products,
+    }),
+  },
+  form: {
+    schema: z.object({
+      name: requiredText("o nome da área", 80),
+      cepRanges: z
+        .string()
+        .max(8000)
+        .transform((text, context) => {
+          const { ranges, invalid } = parseCepRanges(text);
+          if (invalid.length)
+            context.addIssue({
+              code: "custom",
+              message: `Não entendi esta linha: "${invalid[0]}". Use o formato 01000-000 a 05999-999.`,
+            });
+          else if (ranges.length === 0)
+            context.addIssue({ code: "custom", message: "Informe ao menos uma faixa de CEP." });
+          return ranges;
+        }),
+    }),
+    fields: () => [
+      {
+        name: "name",
+        label: "Nome mostrado ao cliente",
+        type: "text",
+        placeholder: "São Paulo, capital",
+        help: 'Aparece no aviso: "Palmeira ráfis tem entrega só nesta área: São Paulo, capital."',
+        wide: true,
+      },
+      {
+        name: "cepRanges",
+        label: "Faixas de CEP (uma por linha)",
+        type: "textarea",
+        rows: 6,
+        placeholder: "01000-000 a 05999-999\n08000-000 a 08499-999",
+        help: "Cada linha é uma faixa, do CEP inicial ao final. Uma linha com um CEP só vale para aquele CEP.",
+        wide: true,
+      },
+    ],
+    toForm: (area) => ({
+      name: area?.name ?? "",
+      cepRanges: area ? formatCepRanges(readCepRanges(area.cepRanges)) : "",
+    }),
+  },
+  blockDelete: (area) =>
+    area._count.products > 0
+      ? `Esta área está em ${area._count.products} produtos. Troque a área desses produtos antes de excluir.`
+      : null,
 });
 
 // ───────────────────────── Redirecionamentos ─────────────────────────

@@ -104,6 +104,7 @@ Atualizado ao longo do projeto.
 | Cupons e totais (puros)                  | `src/server/services/coupons.ts`, `totals.ts`                                                                 |
 | Frete                                    | `src/server/services/shipping.ts`, `src/server/providers/shipping/`                                           |
 | Transportadoras (Correios, Jadlog)       | `src/server/providers/shipping/{carriers,correios,jadlog}/`, `src/server/services/tracking.ts`                |
+| Áreas de entrega por produto             | `src/lib/delivery-areas.ts`, `src/server/services/shipping.ts`, `/admin/areas-de-entrega`                     |
 | Estoque (reserva, baixa, liberação)      | `src/server/services/inventory.ts`                                                                            |
 | Estados do pedido                        | `order-status.ts` (puro) e `orders.ts` (`transitionOrder`)                                                    |
 | Criação do pedido                        | `src/server/services/checkout.ts` (`placeOrder`)                                                              |

@@ -21,6 +21,7 @@ import { requestNow } from "@/server/clock";
 import { getInstallments } from "@/server/services/pricing";
 import { rateLimit, rateLimitMessage } from "@/server/services/rate-limit";
 import { getStoreSettings } from "@/server/services/settings";
+import { blockedContactMessage } from "@/lib/delivery-areas";
 import { quoteShipping } from "@/server/services/shipping";
 import type { Totals } from "@/server/services/totals";
 
@@ -29,6 +30,8 @@ export type CheckoutQuote = {
   options: ShippingOption[];
   notice: string | null;
   blockedByLocalOnly: boolean;
+  /** WhatsApp da loja e mensagem já escrita, quando há item que não vai para o CEP. */
+  contact: { whatsapp: string; message: string } | null;
   /** Totais com o frete escolhido, para cada meio de pagamento. */
   totals: Record<"PIX" | "CREDIT_CARD" | "BOLETO", Totals>;
   boleto: BoletoAvailability;
@@ -70,6 +73,7 @@ export async function checkoutQuoteAction(
   let options: ShippingOption[] = [];
   let notice: string | null = null;
   let blockedByLocalOnly = false;
+  let contact: CheckoutQuote["contact"] = null;
   if (cep) {
     const quote = await quoteShipping({
       cep,
@@ -79,6 +83,11 @@ export async function checkoutQuoteAction(
       now,
     });
     ({ options, notice, blockedByLocalOnly } = quote);
+    if (quote.blockedItems.length > 0)
+      contact = {
+        whatsapp: settings.whatsapp,
+        message: blockedContactMessage(quote.blockedItems, cep),
+      };
     if (cart.shippingCep !== cep)
       await db.cart.update({ where: { id: cart.id }, data: { shippingCep: cep } });
   }
@@ -99,6 +108,7 @@ export async function checkoutQuoteAction(
     options,
     notice,
     blockedByLocalOnly,
+    contact,
     totals,
     boleto: boletoAvailability({
       option,
@@ -146,13 +156,23 @@ export async function saveCheckoutDraftAction(
   return { ok: true, hasAccount: Boolean(account) };
 }
 
-/** Tira da sacola os itens entregues só na Grande São Paulo (quando o CEP é de outra região). */
-export async function removeLocalOnlyItemsAction(): Promise<{ ok: boolean; removed: number }> {
+/** Tira da sacola os itens que não podem ser entregues no CEP informado. */
+export async function removeLocalOnlyItemsAction(
+  cep: string,
+): Promise<{ ok: boolean; removed: number }> {
   const cart = await getCart();
-  if (!cart) return { ok: false, removed: 0 };
-  const ids = cart.items
-    .filter((item) => item.variant.product.deliveryScope === "LOCAL_ONLY")
-    .map((item) => item.id);
+  const destination = normalizeCep(String(cep));
+  if (!cart || !destination) return { ok: false, removed: 0 };
+  const settings = await getStoreSettings();
+  const view = await buildCartView(cart, settings);
+  const quote = await quoteShipping({
+    cep: destination,
+    items: toShippingItems(view.lines),
+    subtotalCents: view.subtotalCents,
+    now: await requestNow(),
+  });
+  const blocked = new Set(quote.blockedItems.map((item) => item.variantId));
+  const ids = cart.items.filter((item) => blocked.has(item.variantId)).map((item) => item.id);
   if (ids.length) await db.cartItem.deleteMany({ where: { id: { in: ids } } });
   return { ok: true, removed: ids.length };
 }

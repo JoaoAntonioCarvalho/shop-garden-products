@@ -8,6 +8,7 @@ import type { ProductCardData, ProductImageData } from "@/components/store/produ
 import type { ShippingQuoteResult } from "@/components/store/shipping-calculator";
 import type { AnalyticsItem } from "@/lib/analytics/events";
 import { db } from "@/lib/db";
+import { blockedContactMessage, blockedProductNotice } from "@/lib/delivery-areas";
 import { clientIpHash } from "@/lib/ip";
 import { centsToReais } from "@/lib/money";
 import { normalizeCep } from "@/lib/validators/cep";
@@ -28,7 +29,7 @@ import { getPriceDisplay } from "@/server/services/pricing";
 import { requestNow } from "@/server/clock";
 import { rateLimit, rateLimitMessage } from "@/server/services/rate-limit";
 import { getStoreSettings } from "@/server/services/settings";
-import { quoteShipping } from "@/server/services/shipping";
+import { quoteShipping, type ShippingQuote } from "@/server/services/shipping";
 
 export type MiniCartLine = {
   itemId: string;
@@ -264,7 +265,19 @@ export async function quoteCartShippingAction(cep: string): Promise<ShippingQuot
     now: await requestNow(),
   });
   await db.cart.update({ where: { id: cart.id }, data: { shippingCep: guard.cep } });
-  return { ok: true, options: quote.options, notice: quote.notice ?? undefined };
+  return {
+    ok: true,
+    options: quote.options,
+    notice: quote.notice ?? undefined,
+    contact: blockedContact(quote, guard.cep, settings.whatsapp),
+  };
+}
+
+/** Contato pelo WhatsApp, já com a mensagem escrita, quando há item que não vai para o CEP. */
+function blockedContact(quote: ShippingQuote, cep: string, whatsapp: string) {
+  return quote.blockedItems.length > 0
+    ? { whatsapp, message: blockedContactMessage(quote.blockedItems, cep) }
+    : undefined;
 }
 
 /** Frete para um produto, na página de produto. */
@@ -298,7 +311,12 @@ export async function quoteProductShippingAction(
     now: await requestNow(),
   });
   const notice = quote.blockedByLocalOnly
-    ? "Este produto é entregue apenas na Grande São Paulo."
+    ? blockedProductNotice(quote.blockedItems)
     : (quote.notice ?? undefined);
-  return { ok: true, options: quote.options, notice };
+  return {
+    ok: true,
+    options: quote.options,
+    notice,
+    contact: blockedContact(quote, guard.cep, settings.whatsapp),
+  };
 }

@@ -4,12 +4,20 @@ import { useId, useState, useTransition, type FormEvent } from "react";
 import { Alert } from "@/components/ui/feedback";
 import { Button } from "@/components/ui/button";
 import { MaskedInput } from "@/components/ui/masked-input";
+import { WhatsAppButton } from "@/components/store/whatsapp-button";
 import { formatBRL } from "@/lib/money";
 import { isValidCep } from "@/lib/validators/cep";
 import type { ShippingOption } from "@/server/providers/shipping/types";
 
 export type ShippingQuoteResult =
-  { ok: true; options: ShippingOption[]; notice?: string } | { ok: false; error: string };
+  | {
+      ok: true;
+      options: ShippingOption[];
+      notice?: string;
+      /** Quando há item que não vai para o CEP: WhatsApp da loja e a mensagem já escrita. */
+      contact?: { whatsapp: string; message: string };
+    }
+  | { ok: false; error: string };
 
 type ShippingCalculatorProps = {
   /** Server action que consulta o serviço de frete. O cálculo nunca acontece no navegador. */
@@ -102,6 +110,19 @@ export function ShippingCalculator({
         {result?.ok && result.notice ? (
           <Alert tone="warning" className="mt-3">
             {result.notice}
+            {result.contact ? (
+              <div className="mt-3">
+                <WhatsAppButton
+                  number={result.contact.whatsapp}
+                  message={result.contact.message}
+                  position="frete"
+                  variant="secondary"
+                  size="sm"
+                >
+                  Falar pelo WhatsApp
+                </WhatsAppButton>
+              </div>
+            ) : null}
           </Alert>
         ) : null}
         {result?.ok && result.options.length > 0 ? (

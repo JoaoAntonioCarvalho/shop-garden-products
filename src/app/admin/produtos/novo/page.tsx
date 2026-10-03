@@ -6,6 +6,7 @@ import { getEnv } from "@/lib/env";
 import {
   categoryOptions,
   collectionOptions,
+  deliveryAreaOptions,
   emptyProductForm,
 } from "@/server/admin/product-queries";
 import { productTypeLabels } from "@/server/admin/products";
@@ -26,6 +27,7 @@ export default async function NewProductPage() {
         data={emptyProductForm()}
         categories={categories}
         collections={collections}
+        deliveryAreas={await deliveryAreaOptions()}
         typeOptions={Object.entries(productTypeLabels).map(([value, label]) => ({ value, label }))}
         canEdit
         canEditImages
