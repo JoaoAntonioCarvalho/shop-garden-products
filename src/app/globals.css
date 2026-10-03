@@ -217,6 +217,13 @@
 }
 
 @layer base {
+  /* Cor padrão de borda: divisores usam `line` quando a classe não informa outra cor. */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-line);
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: 96px;
