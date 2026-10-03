@@ -1,1 +1,351 @@
 @import "tailwindcss";
+
+/*
+ * Design system da Net Shop Garden ("herbário contemporâneo").
+ * Este é o único lugar onde cores, fontes, raios e sombras são definidos.
+ * A paleta padrão do Tailwind é desligada de propósito: só existem os tokens da marca.
+ */
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-moss-900: #2f3221;
+  --color-moss-700: #4d5236;
+  --color-moss-500: #6e7552;
+  --color-moss-100: #e7e8dc;
+  --color-wine-800: #7c1519;
+  --color-wine-700: #9a1b1f;
+  --color-wine-50: #f7ebea;
+  --color-cream-50: #fbf8f2;
+  --color-cream-100: #f3ede1;
+  --color-white: #ffffff;
+  --color-ink: #23251b;
+  --color-ink-muted: #5f624f;
+  --color-line: #ddd6c6;
+  --color-success: #4d5236;
+  --color-warning: #8a5a00;
+  --color-danger: #9a1b1f;
+
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-inter), Inter, system-ui, sans-serif;
+
+  --radius-*: initial;
+  --radius-photo: 2px;
+  --radius-control: 6px;
+  --radius-panel: 12px;
+  --radius-full: 9999px;
+
+  --shadow-*: initial;
+  --shadow-overlay: 0 12px 32px -8px rgb(35 37 27 / 0.18), 0 2px 6px rgb(35 37 27 / 0.06);
+
+  --container-store: 1320px;
+
+  --animate-fade-in: fade-in 600ms ease-out both;
+  --animate-overlay-in: fade-in 160ms ease-out both;
+  --animate-slide-in-right: slide-in-right 220ms ease-out both;
+  --animate-slide-in-left: slide-in-left 220ms ease-out both;
+  --animate-slide-in-bottom: slide-in-bottom 220ms ease-out both;
+  --animate-spin: spin 800ms linear infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-in-left {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-in-bottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* Escala tipográfica (seção 6.3): tamanho mobile primeiro, desktop a partir de 768px. */
+@utility type-display {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 40px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  @media (width >= 48rem) {
+    font-size: 64px;
+  }
+}
+@utility type-h1 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 34px;
+  line-height: 1.1;
+  @media (width >= 48rem) {
+    font-size: 48px;
+  }
+}
+@utility type-h2 {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.15;
+  @media (width >= 48rem) {
+    font-size: 36px;
+  }
+}
+@utility type-h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 1.2;
+  @media (width >= 48rem) {
+    font-size: 26px;
+  }
+}
+@utility type-body-lg {
+  font-size: 17px;
+  line-height: 1.6;
+  @media (width >= 48rem) {
+    font-size: 18px;
+  }
+}
+@utility type-body {
+  font-size: 16px;
+  line-height: 1.6;
+}
+@utility type-small {
+  font-size: 14px;
+  line-height: 1.5;
+}
+@utility type-caption {
+  font-size: 13px;
+  line-height: 1.4;
+}
+/* Nome científico: Cormorant itálico, nunca abaixo de 22px fora da ficha reduzida. */
+@utility type-scientific {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Largura máxima de 1320px com margens de 24px (mobile) e 48px (desktop). */
+@utility container-store {
+  width: 100%;
+  max-width: calc(var(--container-store) + 96px);
+  margin-inline: auto;
+  padding-inline: 24px;
+  @media (width >= 64rem) {
+    padding-inline: 48px;
+  }
+}
+
+/* Respiro vertical das seções da home: 64px no mobile, 96px no desktop. */
+@utility section-y {
+  padding-block: 64px;
+  @media (width >= 64rem) {
+    padding-block: 96px;
+  }
+}
+
+/* Texto corrido com no máximo ~70 caracteres por linha. */
+@utility measure {
+  max-width: 70ch;
+}
+
+/* Linha dupla do topo da ficha botânica: duas linhas de 1px com 3px de espaço. */
+@utility herbarium-rule {
+  height: 5px;
+  border-top: 1px solid var(--color-moss-700);
+  border-bottom: 1px solid var(--color-moss-700);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 96px;
+  }
+
+  body {
+    background: var(--color-cream-50);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Foco visível em todo elemento interativo (seção 6.5). */
+  :focus-visible {
+    outline: 2px solid var(--color-moss-700);
+    outline-offset: 2px;
+  }
+
+  /* Em fundos musgo ou vinho o contorno é creme. */
+  .on-dark :focus-visible,
+  .on-dark:focus-visible {
+    outline-color: var(--color-cream-50);
+  }
+
+  ::selection {
+    background: var(--color-moss-100);
+    color: var(--color-ink);
+  }
+
+  button,
+  [role="button"],
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Conteúdo vindo do editor de texto rico (descrições, páginas, texto de SEO). */
+@layer components {
+  .rich-text {
+    max-width: 70ch;
+  }
+  .rich-text > * + * {
+    margin-top: 1em;
+  }
+  .rich-text h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 28px;
+    line-height: 1.15;
+    margin-top: 1.6em;
+    color: var(--color-moss-900);
+  }
+  .rich-text h3 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.2;
+    margin-top: 1.4em;
+    color: var(--color-moss-900);
+  }
+  .rich-text ul {
+    list-style: disc;
+    padding-left: 1.25em;
+  }
+  .rich-text ol {
+    list-style: decimal;
+    padding-left: 1.25em;
+  }
+  .rich-text li + li {
+    margin-top: 0.35em;
+  }
+  .rich-text a {
+    color: var(--color-moss-700);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rich-text a:hover {
+    color: var(--color-moss-900);
+  }
+}
+
+/* Controles de formulário nativos com a aparência da marca. */
+@layer components {
+  .control-check,
+  .control-radio {
+    appearance: none;
+    flex: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--color-moss-500);
+    background: var(--color-white) center / 14px 14px no-repeat;
+    transition:
+      background-color 120ms,
+      border-color 120ms;
+  }
+  .control-check {
+    border-radius: 4px;
+  }
+  .control-radio {
+    border-radius: 9999px;
+  }
+  .control-check:checked {
+    background-color: var(--color-moss-700);
+    border-color: var(--color-moss-700);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+  }
+  .control-radio:checked {
+    border-color: var(--color-moss-700);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='%234D5236'/%3E%3C/svg%3E");
+  }
+  .control-check:disabled,
+  .control-radio:disabled,
+  .control-switch:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .control-check[aria-invalid="true"],
+  .control-radio[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  .control-switch {
+    appearance: none;
+    flex: none;
+    position: relative;
+    width: 44px;
+    height: 26px;
+    border-radius: 9999px;
+    background: var(--color-moss-500);
+    transition: background-color 150ms;
+  }
+  .control-switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: var(--color-white);
+    transition: transform 150ms;
+  }
+  .control-switch:checked {
+    background: var(--color-moss-900);
+  }
+  .control-switch:checked::after {
+    transform: translateX(18px);
+  }
+}

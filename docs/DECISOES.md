@@ -30,3 +30,21 @@ Conferidas no registro do npm antes do setup.
 - **Banco `netshopgarden_test`** criado pelo `docker/postgres-init.sql` para os testes que precisam de Postgres (estoque e concorrência).
 - **Rota `/api/health`** (faz `SELECT 1`), usada pelo Playwright para saber quando o servidor está pronto.
 - **Dependências entram na fase em que são usadas** (shadcn, Tiptap, Recharts, Auth.js etc.), não todas na fase 0.
+
+## 2026-10-03 — Fase 1
+
+- **Paleta padrão do Tailwind desligada** (`--color-*: initial` no `@theme`). Só existem os tokens da marca, o que impede cores fora do design system. Os tokens do admin (shadcn) serão mapeados para os mesmos tokens na fase 6.
+- **Borda dos campos de formulário em `moss-500`, não em `line`.** A cor `line` sobre branco não atinge 3:1, exigido para contorno de controles (WCAG 1.4.11). `line` fica para divisores.
+- **`Select`, `Checkbox`, `Radio` e `Switch` são controles nativos estilizados**, não Radix. São acessíveis sem JavaScript e melhores no celular. Radix é usado onde há comportamento complexo: modal, gaveta, acordeão, abas, dica, aviso e mega menu (`NavigationMenu`, que já entrega atraso de 150ms, teclado e `aria-expanded`).
+- **Cabeçalho fixo sem JavaScript.** A linha principal (logo, busca, ícones) tem 64px e fica fixa; a barra superior e a linha de categorias rolam com a página. É a "versão compacta de 64px" da especificação, sem ouvir o evento de rolagem.
+- **Ícones de pagamento são um componente React** (`src/components/store/icons.tsx`), não arquivos em `public/brand`, porque precisam herdar a cor do texto (creme no rodapé). São desenhos próprios e neutros.
+- **Ícone do WhatsApp é um desenho próprio em traço fino**; o `lucide-react` não tem ícones de marcas.
+- **Nome científico no card de produto usa Inter itálico 13px**, porque a regra da tipografia proíbe Cormorant abaixo de 22px. Na ficha botânica e na legenda do hero é Cormorant itálico (20px e 22px).
+- **`Skeleton` não tem animação**, seguindo a regra de animação só em resposta a ação do usuário.
+- **Parcela exibida é o preço dividido pelo número de parcelas, arredondado ao centavo mais próximo.**
+- **`ShippingCalculator`, `CouponField` e `NewsletterForm` recebem server actions por propriedade.** O cálculo nunca acontece no navegador; as ações reais entram nas fases 4 e 7. A página `/dev/design-system` usa ações de demonstração.
+- **Ações do card de produto (adicionar e favoritar) são registradas por `registerCardActions`**, para o card não depender dos módulos de carrinho e favoritos (fases 4 e 5).
+- **`src/config/category-tree.ts` guarda a árvore de categorias** (nome e slug). Alimenta o menu enquanto o catálogo não vem do banco e será a base do seed.
+- **`scripts/screenshots.ts`** tira screenshots em 390, 768 e 1440 px e avisa de estouro horizontal e erros no console. Usado nas revisões visuais.
+- **`pnpm typecheck` roda `next typegen` antes do `tsc`**, porque o Next 16 gera os tipos de rota (`LayoutProps`, `PageProps`).
+- **Prettier com `tailwindStylesheet`** apontando para `globals.css`, para o plugin do Tailwind ordenar as classes conhecendo os tokens da marca.

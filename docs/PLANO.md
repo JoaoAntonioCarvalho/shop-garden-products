@@ -15,18 +15,18 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 
 ## Fase 1 — Design system e layout da loja
 
-- [ ] Tokens de cor, tipografia, espaçamento e raio como variáveis CSS expostas ao Tailwind
-- [ ] Fontes Cormorant Garamond e Inter via `next/font`
-- [ ] `src/config/store.config.ts`
-- [ ] Primitivas: Button, Input, Textarea, Select, Checkbox, Radio, Switch, QuantityStepper, MaskedInput, Field
-- [ ] Price, Badge, Rating
-- [ ] Breadcrumb, Pagination, Accordion, Tabs, Dialog, Drawer, Toast, Tooltip, Skeleton, EmptyState, Alert
-- [ ] ProductCard, ProductGrid, CategoryTile, BotanicalSheet, ShippingCalculator, CouponField, FreeShippingProgress, WhatsAppButton, NewsletterForm
-- [ ] Logo provisório (`public/brand/logo.svg` + componente `Logo`) e ícones de pagamento
-- [ ] Layout da loja: barra superior, cabeçalho, mega menu, menu mobile, rodapé
-- [ ] `/dev/design-system` com todos os componentes e estados
-- [ ] Teste unitário de contraste
-- [ ] Revisão visual em 390, 768 e 1440 px
+- [x] Tokens de cor, tipografia, espaçamento e raio como variáveis CSS expostas ao Tailwind
+- [x] Fontes Cormorant Garamond e Inter via `next/font`
+- [x] `src/config/store.config.ts`
+- [x] Primitivas: Button, Input, Textarea, Select, Checkbox, Radio, Switch, QuantityStepper, MaskedInput, Field
+- [x] Price, Badge, Rating
+- [x] Breadcrumb, Pagination, Accordion, Tabs, Dialog, Drawer, Toast, Tooltip, Skeleton, EmptyState, Alert
+- [x] ProductCard, ProductGrid, CategoryTile, BotanicalSheet, ShippingCalculator, CouponField, FreeShippingProgress, WhatsAppButton, NewsletterForm
+- [x] Logo provisório (`public/brand/logo.svg` + componente `Logo`) e ícones de pagamento
+- [x] Layout da loja: barra superior, cabeçalho, mega menu, menu mobile, rodapé
+- [x] `/dev/design-system` com todos os componentes e estados
+- [x] Teste unitário de contraste
+- [x] Revisão visual em 390, 768 e 1440 px
 
 ## Fase 2 — Banco e seed
 

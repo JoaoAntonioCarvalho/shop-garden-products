@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 40" role="img" aria-label="Net Shop Garden">
+  <g fill="none" stroke="#4D5236" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 34C6 20 14 9 28 6c1 14-7 25-22 28Z"/>
+    <path d="M6 34C11 24 17 17 24 11"/>
+  </g>
+  <text x="38" y="28" font-family="'Cormorant Garamond', Georgia, serif" font-weight="600" font-size="27" fill="#4D5236">Net Shop Garden</text>
+</svg>

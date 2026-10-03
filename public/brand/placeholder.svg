@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#FFFFFF"/>
+  <g fill="none" stroke="#4D5236" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M400 760V420"/>
+    <path d="M400 560c-10-90-70-150-170-160 0 100 70 160 170 160Z"/>
+    <path d="M400 470c10-100 70-170 180-180 0 110-70 180-180 180Z"/>
+    <path d="M400 660c-6-60-46-100-110-106 0 66 46 106 110 106Z"/>
+    <path d="M300 760h200l-22 120H322Z"/>
+  </g>
+</svg>
