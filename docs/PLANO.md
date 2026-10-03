@@ -108,53 +108,53 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 
 ## Fase 8 — Qualidade e entrega
 
-- [ ] Testes unitários da seção 18.1
-- [ ] Testes e2e da seção 18.2 (13 cenários) com axe
-- [ ] Lighthouse nas páginas principais (registrar números)
-- [ ] Bundle analyzer (registrar números)
-- [ ] README, ARQUITETURA, INTEGRACOES, ADMIN-MANUAL
-- [ ] CI opcional
-- [ ] Lista final de TODOs em `PENDENCIAS-DO-DONO.md`
+- [x] Testes unitários da seção 18.1
+- [x] Testes e2e da seção 18.2 (13 cenários) com axe
+- [x] Lighthouse nas páginas principais (registrar números)
+- [x] Bundle analyzer (registrar números)
+- [x] README, ARQUITETURA, INTEGRACOES, ADMIN-MANUAL
+- [x] CI opcional (`.github/workflows/ci.yml`, não executado: o repositório ainda não está no GitHub)
+- [x] Lista final de TODOs em `PENDENCIAS-DO-DONO.md`
 
 ## Critérios de aceite finais (seção 20)
 
-- [ ] `docker compose up -d && pnpm install && pnpm db:reset && pnpm dev` sobe do zero sem erros
-- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e` e `pnpm build` passam
-- [ ] Todas as categorias da seção 8.1 existem, aparecem no menu e têm produtos de teste
-- [ ] Todos os redirecionamentos legados respondem 301 para o destino correto
-- [ ] Compra completa com Pix, cartão e boleto simulados, com e-mails no Mailpit
-- [ ] Estoque reservado, baixado e liberado corretamente, sem venda acima do disponível em concorrência
-- [ ] Área do cliente completa
-- [ ] Todos os módulos do admin funcionam, com permissões e auditoria
-- [ ] Pedido manual de WhatsApp aparece nos relatórios por canal
-- [ ] "Remover todos os produtos de teste" limpa os dados de teste sem afetar dados reais
-- [ ] Nenhum telefone, e-mail, preço de frete ou desconto escrito em componente
-- [ ] Marca somente como "Net Shop Garden" (busca por "Net Shopping", "NetShop", "NETSHOP")
-- [ ] Nenhum texto em caixa alta, nenhuma seta em botões, nenhum carrossel automático
-- [ ] Vinho nunca sobre musgo e musgo nunca sobre vinho
-- [ ] Metas do Lighthouse atingidas (números registrados)
-- [ ] Nenhuma violação séria ou crítica do axe
-- [ ] Revisão visual em 390, 768 e 1440 px sem quebras
-- [ ] `PENDENCIAS-DO-DONO.md` completo
+- [ ] `docker compose up -d && pnpm install && pnpm db:reset && pnpm dev` sobe do zero sem erros (falta só o `db:reset`, que aguarda o consentimento do dono; migrações e seed em banco vazio foram verificados)
+- [x] `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e` e `pnpm build` passam
+- [x] Todas as categorias da seção 8.1 existem, aparecem no menu e têm produtos de teste
+- [x] Todos os redirecionamentos legados respondem 301 para o destino correto
+- [x] Compra completa com Pix, cartão e boleto simulados, com e-mails no Mailpit
+- [x] Estoque reservado, baixado e liberado corretamente, sem venda acima do disponível em concorrência
+- [x] Área do cliente completa
+- [x] Todos os módulos do admin funcionam, com permissões e auditoria
+- [x] Pedido manual de WhatsApp aparece nos relatórios por canal
+- [x] "Remover todos os produtos de teste" limpa os dados de teste sem afetar dados reais
+- [x] Nenhum telefone, e-mail, preço de frete ou desconto escrito em componente
+- [x] Marca somente como "Net Shop Garden" (busca por "Net Shopping", "NetShop", "NETSHOP")
+- [x] Nenhum texto em caixa alta, nenhuma seta em botões, nenhum carrossel automático
+- [x] Vinho nunca sobre musgo e musgo nunca sobre vinho
+- [x] Metas do Lighthouse atingidas com limitação aplicada (97 a 99); no modo simulado o desempenho fica em 86 a 87. Números e explicação em `DECISOES.md`, fase 8. Medir de novo em produção
+- [x] Nenhuma violação séria ou crítica do axe
+- [x] Revisão visual em 390, 768 e 1440 px sem quebras
+- [x] `PENDENCIAS-DO-DONO.md` completo
 
 ### Problemas do site antigo (seção 1.4)
 
-- [ ] Site responsivo, uma URL por página
-- [ ] Um único design system com tokens
-- [ ] Uma página por conteúdo, URL canônica
-- [ ] Tudo em UTF-8
-- [ ] Nenhum script de terceiros sem necessidade e consentimento
-- [ ] Banners com texto em HTML, editáveis no admin
-- [ ] Vitrines curadas ou calculadas
-- [ ] Links de WhatsApp com mensagem contextual e evento com origem
-- [ ] Nome, telefones e e-mail de uma única fonte
-- [ ] E-mail em domínio próprio
-- [ ] Pix como método padrão com desconto destacado
-- [ ] Avaliações por produto com moderação, nota, data e compra verificada
-- [ ] Pop-up com cupom, captura com consentimento, captura no checkout
-- [ ] Cupom de boas-vindas como gancho de captação
-- [ ] Editor de produto com campos estruturados e indicador de qualidade
-- [ ] Texto de SEO e FAQ por categoria, sem listas de palavras-chave
-- [ ] Eventos de analytics, UTM em pedidos e leads, vendas por origem
-- [ ] Pedido manual com origem WhatsApp
-- [ ] LGPD: consentimento, exportação, exclusão, logs de exportação
+- [x] Site responsivo, uma URL por página
+- [x] Um único design system com tokens
+- [x] Uma página por conteúdo, URL canônica
+- [x] Tudo em UTF-8
+- [x] Nenhum script de terceiros sem necessidade e consentimento
+- [x] Banners com texto em HTML, editáveis no admin
+- [x] Vitrines curadas ou calculadas
+- [x] Links de WhatsApp com mensagem contextual e evento com origem
+- [x] Nome, telefones e e-mail de uma única fonte
+- [x] E-mail em domínio próprio
+- [x] Pix como método padrão com desconto destacado
+- [x] Avaliações por produto com moderação, nota, data e compra verificada
+- [x] Pop-up com cupom, captura com consentimento, captura no checkout
+- [x] Cupom de boas-vindas como gancho de captação
+- [x] Editor de produto com campos estruturados e indicador de qualidade
+- [x] Texto de SEO e FAQ por categoria, sem listas de palavras-chave
+- [x] Eventos de analytics, UTM em pedidos e leads, vendas por origem
+- [x] Pedido manual com origem WhatsApp
+- [x] LGPD: consentimento, exportação, exclusão, logs de exportação

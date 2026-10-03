@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: netshopgarden
+          POSTGRES_PASSWORD: netshopgarden
+          POSTGRES_DB: netshopgarden
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U netshopgarden" --health-interval 5s --health-timeout 5s --health-retries 10
+      mailpit:
+        image: axllent/mailpit:latest
+        ports: ["1025:1025", "8025:8025"]
+    env:
+      DATABASE_URL: postgresql://netshopgarden:netshopgarden@localhost:5432/netshopgarden?schema=public
+      DATABASE_URL_TEST: postgresql://netshopgarden:netshopgarden@localhost:5432/netshopgarden_test?schema=public
+      AUTH_SECRET: segredo-so-para-o-ci-nao-usar-em-producao
+      APP_URL: http://localhost:3100
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: Admin#Ci2026
+      SMTP_HOST: localhost
+      SMTP_PORT: 1025
+      VIACEP_ENABLED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Banco de teste
+        run: PGPASSWORD=netshopgarden psql -h localhost -U netshopgarden -d netshopgarden -c "CREATE DATABASE netshopgarden_test"
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: Banco de desenvolvimento com os dados de teste
+        run: pnpm db:deploy && pnpm db:seed
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright
+          path: test-results

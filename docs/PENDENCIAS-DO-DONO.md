@@ -2,7 +2,7 @@
 
 Tudo o que depende de você para o site ir ao ar. Cada item diz onde trocar. A maior parte também pode ser alterada pelo painel, em Configurações, sem mexer no código.
 
-Este arquivo é completado ao longo do projeto. A lista final de marcações `TODO(dono)` e `TODO(integracao)` do código entra no fim.
+A lista de marcações `TODO(dono)` e `TODO(integracao)` do código está no fim.
 
 ## Dados da empresa
 
@@ -63,8 +63,59 @@ Todos os valores abaixo são exemplos.
 - Cupom `FRETEGRATIS`: hoje vale para a entrega agendada na Grande SP, acima de R$ 150. Confirmar.
 - Preços, prazos e faixas de CEP de todas as regras de frete são exemplos (`prisma/seed/settings.ts`, ou Admin > Frete).
 
+- **Carol Costa:** confirmar se o nome pode ser usado na coleção "Linha Carol Costa" e quais produtos fazem parte dela.
+- **Boleto:** hoje não é oferecido para plantas vivas, entrega hoje e entrega agendada em menos de 3 dias úteis. Confirmar.
+- **Embalagem para presente e mensagem do cartão:** confirmar se a loja oferece e o preço.
+- **Retirada na loja:** a regra existe, desligada. Ligar em Admin > Frete se houver retirada.
+- **Modo manutenção, cupom de boas-vindas e textos do pop-up:** revisar em Admin > Configurações antes de divulgar o site.
+
+## Antes de ir ao ar
+
+1. Preencher razão social, CNPJ e endereço (obrigatórios no rodapé).
+2. Criar o e-mail em domínio próprio e configurar o SMTP com SPF e DKIM.
+3. Revisar com advogado: privacidade, cookies, termos e trocas. Informar o nome do encarregado de dados.
+4. Cadastrar o catálogo real (Admin > Produtos > Importar CSV aceita a exportação do site antigo) e enviar as fotos.
+5. Conferir os redirecionamentos do site antigo em Admin > Redirecionamentos > Testar URL, com uma amostra das URLs mais acessadas (Google Search Console).
+6. Remover os dados de teste (Admin > Produtos > Remover todos os produtos de teste).
+7. Contratar e ligar o gateway de pagamento (`docs/INTEGRACOES.md`). Sem isso a loja não recebe.
+8. Trocar a senha do administrador e convidar a equipe (Admin > Usuários).
+9. Agendar as tarefas (`README.md`, "Tarefas agendadas") e definir `CRON_SECRET`.
+10. Informar os IDs do Google Analytics e do pixel da Meta, se for usar (Admin > Configurações).
+
 ## Integrações a contratar
+
+| Integração               | Situação hoje                           | O que falta                                                 |
+| ------------------------ | --------------------------------------- | ----------------------------------------------------------- |
+| Gateway de pagamento     | Simulado (Pix, cartão, boleto)          | Escolher o gateway e implementar o provider                 |
+| Transportadora           | Simulada, pelas regras de Admin > Frete | Contratar (Melhor Envio, Correios) e implementar o provider |
+| E-mail transacional      | SMTP local (Mailpit)                    | Contratar um SMTP e configurar o domínio                    |
+| Armazenamento de imagens | Pasta local                             | Bucket S3 ou R2 em produção                                 |
+| Nota fiscal              | Não há                                  | Emissor (Bling, Tiny, NFe.io) e NCM dos produtos            |
+| WhatsApp Business API    | Links e mensagens copiadas à mão        | Só se quiser mensagens automáticas                          |
+
+O passo a passo de cada uma está em `docs/INTEGRACOES.md`.
 
 ## Dados da base antiga
 
 A base antiga de clientes e assinantes **não** deve ser importada para disparos de marketing sem uma campanha de reconfirmação de consentimento (LGPD). Arquivos de importação com dados reais ficam somente na pasta `data-privada/`, que não entra no repositório.
+
+## Marcações no código
+
+### `TODO(dono)`: valores e textos a confirmar
+
+| Onde                                          | O quê                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/config/store.config.ts` (linhas 61 a 95) | Slogan, razão social, CNPJ, endereço, WhatsApp, telefone, e-mails, horário, Instagram, frase da parceria, desconto do Pix, parcelas, frete grátis, embalagem, entrega hoje (corte, dias, CEPs, hora limite), cupom de boas-vindas e texto de embalagem. Todos também editáveis em Admin > Configurações |
+| `src/components/store/logo.tsx`               | Logo definitivo                                                                                                                                                                                                                                                                                         |
+| `prisma/seed/pages.ts`                        | Textos das páginas institucionais; os jurídicos são modelos                                                                                                                                                                                                                                             |
+| `prisma/seed/settings.ts`                     | Preços, prazos e faixas de CEP do frete; texto institucional da home                                                                                                                                                                                                                                    |
+
+### `TODO(integracao)`: pontos de provedor real
+
+| Onde                                                | O quê                                             |
+| --------------------------------------------------- | ------------------------------------------------- |
+| `src/server/providers/payment/index.ts` e `mock.ts` | Registrar o provider do gateway real              |
+| `src/components/store/checkout/card-form.tsx`       | Trocar a tokenização simulada pelo SDK do gateway |
+| `src/server/providers/shipping/index.ts`            | Cotação real de frete                             |
+| `src/server/providers/email/index.ts`               | Envio por API (Resend, SES), se não for usar SMTP |
+| `src/server/services/rate-limit.ts`                 | Redis ou Upstash, para tráfego alto               |

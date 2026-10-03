@@ -164,3 +164,24 @@ Conferidas no registro do npm antes do setup.
 - **Sitemap em arquivos de 5.000 URLs** (`/sitemap/0.xml`...), listados no `robots.txt`. Fora de produção o `robots.txt` bloqueia tudo.
 - **CSP com `'unsafe-inline'` em scripts e estilos**, porque o Next injeta scripts embutidos; uma política com nonce exigiria renderização dinâmica em todas as páginas. `frame-ancestors 'none'`, `object-src 'none'`, `base-uri` e `form-action` restritos. HSTS só em produção.
 - **Limite de requisições na busca** (60 por minuto por visitante), além de login, cadastro, senha, rastreio e formulários públicos.
+
+## 2026-10-03 — Fase 8
+
+- **Lighthouse (mobile, build de produção, catálogo de teste, máquina local).** Acessibilidade, boas práticas e SEO: 100 nas três páginas.
+
+  | Página    | Desempenho, limitação aplicada | LCP   | CLS   | TBT   | Desempenho, limitação simulada | LCP estimado |
+  | --------- | ------------------------------ | ----- | ----- | ----- | ------------------------------ | ------------ |
+  | Home      | 98                             | 2,0 s | 0,001 | 20 ms | 86                             | 4,2 s        |
+  | Categoria | 97                             | 2,5 s | 0,001 | 10 ms | 87                             | 4,1 s        |
+  | Produto   | 99                             | 1,7 s | 0     | 10 ms | 87                             | 4,1 s        |
+
+  Com a limitação aplicada de verdade (`--throttling-method=devtools`, 4G lento e CPU 4x mais lenta) as metas são atingidas; a categoria fica no limite de 2,5 s de LCP. No modo padrão do Lighthouse (limitação simulada), o desempenho fica em 86 a 87, abaixo da meta de 90: em servidor local tudo carrega em menos de 150 ms, e o modelo conta todo o JavaScript como anterior à imagem principal. A imagem do LCP já é pré-carregada, com prioridade alta, em WebP de 5 KB. **Refazer a medição no domínio de produção, com fotos reais**, que pesam mais do que as ilustrações de teste.
+
+- **Peso das páginas da loja** (transferido, primeira visita): JavaScript 239 KB, CSS 17 KB, fontes 126 KB (três arquivos: Inter, Cormorant e Cormorant itálico). Total: home 501 KB, categoria 445 KB, produto 452 KB.
+- **Recharts, Tiptap e TanStack Table ficam em arquivos carregados só no painel.** Conferido no build: nenhum dos arquivos de JavaScript da home contém essas bibliotecas. O Tiptap é carregado sob demanda (`next/dynamic`), só nas telas com editor.
+- **Análise de bundle pelos números do build e do Lighthouse**, em vez do `@next/bundle-analyzer`, que é um plugin do webpack e não funciona com o Turbopack, usado pelo Next 16.
+- **Testes:** 212 unitários e de integração (Vitest) e 17 de ponta a ponta (Playwright), cobrindo os 13 cenários da especificação e mais boleto, contato, consentimento de cookies e permissões da equipe. O axe roda em home, categoria, produto, ajuda, contato, sacola, checkout, login, conta e quatro telas do painel, sem violações sérias ou críticas.
+- **Os testes e2e usam o banco de desenvolvimento** e reabastecem os produtos de teste antes de cada arquivo; o produto criado pelo teste do painel é apagado no fim.
+- **Gráficos do painel com `inert`:** além de `aria-hidden`, para os elementos internos do gráfico não receberem foco (apontado pelo axe).
+- **Conferência final:** os 127 redirecionamentos do site antigo respondem 301 para o destino certo; as 42 categorias têm produtos de teste (mínimo de 4) e abrem; buscas por "Net Shopping", "NetShop", caixa alta, setas em botões, pontos médios, gradientes, carrossel automático e telefone, e-mail ou valores fixos em componentes não encontraram nada.
+- **Não feito:** `pnpm db:reset` (o Prisma exige o consentimento do dono para um agente apagar o banco); "Mover para favoritos" na sacola; arrastar categoria para outro nível; etiquetas e rastreio automático; aviso de contraste na prévia do banner (o texto fica sempre sobre painel sólido).

@@ -62,7 +62,7 @@ export function RevenueLineChart({
 }) {
   return (
     <figure>
-      <div aria-hidden="true" className="h-64">
+      <div aria-hidden="true" inert className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid stroke="#DDD6C6" strokeDasharray="3 3" vertical={false} />
@@ -129,6 +129,8 @@ export function SimpleBarChart({
     <figure>
       <div
         aria-hidden="true"
+        // inert: o gráfico é decorativo para leitores de tela (há a tabela equivalente) e não recebe foco.
+        inert
         style={{ height: horizontal ? Math.max(160, data.length * 38) : 220 }}
       >
         <ResponsiveContainer width="100%" height="100%">

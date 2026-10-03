@@ -174,3 +174,39 @@ test("produto só local com CEP de outro estado mostra o aviso e bloqueia o envi
   await expect(page.getByRole("radio", { name: /Entrega hoje/ })).toBeVisible();
   await expect(page.getByRole("radio", { name: /Envio econômico/ })).toHaveCount(0);
 });
+
+test("convidado compra com boleto para outro estado, vê a linha digitável e o pagamento é confirmado", async ({
+  page,
+  context,
+}) => {
+  await freezeTime(context);
+  const email = uniqueEmail("boleto");
+  await addToCart(page, "vaso-esmaltado-azul");
+  await page.getByRole("dialog").getByRole("link", { name: "Finalizar compra" }).click();
+  await fillIdentification(page, email);
+  await fillAddress(page, RIO);
+  await chooseShipping(page, /Envio econômico/);
+  await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
+
+  await page.getByRole("radio", { name: /Boleto/ }).check();
+  await page.getByRole("button", { name: "Continuar para a revisão" }).click();
+  const number = await reviewAndPlaceOrder(page);
+
+  await expect(page.getByRole("heading", { name: /Pague o boleto de R\$/ })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: /Linha digitável/ })).toHaveValue(/\d{5}/);
+  const pending = await db.order.findUniqueOrThrow({ where: { number } });
+  expect(pending).toMatchObject({
+    status: "PENDING_PAYMENT",
+    paymentMethod: "BOLETO",
+    pixDiscountCents: 0,
+  });
+
+  await page.getByRole("button", { name: "Simular boleto pago" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Pagamento aprovado" })).toBeVisible({
+    timeout: 20_000,
+  });
+  expect((await db.order.findUniqueOrThrow({ where: { number } })).status).toBe("PAID");
+  await expect
+    .poll(() => mailTo(page.request, email))
+    .toEqual(expect.arrayContaining([`Pagamento aprovado: pedido ${number}`]));
+});
