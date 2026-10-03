@@ -98,13 +98,13 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 
 ## Fase 7 — Institucional, leads, SEO e analytics
 
-- [ ] Páginas institucionais, contato, solicitar produto, 404 e 500
-- [ ] Pop-up de boas-vindas, newsletter, double opt-in, descadastro
-- [ ] Banner e preferências de cookies
-- [ ] Sitemap, robots, JSON-LD completo, imagens Open Graph
-- [ ] Redirecionamentos legados no middleware, `NotFoundLog`
-- [ ] Camada de analytics, captura de UTM, scripts só após consentimento
-- [ ] Cabeçalhos de segurança, rate limit, honeypot
+- [x] Páginas institucionais, contato, solicitar produto, 404 e 500
+- [x] Pop-up de boas-vindas, newsletter, double opt-in, descadastro
+- [x] Banner e preferências de cookies
+- [x] Sitemap, robots, JSON-LD completo, imagens Open Graph
+- [x] Redirecionamentos legados no middleware, `NotFoundLog`
+- [x] Camada de analytics, captura de UTM, scripts só após consentimento
+- [x] Cabeçalhos de segurança, rate limit, honeypot
 
 ## Fase 8 — Qualidade e entrega
 

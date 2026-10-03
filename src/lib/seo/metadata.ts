@@ -15,7 +15,7 @@ type PageMetadataInput = {
   description?: string | null;
   /** Caminho canônico, com query quando ela faz parte da página (paginação). */
   path: string;
-  /** Imagem de Open Graph. Sem ela, vale a imagem gerada da rota (opengraph-image). */
+  /** Imagem de Open Graph. Sem ela, vale a imagem gerada com o título (rota /og). */
   image?: string | null;
   noindex?: boolean;
   /** Usa o título exatamente como veio, sem o sufixo com o nome da loja. */
@@ -34,7 +34,10 @@ export function pageMetadata({
   type = "website",
 }: PageMetadataInput): Metadata {
   const cleanDescription = description?.replace(/\s+/g, " ").trim().slice(0, 160) || undefined;
-  const images = image ? [{ url: absoluteUrl(image) }] : undefined;
+  // Sem foto própria, a página usa a imagem gerada com o título (rota /og).
+  const images = [
+    { url: absoluteUrl(image || `/og?titulo=${encodeURIComponent(title.slice(0, 90))}`) },
+  ];
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description: cleanDescription,
@@ -52,7 +55,7 @@ export function pageMetadata({
       card: "summary_large_image",
       title,
       description: cleanDescription,
-      images: images?.map((item) => item.url),
+      images: images.map((item) => item.url),
     },
   };
 }

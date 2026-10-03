@@ -1,5 +1,6 @@
 import { Lock } from "lucide-react";
 import Link from "next/link";
+import { AnalyticsScripts, CookieBanner } from "@/components/store/cookie-consent";
 import { Logo } from "@/components/store/logo";
 import { WhatsAppButton } from "@/components/store/whatsapp-button";
 import { Toaster } from "@/components/ui/toast";
@@ -47,6 +48,11 @@ export default async function CheckoutLayout({ children }: LayoutProps<"/">) {
         </p>
       </footer>
       <Toaster />
+      <CookieBanner />
+      <AnalyticsScripts
+        ga4Id={settings.analytics.ga4Id}
+        metaPixelId={settings.analytics.metaPixelId}
+      />
     </div>
   );
 }

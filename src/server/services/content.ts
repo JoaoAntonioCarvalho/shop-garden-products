@@ -160,3 +160,19 @@ export const getMediaImage = unstable_cache(
   ["media-image"],
   { tags: [HOME_TAG] },
 );
+
+/** Foto do pop-up de boas-vindas: a mesma da seção de newsletter da home. */
+export const getPopupImage = unstable_cache(
+  async () => {
+    const section = await db.homeSection.findUnique({
+      where: { key: "newsletter" },
+      select: { sourceId: true },
+    });
+    if (!section?.sourceId) return null;
+    return toImage(
+      await db.mediaAsset.findUnique({ where: { id: section.sourceId }, select: mediaSelect }),
+    );
+  },
+  ["popup-image"],
+  { tags: [HOME_TAG] },
+);

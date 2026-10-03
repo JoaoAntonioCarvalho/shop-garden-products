@@ -1,3 +1,4 @@
+import { clientIpHash } from "@/lib/ip";
 import { formatBRL } from "@/lib/money";
 import {
   getCards,
@@ -5,12 +6,20 @@ import {
   searchCategories,
   searchProductScores,
 } from "@/server/services/catalog";
+import { rateLimit } from "@/server/services/rate-limit";
 import { getStoreSettings } from "@/server/services/settings";
 
 /** Sugestões da busca: até 6 produtos e até 3 categorias. */
 export async function GET(request: Request) {
   const term = (new URL(request.url).searchParams.get("q") ?? "").trim().slice(0, 80);
   if (term.length < 2) return Response.json({ products: [], categories: [] });
+  // 60 buscas por minuto por visitante: sobra para quem digita e freia a raspagem.
+  const limit = await rateLimit("search", clientIpHash(request.headers));
+  if (!limit.allowed)
+    return Response.json(
+      { products: [], categories: [] },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } },
+    );
 
   const [scores, index, settings, categories] = await Promise.all([
     searchProductScores(term),

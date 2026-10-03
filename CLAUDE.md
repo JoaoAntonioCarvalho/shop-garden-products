@@ -123,6 +123,10 @@ Atualizado ao longo do projeto.
 | Relatórios                               | `src/server/admin/reports.ts`                                                                                 |
 | Tarefas agendadas                        | `src/server/jobs.ts`, `/api/cron/[tarefa]`                                                                    |
 | Screenshots do painel                    | `pnpm tsx scripts/admin-shots.ts <pasta> [largura] /admin/...`                                                |
+| Redirecionamentos legados e 404          | `src/server/services/legacy-redirects.ts` (chamado pelo proxy), `src/components/store/not-found-content.tsx`  |
+| Leads, newsletter e formulários públicos | `src/server/services/leads.ts`, `src/server/actions/leads.ts`, `src/components/store/public-forms.tsx`        |
+| Cookies, consentimento e scripts         | `src/lib/consent.ts`, `src/components/store/cookie-consent.tsx`                                               |
+| Sitemap, robots, imagem OG, cabeçalhos   | `src/app/sitemap.ts`, `robots.ts`, `og/route.tsx`, `next.config.ts`                                           |
 | Plano e progresso                        | `docs/PLANO.md`                                                                                               |
 | Decisões                                 | `docs/DECISOES.md`                                                                                            |
 | Pendências do dono                       | `docs/PENDENCIAS-DO-DONO.md`                                                                                  |

@@ -1,6 +1,9 @@
 import { Skeleton } from "@/components/ui/feedback";
 
-/** Esqueleto exibido enquanto uma página da loja carrega. */
+/**
+ * Esqueleto exibido enquanto a página carrega. Fica só nas rotas que nunca respondem 404: um
+ * loading acima de uma página que chama notFound() faria o endereço inexistente responder 200.
+ */
 export default function StoreLoading() {
   return (
     <div className="container-store pt-6 pb-16" aria-busy="true">
