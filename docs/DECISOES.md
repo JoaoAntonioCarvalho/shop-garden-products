@@ -67,3 +67,18 @@ Conferidas no registro do npm antes do setup.
 - **Imagens placeholder em `uploads/amostra/`**, geradas uma vez e reaproveitadas nas execuções seguintes do seed. O `next/image` usa a versão de 1600 px como origem.
 - **Logins de teste:** `cliente@example.com` / `Cliente@123` e `expedicao@example.com` / `Equipe@123`. O admin usa `ADMIN_EMAIL` e `ADMIN_PASSWORD` do `.env`; a senha só é gravada na criação.
 - **Seed não sobrescreve o que já existe** (categorias, páginas, cupons, regras de frete usam `upsert` com `update: {}`), para não desfazer edições do admin.
+
+## 2026-10-03 — Fase 3
+
+- **Cache com `unstable_cache` e tags, sem Cache Components.** O Next 16 recomenda a diretiva `use cache`, mas ela exige ligar `cacheComponents`, que muda o modelo de renderização do app inteiro. A especificação aceita `unstable_cache` com tags, que continua disponível. Tags: `settings`, `categories`, `catalog`, `home`, `pages` e `product:[slug]`. No Next 16, `revalidateTag` pede um segundo argumento (perfil); nas ações do admin usar `updateTag`.
+- **`unstable_cache` devolve datas como texto.** As funções em cache retornam objetos simples, com datas em ISO; quem consome converte.
+- **Listagens filtram e ordenam em memória sobre um índice leve em cache.** `getCatalogIndex()` carrega uma linha enxuta por produto ativo (uma consulta, em cache, renovada a cada 5 minutos ou quando o admin altera o catálogo). Categoria, coleção, busca e vitrines filtram, ordenam, contam facetas e paginam em funções puras (`catalog-filters.ts`, com testes) e só então buscam os cards da página (uma consulta, sem cache, para o estoque estar certo). Cada listagem faz no máximo 2 consultas. Serve bem até dezenas de milhares de produtos; acima disso, mover os filtros para SQL.
+- **Busca:** `searchText` normalizado (nome, nome científico, nome popular, tags, SKU, categoria, material, marca) com `pg_trgm`. Cada palavra do termo precisa aparecer por trecho exato ou por `word_similarity >= 0.45`. "orquidia branca" encontra orquídeas brancas.
+- **Produto arquivado mostra "Este produto não está mais disponível" com produtos parecidos**, com `noindex`, em vez de responder 410. Mantém o visitante na loja. Produto em rascunho responde 404; a pré-visualização para o admin entra na fase 6.
+- **Hero com `<picture>` e `getImageProps`**, para o celular baixar só a imagem 4:5 e o desktop só a 16:7.
+- **Texto do hero sobre um painel creme sólido** no desktop e abaixo da foto no celular: contraste garantido com qualquer imagem.
+- **Grade de categorias da home em 12 colunas:** orquídeas ocupa metade e duas linhas; ao lado, duas categorias em cima e três embaixo.
+- **Filtros navegam a cada mudança** (`router.replace` sem rolar a página). O estado vive só na URL, no formato da especificação (`?preco=50-150&material=ceramica&ordem=menor-preco&pagina=2`).
+- **Botões "Adicionar à sacola" e "Comprar agora" e a calculadora de frete do produto** recebem as ações do carrinho na fase 4.
+- **"Escrever avaliação"** aponta para `/conta/avaliar/[slug]`, criado na fase 5 (exige login ou link do e-mail).
+- **Limite de requisições baseado no banco** (`RateLimitHit`, janela fixa), atrás da interface `RateLimiter`.

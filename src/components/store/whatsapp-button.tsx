@@ -67,7 +67,10 @@ export function floatingMessage(
 /** Botão flutuante. Não é renderizado no layout do checkout, para não distrair. */
 export function FloatingWhatsApp({ number, storeName }: { number: string; storeName: string }) {
   const pathname = usePathname();
-  const fallback = floatingMessage(pathname, "", "", storeName);
+  // Antes do clique o link leva a mensagem geral; a do produto é montada no clique, com título e URL.
+  const fallback = pathname.startsWith("/produto/")
+    ? "Olá! Vim pelo site e gostaria de ajuda."
+    : floatingMessage(pathname, "", "", storeName);
 
   // A mensagem do produto usa o título e a URL da página, lidos no momento do clique.
   function handleClick(event: MouseEvent<HTMLAnchorElement>) {
@@ -81,10 +84,7 @@ export function FloatingWhatsApp({ number, storeName }: { number: string; storeN
 
   return (
     <a
-      href={buildWhatsAppUrl(
-        number,
-        pathname.startsWith("/produto/") ? "Olá! Vim pelo site e gostaria de ajuda." : fallback,
-      )}
+      href={buildWhatsAppUrl(number, fallback)}
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}

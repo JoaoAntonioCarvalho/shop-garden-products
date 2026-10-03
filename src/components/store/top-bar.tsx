@@ -1,12 +1,7 @@
 import type { StoreSettings } from "@/config/store.config";
 import { formatBRLShort } from "@/lib/money";
+import { formatCutoff } from "@/lib/template";
 import { TopBarRotator } from "./top-bar-rotator";
-
-/** "14:00" → "14h", "14:30" → "14h30" */
-export function formatCutoff(time: string): string {
-  const [hours, minutes] = time.split(":");
-  return minutes === "00" ? `${Number(hours)}h` : `${Number(hours)}h${minutes}`;
-}
 
 /** Mensagens padrão da barra superior, sempre a partir da configuração. */
 export function defaultTopBarMessages(settings: StoreSettings): string[] {

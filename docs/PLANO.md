@@ -41,15 +41,15 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 
 ## Fase 3 — Catálogo
 
-- [ ] `getStoreSettings()` com cache e invalidação
-- [ ] Serviços `pricing` e `catalog` com testes
-- [ ] Home com seções configuráveis
-- [ ] Categoria e coleção: filtros na URL, ordenação, paginação, SEO e FAQ
-- [ ] Busca com sugestões, `unaccent` + `pg_trgm`, `SearchLog`
-- [ ] Página de produto completa (galeria, variantes, ficha, avaliações, relacionados, vistos recentemente)
-- [ ] Presentes e ocasiões
-- [ ] Metadados e JSON-LD básicos por página
-- [ ] Revisão visual em 390, 768 e 1440 px
+- [x] `getStoreSettings()` com cache e invalidação
+- [x] Serviços `pricing` e `catalog` com testes
+- [x] Home com seções configuráveis
+- [x] Categoria e coleção: filtros na URL, ordenação, paginação, SEO e FAQ
+- [x] Busca com sugestões, `unaccent` + `pg_trgm`, `SearchLog`
+- [x] Página de produto completa (galeria, variantes, ficha, avaliações, relacionados, vistos recentemente)
+- [x] Presentes e ocasiões
+- [x] Metadados e JSON-LD básicos por página
+- [x] Revisão visual em 390, 768 e 1440 px
 
 ## Fase 4 — Carrinho, checkout e pagamento
 

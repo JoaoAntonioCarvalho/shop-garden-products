@@ -15,6 +15,8 @@ type EmptyStateProps = {
   action?: ReactNode;
   headingLevel?: "h1" | "h2" | "h3";
   className?: string;
+  /** Conteúdo extra abaixo das ações (sugestões de categorias, por exemplo). */
+  children?: ReactNode;
 };
 
 export function EmptyState({
@@ -24,6 +26,7 @@ export function EmptyState({
   action,
   headingLevel = "h2",
   className,
+  children,
 }: EmptyStateProps) {
   const Heading = headingLevel;
   return (
@@ -32,6 +35,7 @@ export function EmptyState({
       <Heading className="type-h3 text-moss-900">{title}</Heading>
       {description ? <p className="mt-2 max-w-md type-body text-ink-muted">{description}</p> : null}
       {action ? <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div> : null}
+      {children ? <div className="mt-8 w-full">{children}</div> : null}
     </div>
   );
 }

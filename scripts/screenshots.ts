@@ -35,6 +35,15 @@ async function main() {
     page.on("pageerror", (error) => problems.push(error.message));
     for (const path of paths) {
       await page.goto(baseURL + path, { waitUntil: "networkidle" });
+      // Rola a página inteira para carregar as imagens com lazy loading antes da captura.
+      await page.evaluate(async () => {
+        for (let y = 0; y < document.body.scrollHeight; y += 600) {
+          window.scrollTo(0, y);
+          await new Promise((resolve) => setTimeout(resolve, 60));
+        }
+        window.scrollTo(0, 0);
+      });
+      await page.waitForLoadState("networkidle");
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );

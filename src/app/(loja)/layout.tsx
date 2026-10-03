@@ -1,28 +1,41 @@
 import { Footer } from "@/components/store/footer";
 import { Header } from "@/components/store/header";
+import { SearchBox } from "@/components/store/search-box";
 import { defaultTopBarMessages, TopBar } from "@/components/store/top-bar";
 import { FloatingWhatsApp } from "@/components/store/whatsapp-button";
 import { Toaster } from "@/components/ui/toast";
-import { defaultNavigation } from "@/config/navigation";
-import { storeConfig } from "@/config/store.config";
+import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
+import { getNavigation } from "@/server/services/catalog";
+import { getBanners } from "@/server/services/content";
+import { getStoreSettings } from "@/server/services/settings";
 
-export default function StoreLayout({ children }: LayoutProps<"/">) {
-  const settings = storeConfig;
+export default async function StoreLayout({ children }: LayoutProps<"/">) {
+  const [settings, navigation] = await Promise.all([getStoreSettings(), getNavigation()]);
+  const topBar = await getBanners("TOP_BAR", settings);
+  const messages =
+    topBar.length > 0 ? topBar.map((banner) => banner.title) : defaultTopBarMessages(settings);
 
   return (
     <div className="flex min-h-dvh flex-col">
+      <JsonLd data={[organizationJsonLd(settings), websiteJsonLd(settings)]} />
       <a
         href="#conteudo"
         className="sr-only z-50 rounded-control bg-white px-4 py-3 text-moss-700 focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
       >
         Pular para o conteúdo
       </a>
-      <TopBar messages={defaultTopBarMessages(settings)} />
-      <Header settings={settings} navigation={defaultNavigation} cartCount={0} wishlistCount={0} />
+      <TopBar messages={messages} />
+      <Header
+        settings={settings}
+        navigation={navigation}
+        cartCount={0}
+        wishlistCount={0}
+        search={<SearchBox className="w-full lg:max-w-[560px]" />}
+      />
       <main id="conteudo" tabIndex={-1} className="flex-1 outline-none">
         {children}
       </main>
-      <Footer settings={settings} navigation={defaultNavigation} />
+      <Footer settings={settings} navigation={navigation} />
       <FloatingWhatsApp number={settings.whatsapp} storeName={settings.name} />
       <Toaster />
     </div>
