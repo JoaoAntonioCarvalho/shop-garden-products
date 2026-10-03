@@ -9,6 +9,7 @@ import {
   paymentStatusLabels,
 } from "@/server/services/order-status";
 import { stripHtml } from "@/lib/sanitize";
+import { movementLabels, movementWhere } from "./inventory";
 import type { ListParams } from "./list";
 import { IMPORT_FIELDS } from "./product-import";
 import { productWhere } from "./product-queries";
@@ -193,6 +194,45 @@ export const exporters: Record<string, Exporter> = {
           redirect.statusCode,
           redirect.hits,
           redirect.isActive ? "sim" : "não",
+        ]),
+      };
+    },
+  },
+  estoque: {
+    permission: "inventory.view",
+    auditEntity: "inventory",
+    build: async (params) => {
+      const movements = await db.inventoryMovement.findMany({
+        where: movementWhere(params),
+        orderBy: { createdAt: "desc" },
+        take: EXPORT_LIMIT,
+        include: {
+          variant: { select: { sku: true, product: { select: { name: true } } } },
+          order: { select: { number: true } },
+        },
+      });
+      return {
+        headers: [
+          "Data",
+          "Produto",
+          "SKU",
+          "Tipo",
+          "Quantidade",
+          "Em estoque depois",
+          "Reservado depois",
+          "Motivo",
+          "Pedido",
+        ],
+        rows: movements.map((movement) => [
+          formatDateTime(movement.createdAt),
+          movement.variant.product.name,
+          movement.variant.sku,
+          movementLabels[movement.type],
+          movement.quantity,
+          movement.stockOnHandAfter,
+          movement.stockReservedAfter,
+          movement.reason,
+          movement.order?.number,
         ]),
       };
     },
