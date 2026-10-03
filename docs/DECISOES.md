@@ -122,3 +122,12 @@ Conferidas no registro do npm antes do setup.
 - **Checkout de cliente logado** vem com nome, e-mail, CPF, celular e endereço padrão preenchidos, e um seletor de endereços salvos. O login dentro do checkout é um link para `/entrar` que volta ao checkout.
 - **"Mover para favoritos" na sacola não foi feito**: o coração do produto cobre o caso. Pode entrar depois se fizer falta.
 - **`verifyCredentials` fica em `src/lib/credentials.ts`**, separado do Auth.js, para ser testável.
+
+## 2026-10-03 — Fase 6 (em andamento)
+
+- **Log de argumentos das server actions desligado** (`logging.serverFunctions: false` no `next.config.ts`). Em desenvolvimento o Next registrava os argumentos de cada ação, o que incluía senhas do login e do cadastro e dados pessoais do checkout.
+- **shadcn/ui só no admin**, em `src/components/admin/ui`, com os tokens do shadcn (`primary`, `muted`, `destructive`...) mapeados para as cores da marca no `@theme`: musgo como cor principal, vinho só em ações destrutivas e alertas.
+- **TanStack Table v9** (API nova: `useTable` e `tableFeatures`). A tabela usa no navegador só a seleção de linhas; ordenação, filtros e paginação acontecem no servidor e ficam na URL. As células são renderizadas no servidor e passadas prontas.
+- **Toda server action do admin passa por `runAdmin`** (`src/server/admin/action.ts`): confere a permissão no servidor, valida com Zod e entrega um `audit()` já com usuário, IP em hash e navegador.
+- **Cancelar ou devolver pedido pago com estorno exige ADMIN.** A equipe (STAFF) altera os demais status.
+- **Gráficos sem animação e com uma tabela equivalente para leitores de tela.**
