@@ -134,4 +134,67 @@ export const exporters: Record<string, Exporter> = {
       };
     },
   },
+  cupons: {
+    permission: "coupons.manage",
+    auditEntity: "coupons",
+    build: async (params) => {
+      const coupons = await db.coupon.findMany({
+        where: params.filters.lote ? { batch: params.filters.lote } : {},
+        orderBy: { createdAt: "desc" },
+        take: EXPORT_LIMIT,
+      });
+      return {
+        headers: [
+          "Código",
+          "Tipo",
+          "Valor",
+          "Usos",
+          "Limite de usos",
+          "Início",
+          "Fim",
+          "Ativo",
+          "Lote",
+        ],
+        rows: coupons.map((coupon) => [
+          coupon.code,
+          coupon.type === "PERCENT"
+            ? "Percentual"
+            : coupon.type === "FIXED"
+              ? "Valor fixo"
+              : "Frete grátis",
+          coupon.type === "FIXED"
+            ? formatCentsPlain(coupon.value)
+            : coupon.type === "PERCENT"
+              ? `${coupon.value}%`
+              : "",
+          coupon.usageCount,
+          coupon.usageLimit,
+          coupon.startsAt ? formatDateTime(coupon.startsAt) : "",
+          coupon.endsAt ? formatDateTime(coupon.endsAt) : "",
+          coupon.isActive ? "sim" : "não",
+          coupon.batch,
+        ]),
+      };
+    },
+  },
+  redirecionamentos: {
+    permission: "redirects.manage",
+    auditEntity: "redirects",
+    build: async () => {
+      const redirects = await db.redirect.findMany({
+        orderBy: { fromPath: "asc" },
+        take: EXPORT_LIMIT,
+      });
+      return {
+        headers: ["origem", "destino", "codigo", "acessos", "ativo"],
+        rows: redirects.map((redirect) => [
+          redirect.fromPath,
+          redirect.toPath,
+          redirect.statusCode,
+          redirect.hits,
+          redirect.isActive ? "sim" : "não",
+        ]),
+      };
+    },
+  },
 };

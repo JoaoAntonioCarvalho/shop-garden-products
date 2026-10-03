@@ -21,6 +21,8 @@ type ActionButtonProps = Omit<ComponentProps<typeof Button>, "onClick"> & {
   /** Pede confirmação com este texto (ações destrutivas dizem o nome do item). */
   confirm?: { title: string; description: ReactNode; confirmLabel?: string };
   onDone?: () => void;
+  /** Depois de concluir, vai para o endereço devolvido pela ação em data.redirect. */
+  redirectOnDone?: boolean;
 };
 
 /** Botão que executa uma ação do admin, mostra o aviso com o nome da ação e atualiza a página. */
@@ -28,6 +30,7 @@ export function ActionButton({
   action,
   confirm,
   onDone,
+  redirectOnDone,
   children,
   disabled,
   ...props
@@ -43,7 +46,15 @@ export function ActionButton({
       if (result.ok) {
         toast(result.message);
         onDone?.();
-        router.refresh();
+        const target =
+          redirectOnDone &&
+          result.data &&
+          typeof result.data === "object" &&
+          "redirect" in result.data
+            ? (result.data.redirect as string | undefined)
+            : undefined;
+        if (target) router.push(target);
+        else router.refresh();
       } else {
         toast(result.error, { tone: "error", duration: 8000 });
       }
