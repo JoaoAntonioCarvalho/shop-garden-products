@@ -6,8 +6,11 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     tsconfigPaths: true,
-    // "server-only" lança erro fora do servidor do Next; nos testes vira um módulo vazio.
-    alias: { "server-only": fileURLToPath(new URL("./tests/empty-module.ts", import.meta.url)) },
+    alias: {
+      // "server-only" lança erro fora do servidor do Next; nos testes vira um módulo vazio.
+      "server-only": fileURLToPath(new URL("./tests/empty-module.ts", import.meta.url)),
+      "next/cache": fileURLToPath(new URL("./tests/stubs/next-cache.ts", import.meta.url)),
+    },
   },
   test: {
     environment: "node",

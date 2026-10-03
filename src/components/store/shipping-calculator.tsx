@@ -19,13 +19,21 @@ type ShippingCalculatorProps = {
   className?: string;
 };
 
+/** Prazo em texto. Entrega hoje e agendada já se explicam pela descrição, então não repetem o prazo. */
 export function formatDeliveryEstimate(option: ShippingOption): string {
-  if (option.deliveryDate && option.minDays === 0) return "Hoje";
-  if (option.requiresScheduling) return "Você escolhe a data";
+  if (option.requiresScheduling || (option.deliveryDate && option.minDays === 0)) return "";
   if (option.minDays === option.maxDays) {
     return option.minDays === 1 ? "1 dia útil" : `${option.minDays} dias úteis`;
   }
   return `${option.minDays} a ${option.maxDays} dias úteis`;
+}
+
+/** "2 a 4 dias úteis. Transportadora." ou só a descrição, quando não há prazo a mostrar. */
+export function describeShippingOption(option: ShippingOption): string {
+  return [formatDeliveryEstimate(option), option.description]
+    .filter(Boolean)
+    .join(". ")
+    .replace(/\.\.$/, ".");
 }
 
 export function ShippingCalculator({
@@ -102,9 +110,7 @@ export function ShippingCalculator({
               <li key={option.code} className="flex items-start justify-between gap-4 py-3">
                 <div>
                   <p className="type-small font-medium text-ink">{option.name}</p>
-                  <p className="type-caption text-ink-muted">
-                    {formatDeliveryEstimate(option)}. {option.description}
-                  </p>
+                  <p className="type-caption text-ink-muted">{describeShippingOption(option)}</p>
                 </div>
                 <p className="type-small font-medium whitespace-nowrap text-ink tabular-nums">
                   {option.isFree ? "Grátis" : formatBRL(option.priceCents)}

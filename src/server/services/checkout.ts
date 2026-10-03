@@ -36,6 +36,8 @@ export type PlaceOrderResult =
 export type OrderContext = {
   cartId: string;
   userId: string | null;
+  /** Horário da requisição (os testes podem fixá-lo). */
+  now?: Date;
   utm: {
     source?: string;
     medium?: string;
@@ -82,7 +84,7 @@ export async function placeOrder(
     };
   }
 
-  const now = new Date();
+  const now = context.now ?? new Date();
   const changes: string[] = [];
 
   // 1. Estoque revalidado.

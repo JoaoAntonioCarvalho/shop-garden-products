@@ -53,17 +53,17 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 
 ## Fase 4 — Carrinho, checkout e pagamento
 
-- [ ] Carrinho no banco com cookie httpOnly, mini-carrinho e `/carrinho`
-- [ ] Serviços `coupons`, `shipping`, `inventory`, `orders` com testes
-- [ ] Providers `payment`, `shipping`, `email`, `storage` (interfaces + mock/local)
-- [ ] `/api/cep/[cep]`
-- [ ] Checkout em 4 etapas com idempotência e detecção de divergência
-- [ ] Reserva e baixa de estoque com `SELECT ... FOR UPDATE`; teste de concorrência
-- [ ] Máquina de estados `transitionOrder()`
-- [ ] Pix, cartão e boleto simulados; webhook com HMAC; simulador
-- [ ] Confirmação do pedido com polling e boleto imprimível
-- [ ] Templates de e-mail transacionais e `EmailLog`
-- [ ] Revisão visual em 390, 768 e 1440 px
+- [x] Carrinho no banco com cookie httpOnly, mini-carrinho e `/carrinho`
+- [x] Serviços `coupons`, `shipping`, `inventory`, `orders` com testes
+- [x] Providers `payment`, `shipping`, `email`, `storage` (interfaces + mock/local)
+- [x] `/api/cep/[cep]`
+- [x] Checkout em 4 etapas com idempotência e detecção de divergência
+- [x] Reserva e baixa de estoque com `SELECT ... FOR UPDATE`; teste de concorrência
+- [x] Máquina de estados `transitionOrder()`
+- [x] Pix, cartão e boleto simulados; webhook com HMAC; simulador
+- [x] Confirmação do pedido com polling e boleto imprimível
+- [x] Templates de e-mail transacionais e `EmailLog`
+- [x] Revisão visual em 390, 768 e 1440 px
 
 ## Fase 5 — Conta do cliente
 
@@ -158,12 +158,3 @@ Marcar `[x]` ao concluir. Ao final de cada fase: `pnpm lint`, `pnpm typecheck`, 
 - [ ] Eventos de analytics, UTM em pedidos e leads, vendas por origem
 - [ ] Pedido manual com origem WhatsApp
 - [ ] LGPD: consentimento, exportação, exclusão, logs de exportação
-
-## Estado em 2026-10-03 (sessão interrompida pelo limite de uso)
-
-Fases 0 a 3 concluídas. Fase 4 em andamento:
-
-- Feito e testado (133 testes): cupons, totais, frete simulado, máquina de estados, estoque com concorrência.
-- Escrito, com lint e typecheck passando, mas ainda NÃO verificado no navegador: sacola e mini-carrinho, checkout em 4 etapas, criação do pedido, pagamento simulado, webhook, simulador, confirmação, boleto, e-mails.
-- Próximo passo: rodar o fluxo de compra de ponta a ponta (o roteiro de teste parou no seletor ambíguo do campo "E-mail"; usar `getByRole("textbox", { name: "E-mail" })`), corrigir o que aparecer, escrever os testes de integração de pedido e pagamento e os de renderização de e-mail, marcar a fase 4 e fazer o commit final dela.
-- Pendente do dono: consentimento para `pnpm db:reset` (ver `docs/PENDENCIAS-DO-DONO.md`).

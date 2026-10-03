@@ -82,3 +82,27 @@ Conferidas no registro do npm antes do setup.
 - **Botões "Adicionar à sacola" e "Comprar agora" e a calculadora de frete do produto** recebem as ações do carrinho na fase 4.
 - **"Escrever avaliação"** aponta para `/conta/avaliar/[slug]`, criado na fase 5 (exige login ou link do e-mail).
 - **Limite de requisições baseado no banco** (`RateLimitHit`, janela fixa), atrás da interface `RateLimiter`.
+
+## 2026-10-03 — Fase 4
+
+- **Uma única conta de totais** (`computeTotals`) para sacola, checkout e criação do pedido. O cupom entra antes do Pix; o desconto do Pix incide sobre os produtos (subtotal menos cupom), nunca sobre frete e embalagem.
+- **Cupom que não acumula com Pix:** pagando por Pix vale o maior dos dois descontos, e o checkout mostra os dois valores e qual foi aplicado. No cartão e no boleto o cupom vale normalmente.
+- **Cupom de frete grátis vale para a entrega agendada** (Grande SP). Para a entrega no mesmo dia só com `appliesToSameDay`. Não zera o envio por transportadora.
+- **O cupom por categoria vale para as subcategorias.**
+- **Sacola no banco, com cookie httpOnly `nsg_cart`.** Não reserva estoque: ao abrir a sacola, o mini-carrinho e o checkout a disponibilidade é revalidada e os ajustes são avisados.
+- **Estado da sacola no navegador:** um `CartProvider` com o contador e a gaveta; todo cálculo vem das server actions.
+- **`placeOrder` recalcula tudo no servidor** (preço, cupom, frete, estoque) e compara com o total que o cliente viu. Qualquer diferença interrompe o envio e lista o que mudou. A chave de idempotência nasce ao abrir a revisão.
+- **Reserva de estoque e criação do pedido na mesma transação**, com `SELECT ... FOR UPDATE` nas variantes, sempre em ordem de id para evitar deadlock.
+- **`transitionOrder` bloqueia a linha do pedido** antes de validar a transição: webhook e admin simultâneos entram em fila. Estorno no gateway, cache e e-mails acontecem depois do commit; uma falha neles não desfaz o status.
+- **Cartão aprovado passa pelo mesmo caminho do webhook** (`applyPaymentEvent`), que é idempotente. Um pagamento encerrado só pode mudar para estornado: um Pix pago depois da expiração não reabre o pedido.
+- **Troca de meio de pagamento em nova tentativa recalcula o total** (o desconto do Pix depende do meio).
+- **Expiração de Pix e boleto:** além da tarefa agendada (fase 6), a página e a API de status do pedido expiram a cobrança vencida na hora da consulta.
+- **Webhook do mock assinado com HMAC-SHA256** usando `PAYMENT_WEBHOOK_SECRET` ou, na falta, `AUTH_SECRET`. O simulador faz uma chamada HTTP real ao webhook.
+- **Cartões de teste válidos pelo algoritmo de Luhn:** 4000 0000 0002 0000 (aprovado), 4000 0000 0000 0002 (saldo), 4000 0000 0007 0005 (fraude). Qualquer outro final é aprovado.
+- **Calendário da entrega agendada é um grupo de opções** com as 14 datas disponíveis, em vez de um calendário de mês: acessível por teclado e sem datas inválidas para escolher.
+- **Evento `purchase` uma única vez:** o servidor marca `purchaseTrackedAt` na primeira exibição da confirmação e só nessa vez envia os dados do evento.
+- **E-mail nunca derruba a compra:** `sendEmail` grava `EmailLog` (enviado ou falhou) e não lança erro.
+- **ViaCEP com cache em memória de 24h e tempo limite de 3s.** Falha ou `VIACEP_ENABLED=false` só desligam o autopreenchimento.
+- **Relógio fixável nos testes e2e:** fora de produção, o cookie `nsg_test_now` fixa o horário das cotações e do pedido, para testar a entrega no mesmo dia antes do corte. Em produção é ignorado (`src/server/clock.ts`).
+- **Testes de integração** rodam contra o banco `netshopgarden_test` (migrações aplicadas por `migrate deploy` no início) e substituem `next/cache` e `server-only` por módulos vazios.
+- **Login dentro do checkout e "Mover para favoritos"** entram na fase 5, com a autenticação. Hoje o checkout avisa quando o e-mail já tem conta e oferece o link para entrar.

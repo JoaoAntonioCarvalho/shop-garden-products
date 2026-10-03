@@ -70,38 +70,48 @@ pnpm images:placeholders
 
 Atualizado ao longo do projeto.
 
-| O quê                                    | Onde                                                                                    |
-| ---------------------------------------- | --------------------------------------------------------------------------------------- |
-| Proxy (antigo middleware do Next)        | `src/proxy.ts`                                                                          |
-| Variáveis de ambiente validadas          | `src/lib/env.ts`                                                                        |
-| Cliente Prisma                           | `src/lib/db.ts` (config em `prisma7.config.ts`)                                         |
-| Configuração central da loja             | `src/config/store.config.ts`                                                            |
-| Tokens do design system                  | `src/app/globals.css` (`@theme`) e `src/lib/color.ts`                                   |
-| Primitivas da loja                       | `src/components/ui/`                                                                    |
-| Componentes da loja                      | `src/components/store/`                                                                 |
-| Página de design system                  | `/dev/design-system` (fora de produção)                                                 |
-| Árvore de categorias e menu              | `src/config/category-tree.ts`, `src/config/navigation.ts`                               |
-| Cálculo de preço                         | `src/server/services/pricing.ts` (`getPriceDisplay`)                                    |
-| Validadores e máscaras                   | `src/lib/validators/`                                                                   |
-| Eventos de analytics                     | `src/lib/analytics/events.ts` (`track`)                                                 |
-| Screenshots para revisão visual          | `pnpm tsx scripts/screenshots.ts <pasta> /caminho`                                      |
-| Schema e migrações                       | `prisma/schema.prisma`, `prisma/migrations/`                                            |
-| Seed                                     | `prisma/seed/` (`index.ts` orquestra; `product-data.ts` é o catálogo de teste)          |
-| Imagens placeholder                      | `scripts/generate-placeholders.ts`                                                      |
-| Armazenamento e imagens                  | `src/server/providers/storage/`, `src/server/services/media.ts`, rota `/media/[...key]` |
-| Normalização de URLs antigas             | `src/lib/redirects.ts`                                                                  |
-| Configuração mesclada com o banco        | `src/server/services/settings.ts` (`getStoreSettings`)                                  |
-| Catálogo (índice, cards, busca, produto) | `src/server/services/catalog.ts`                                                        |
-| Filtros, ordenação e facetas (puro)      | `src/server/services/catalog-filters.ts`                                                |
-| Banners, seções da home, páginas, FAQ    | `src/server/services/content.ts`                                                        |
-| Marcadores `{{...}}` em textos           | `src/lib/template.ts`                                                                   |
-| Sanitização de HTML rico                 | `src/lib/sanitize.ts`, componente `RichText`                                            |
-| Datas e horário de corte (fuso de SP)    | `src/lib/dates.ts`                                                                      |
-| SEO (metadados e JSON-LD)                | `src/lib/seo/`                                                                          |
-| Limite de requisições                    | `src/server/services/rate-limit.ts`                                                     |
-| Server actions                           | `src/server/actions/`                                                                   |
-| Plano e progresso                        | `docs/PLANO.md`                                                                         |
-| Decisões                                 | `docs/DECISOES.md`                                                                      |
-| Pendências do dono                       | `docs/PENDENCIAS-DO-DONO.md`                                                            |
+| O quê                                    | Onde                                                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Proxy (antigo middleware do Next)        | `src/proxy.ts`                                                                                          |
+| Variáveis de ambiente validadas          | `src/lib/env.ts`                                                                                        |
+| Cliente Prisma                           | `src/lib/db.ts` (config em `prisma7.config.ts`)                                                         |
+| Configuração central da loja             | `src/config/store.config.ts`                                                                            |
+| Tokens do design system                  | `src/app/globals.css` (`@theme`) e `src/lib/color.ts`                                                   |
+| Primitivas da loja                       | `src/components/ui/`                                                                                    |
+| Componentes da loja                      | `src/components/store/`                                                                                 |
+| Página de design system                  | `/dev/design-system` (fora de produção)                                                                 |
+| Árvore de categorias e menu              | `src/config/category-tree.ts`, `src/config/navigation.ts`                                               |
+| Cálculo de preço                         | `src/server/services/pricing.ts` (`getPriceDisplay`)                                                    |
+| Validadores e máscaras                   | `src/lib/validators/`                                                                                   |
+| Eventos de analytics                     | `src/lib/analytics/events.ts` (`track`)                                                                 |
+| Screenshots para revisão visual          | `pnpm tsx scripts/screenshots.ts <pasta> /caminho`                                                      |
+| Schema e migrações                       | `prisma/schema.prisma`, `prisma/migrations/`                                                            |
+| Seed                                     | `prisma/seed/` (`index.ts` orquestra; `product-data.ts` é o catálogo de teste)                          |
+| Imagens placeholder                      | `scripts/generate-placeholders.ts`                                                                      |
+| Armazenamento e imagens                  | `src/server/providers/storage/`, `src/server/services/media.ts`, rota `/media/[...key]`                 |
+| Normalização de URLs antigas             | `src/lib/redirects.ts`                                                                                  |
+| Configuração mesclada com o banco        | `src/server/services/settings.ts` (`getStoreSettings`)                                                  |
+| Catálogo (índice, cards, busca, produto) | `src/server/services/catalog.ts`                                                                        |
+| Filtros, ordenação e facetas (puro)      | `src/server/services/catalog-filters.ts`                                                                |
+| Banners, seções da home, páginas, FAQ    | `src/server/services/content.ts`                                                                        |
+| Marcadores `{{...}}` em textos           | `src/lib/template.ts`                                                                                   |
+| Sanitização de HTML rico                 | `src/lib/sanitize.ts`, componente `RichText`                                                            |
+| Datas e horário de corte (fuso de SP)    | `src/lib/dates.ts`                                                                                      |
+| SEO (metadados e JSON-LD)                | `src/lib/seo/`                                                                                          |
+| Limite de requisições                    | `src/server/services/rate-limit.ts`                                                                     |
+| Server actions                           | `src/server/actions/`                                                                                   |
+| Sacola (cookie, itens, visão calculada)  | `src/server/services/cart.ts`, `src/components/store/cart/`                                             |
+| Cupons e totais (puros)                  | `src/server/services/coupons.ts`, `totals.ts`                                                           |
+| Frete                                    | `src/server/services/shipping.ts`, `src/server/providers/shipping/`                                     |
+| Estoque (reserva, baixa, liberação)      | `src/server/services/inventory.ts`                                                                      |
+| Estados do pedido                        | `order-status.ts` (puro) e `orders.ts` (`transitionOrder`)                                              |
+| Criação do pedido                        | `src/server/services/checkout.ts` (`placeOrder`)                                                        |
+| Pagamentos e webhook                     | `src/server/services/payments.ts`, `src/server/providers/payment/`, `/api/webhooks/payments/[provider]` |
+| E-mails                                  | `src/server/services/emails.ts`, `src/components/email/`                                                |
+| Auditoria                                | `src/lib/audit.ts` (`logAudit`)                                                                         |
+| Testes                                   | `tests/unit`, `tests/integration` (Postgres de teste), `tests/e2e` (Playwright, usa o servidor de dev)  |
+| Plano e progresso                        | `docs/PLANO.md`                                                                                         |
+| Decisões                                 | `docs/DECISOES.md`                                                                                      |
+| Pendências do dono                       | `docs/PENDENCIAS-DO-DONO.md`                                                                            |
 
 @AGENTS.md

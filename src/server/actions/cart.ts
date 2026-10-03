@@ -25,6 +25,7 @@ import {
 } from "@/server/services/cart";
 import { getCards } from "@/server/services/catalog";
 import { getPriceDisplay } from "@/server/services/pricing";
+import { requestNow } from "@/server/clock";
 import { rateLimit, rateLimitMessage } from "@/server/services/rate-limit";
 import { getStoreSettings } from "@/server/services/settings";
 import { quoteShipping } from "@/server/services/shipping";
@@ -260,6 +261,7 @@ export async function quoteCartShippingAction(cep: string): Promise<ShippingQuot
     items: toShippingItems(view.lines),
     subtotalCents: view.subtotalCents - (view.coupon?.ok ? view.coupon.discountCents : 0),
     freeShippingCoupon: view.coupon?.ok ? view.coupon.coupon : null,
+    now: await requestNow(),
   });
   await db.cart.update({ where: { id: cart.id }, data: { shippingCep: guard.cep } });
   return { ok: true, options: quote.options, notice: quote.notice ?? undefined };
@@ -293,6 +295,7 @@ export async function quoteProductShippingAction(
       },
     ],
     subtotalCents: getPriceDisplay(variant, settings).priceCents * units,
+    now: await requestNow(),
   });
   const notice = quote.blockedByLocalOnly
     ? "Este produto é entregue apenas na Grande São Paulo."

@@ -17,6 +17,7 @@ import {
 } from "@/server/services/cart";
 import { placeOrder, type PlaceOrderResult } from "@/server/services/checkout";
 import { boletoAvailability, type BoletoAvailability } from "@/server/services/checkout-rules";
+import { requestNow } from "@/server/clock";
 import { getInstallments } from "@/server/services/pricing";
 import { rateLimit, rateLimitMessage } from "@/server/services/rate-limit";
 import { getStoreSettings } from "@/server/services/settings";
@@ -61,7 +62,7 @@ export async function checkoutQuoteAction(
   if (cart.items.length === 0)
     return { ok: false, error: notices.join(" ") || "Sua sacola está vazia." };
 
-  const now = new Date();
+  const now = await requestNow();
   const base = await buildCartView(cart, settings, { now });
   const coupon = base.coupon?.ok ? base.coupon : null;
   const cep = normalizeCep(parsed.data.cep);
@@ -183,6 +184,7 @@ export async function placeOrderAction(input: PlaceOrderInput): Promise<PlaceOrd
   return placeOrder(input, {
     cartId: cart.id,
     userId: cart.userId,
+    now: await requestNow(),
     utm: (await readUtm()) ?? (cart.utm as never) ?? null,
   });
 }

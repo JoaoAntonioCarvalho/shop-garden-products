@@ -514,7 +514,7 @@ export function ProductView({
                 max={Math.max(1, variant.available)}
                 label={product.name}
               />
-              {addButton("flex-1")}
+              {addButton("min-w-0 flex-1 px-3 sm:px-7")}
             </div>
             <Button size="lg" variant="secondary" loading={pendingBuy} onClick={buy}>
               Comprar agora

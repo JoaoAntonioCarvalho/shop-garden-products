@@ -8,7 +8,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { formatDeliveryEstimate } from "@/components/store/shipping-calculator";
+import {
+  describeShippingOption,
+  formatDeliveryEstimate,
+} from "@/components/store/shipping-calculator";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
 import { Field } from "@/components/ui/field";
@@ -619,7 +622,9 @@ export function CheckoutFlow({
                   {option.name}
                   {shipping.deliveryDate
                     ? `: ${formatDateKey(shipping.deliveryDate)}${shipping.window ? `, ${deliveryWindowLabels[shipping.window].toLowerCase()}` : ""}`
-                    : `: ${formatDeliveryEstimate(option).toLowerCase()}`}
+                    : formatDeliveryEstimate(option)
+                      ? `: ${formatDeliveryEstimate(option).toLowerCase()}`
+                      : ""}
                 </p>
                 {delivery?.recipient.isGift ? <p>Presente para {delivery.recipient.name}</p> : null}
               </>
@@ -795,7 +800,7 @@ export function CheckoutFlow({
                         <span className="flex-1">
                           <span className="block type-body font-medium text-ink">{item.name}</span>
                           <span className="block type-small text-ink-muted">
-                            {formatDeliveryEstimate(item)}. {item.description}
+                            {describeShippingOption(item)}
                           </span>
                         </span>
                         <span className="type-body font-medium whitespace-nowrap text-ink tabular-nums">
