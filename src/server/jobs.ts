@@ -107,14 +107,14 @@ export const JOBS: Job[] = [
     },
   },
   {
-    key: "rastreio-correios",
-    label: "Conferir entregas nos Correios",
+    key: "rastreio-transportadoras",
+    label: "Conferir entregas nas transportadoras",
     description:
-      "Consulta o rastreio dos pedidos enviados pelos Correios e marca como entregues os que já chegaram. Só funciona com a integração dos Correios ligada.",
+      "Consulta o rastreio dos pedidos enviados pelos Correios e pela Jadlog e marca como entregues os que já chegaram. Só funciona com alguma transportadora ligada.",
     schedule: "A cada 2 horas",
     run: async () => {
       const result = await syncCarrierDeliveries();
-      if (!result.enabled) return "Integração dos Correios desligada";
+      if (!result.enabled) return "Nenhuma transportadora ligada";
       return `${result.checked} pedidos conferidos, ${result.delivered} marcados como entregues`;
     },
   },

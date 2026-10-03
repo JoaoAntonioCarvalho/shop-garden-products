@@ -208,6 +208,16 @@ const DELIVERY_FIELDS: FieldDef[] = [
       { value: "LOCAL_ONLY", label: "Só na Grande São Paulo" },
     ],
   },
+  {
+    name: "carrierRestriction",
+    label: "Transportadora no envio nacional",
+    type: "select",
+    options: [
+      { value: "ANY", label: "Qualquer uma (a mais barata)" },
+      { value: "JADLOG_ONLY", label: "Só Jadlog (volumoso ou planta que os Correios não aceitam)" },
+    ],
+    help: "Com um produto só Jadlog na sacola, o pedido inteiro vai pela Jadlog.",
+  },
   { name: "fragile", label: "Frágil", type: "checkbox" },
   { name: "perishable", label: "Perecível (planta ou flor natural)", type: "checkbox" },
 ];

@@ -208,3 +208,12 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Entrega automática** pela tarefa `rastreio-correios`: evento BDE, BDI ou BDR com tipo 00 ou 01. Passa por `transitionOrder`, então grava histórico e manda o e-mail.
 - **Códigos de serviço padrão** `03298` (PAC) e `03220` (SEDEX) vieram de memória, não da documentação consultada. São configuráveis e precisam ser conferidos no contrato.
 - **Não feito:** pré-postagem (etiqueta e geração do código de rastreio).
+
+## 2026-10-03 — Jadlog e mais de uma transportadora
+
+- **`SHIPPING_PROVIDER` virou lista** (`mock`, `correios`, `jadlog`, `correios,jadlog`). As variáveis comuns passaram a `SHIPPING_ORIGIN_CEP` e `SHIPPING_HANDLING_DAYS` (antes `CORREIOS_*`, criadas horas antes e ainda sem uso).
+- **Interface `Carrier`** (`carriers/types.ts`): cada transportadora cota "econômico" e "expresso". O `CarrierShippingProvider` substituiu o provider só dos Correios e escolhe a mais barata por modalidade. A escolha por preço é um padrão meu; se o dono preferir prioridade fixa, é uma linha no provider.
+- **Restrição por produto:** `Product.carrierRestriction` (`ANY`, `JADLOG_ONLY`), migração `product_carrier_restriction`. Um item só Jadlog leva a sacola inteira para a Jadlog. O escopo de entrega (só Grande São Paulo ou Brasil) continua sendo outro campo: planta volumosa que vai para fora precisa dos dois ajustes.
+- **Jadlog escrita pelo manual oficial 2.3**, lido do PDF. Endpoints, campos e exemplos de resposta vieram dele. Vieram de memória, e estão marcados na documentação para confirmar: códigos de modalidade, divisores de cubagem (3333 e 6000), prefixo `Bearer` e o status `ENTREGUE`. **Não foi testada com token real.**
+- **Nome da transportadora no nome da opção** ("Envio econômico (Jadlog)"): é o que fica gravado no pedido, sem mudar o schema do pedido.
+- **Tarefa renomeada** de `rastreio-correios` para `rastreio-transportadoras`.

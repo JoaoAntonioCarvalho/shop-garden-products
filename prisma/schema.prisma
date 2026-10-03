@@ -239,6 +239,13 @@ enum DeliveryScope {
   NATIONAL
 }
 
+/// Transportadora que pode levar o produto no envio nacional.
+enum CarrierRestriction {
+  ANY
+  /// Volumosos e plantas que os Correios não aceitam.
+  JADLOG_ONLY
+}
+
 enum LightLevel {
   FULL_SUN
   PARTIAL_SHADE
@@ -265,28 +272,29 @@ enum CareLevel {
 }
 
 model Product {
-  id                String        @id @default(cuid())
-  name              String
-  slug              String        @unique
+  id                 String             @id @default(cuid())
+  name               String
+  slug               String             @unique
   /// Código pai.
-  sku               String        @unique
-  status            ProductStatus @default(DRAFT)
-  productType       ProductType
-  primaryCategoryId String?
-  brand             String?
-  shortDescription  String?       @db.VarChar(160)
+  sku                String             @unique
+  status             ProductStatus      @default(DRAFT)
+  productType        ProductType
+  primaryCategoryId  String?
+  brand              String?
+  shortDescription   String?            @db.VarChar(160)
   /// HTML rico sanitizado.
-  description       String?
+  description        String?
   /// HTML rico sanitizado.
-  careInstructions  String?
-  tags              String[]      @default([])
-  isFeatured        Boolean       @default(false)
-  isNew             Boolean       @default(false)
-  isGiftable        Boolean       @default(false)
-  sameDayEligible   Boolean       @default(false)
-  deliveryScope     DeliveryScope @default(NATIONAL)
-  fragile           Boolean       @default(false)
-  perishable        Boolean       @default(false)
+  careInstructions   String?
+  tags               String[]           @default([])
+  isFeatured         Boolean            @default(false)
+  isNew              Boolean            @default(false)
+  isGiftable         Boolean            @default(false)
+  sameDayEligible    Boolean            @default(false)
+  deliveryScope      DeliveryScope      @default(NATIONAL)
+  carrierRestriction CarrierRestriction @default(ANY)
+  fragile            Boolean            @default(false)
+  perishable         Boolean            @default(false)
 
   // Ficha botânica
   commonName     String?

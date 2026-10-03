@@ -4,6 +4,8 @@
  * Exige contrato: usuário do Meu Correios, código de acesso às APIs e cartão de postagem.
  */
 
+import { CarrierUnavailableError, type CarrierServiceQuote, type Parcel } from "../carriers/types";
+
 export type CorreiosConfig = {
   baseUrl: string;
   user: string;
@@ -13,15 +15,8 @@ export type CorreiosConfig = {
   dr?: number;
 };
 
-export type CorreiosPackage = {
-  weightGrams: number;
-  lengthCm: number;
-  widthCm: number;
-  heightCm: number;
-};
-
-export type CorreiosServiceQuote =
-  { ok: true; priceCents: number; businessDays: number } | { ok: false; error: string };
+export type CorreiosPackage = Parcel;
+export type CorreiosServiceQuote = CarrierServiceQuote;
 
 export type CorreiosTrackingEvent = {
   /** Código do evento, como "BDE" (baixa de distribuição externa). */
@@ -37,7 +32,7 @@ export type CorreiosTracking =
   { ok: true; events: CorreiosTrackingEvent[] } | { ok: false; error: string };
 
 /** Falha de rede, de autenticação ou resposta inesperada: o serviço não pôde ser consultado. */
-export class CorreiosUnavailableError extends Error {}
+export class CorreiosUnavailableError extends CarrierUnavailableError {}
 
 const TIMEOUT_MS = 8000;
 const TOKEN_MARGIN_MS = 5 * 60 * 1000;

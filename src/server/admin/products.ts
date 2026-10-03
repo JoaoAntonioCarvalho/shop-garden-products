@@ -249,6 +249,7 @@ export const productSchema = z.object({
   // Entrega
   sameDayEligible: bool(),
   deliveryScope: z.enum(["LOCAL_ONLY", "NATIONAL"]),
+  carrierRestriction: z.enum(["ANY", "JADLOG_ONLY"]).default("ANY"),
   fragile: bool(),
   perishable: bool(),
   // SEO
@@ -300,6 +301,7 @@ const scalarOf = (data: ProductInput) => ({
   subtype: data.subtype,
   sameDayEligible: data.sameDayEligible,
   deliveryScope: data.deliveryScope,
+  carrierRestriction: data.carrierRestriction,
   fragile: data.fragile,
   perishable: data.perishable,
   seoTitle: data.seoTitle,

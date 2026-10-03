@@ -84,15 +84,15 @@ Todos os valores abaixo são exemplos.
 
 ## Integrações a contratar
 
-| Integração               | Situação hoje                         | O que falta                                                  |
-| ------------------------ | ------------------------------------- | ------------------------------------------------------------ |
-| Gateway de pagamento     | Simulado (Pix, cartão, boleto)        | Escolher o gateway e implementar o provider                  |
-| Transportadora           | Correios pronto, desligado            | Contrato, cartão de postagem e código de acesso (ver abaixo) |
-| E-mail transacional      | SMTP local (Mailpit)                  | Contratar um SMTP e configurar o domínio                     |
-| Armazenamento de imagens | Pasta local                           | Bucket S3 ou R2 em produção                                  |
-| Nota fiscal              | Não há                                | Ligar ao Bling, que a loja já usa (ver abaixo)               |
-| Etiquetas e rastreio     | Código de rastreio digitado no pedido | Depende da transportadora ou do Bling (ver abaixo)           |
-| WhatsApp Business API    | Links e mensagens copiadas à mão      | Só se quiser mensagens automáticas                           |
+| Integração               | Situação hoje                         | O que falta                                        |
+| ------------------------ | ------------------------------------- | -------------------------------------------------- |
+| Gateway de pagamento     | Simulado (Pix, cartão, boleto)        | Escolher o gateway e implementar o provider        |
+| Transportadora           | Correios e Jadlog prontos, desligados | Credenciais de cada uma (ver abaixo)               |
+| E-mail transacional      | SMTP local (Mailpit)                  | Contratar um SMTP e configurar o domínio           |
+| Armazenamento de imagens | Pasta local                           | Bucket S3 ou R2 em produção                        |
+| Nota fiscal              | Não há                                | Ligar ao Bling, que a loja já usa (ver abaixo)     |
+| Etiquetas e rastreio     | Código de rastreio digitado no pedido | Depende da transportadora ou do Bling (ver abaixo) |
+| WhatsApp Business API    | Links e mensagens copiadas à mão      | Só se quiser mensagens automáticas                 |
 
 O passo a passo de cada uma está em `docs/INTEGRACOES.md`.
 
@@ -107,6 +107,15 @@ A integração de preço, prazo e rastreio está escrita e testada com respostas
 - [ ] CEP de onde os pedidos são postados.
 - [ ] Peso e medidas reais nos produtos (a cotação usa esses dados).
 - [ ] Primeiro teste em homologação, depois produção. Passo a passo em `docs/INTEGRACOES.md`, seção 2.
+
+### Para ligar a Jadlog
+
+Também escrita e testada só com respostas simuladas. Para ligar:
+
+- [ ] Pedir à franquia Jadlog os dados de acesso da API: token, código do cliente e conta corrente.
+- [ ] Confirmar com a Jadlog o código das modalidades contratadas (econômico e, se houver, expresso) e o fator de cubagem.
+- [ ] Marcar como "só Jadlog" os produtos que os Correios não aceitam (aba Entrega do produto) e, se forem plantas enviadas para fora da Grande São Paulo, mudar "Onde entrega" para todo o Brasil.
+- [ ] Peso e medidas reais nesses produtos: na Jadlog o peso cubado pesa muito no preço de volumosos.
 
 ### Para lembrar: etiquetas e rastreio automático
 

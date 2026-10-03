@@ -223,7 +223,11 @@ export default async function SettingsPage() {
     ],
     [
       "Cotação de frete",
-      env.SHIPPING_PROVIDER === "mock" ? "Modo simulado" : "Correios (preço, prazo e rastreio)",
+      env.SHIPPING_PROVIDER.includes("mock")
+        ? "Modo simulado"
+        : env.SHIPPING_PROVIDER.map((name) => (name === "correios" ? "Correios" : "Jadlog")).join(
+            " e ",
+          ),
       "Calculada pelas regras de Frete e entrega, sem transportadora.",
     ],
     ["E-mail", `SMTP em ${env.SMTP_HOST}`, `Remetente: ${env.EMAIL_FROM}`],

@@ -63,7 +63,10 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/pedid
     include: {
       items: {
         orderBy: { id: "asc" },
-        include: { variant: { select: { stockOnHand: true, stockReserved: true } } },
+        include: {
+          variant: { select: { stockOnHand: true, stockReserved: true } },
+          product: { select: { carrierRestriction: true } },
+        },
       },
       payments: { orderBy: { createdAt: "desc" }, include: { refunds: true } },
       statusHistory: { orderBy: { createdAt: "asc" } },
@@ -321,6 +324,11 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/pedid
               <p className="mt-2">
                 Rastreio{order.carrier ? ` (${order.carrier})` : ""}:{" "}
                 <strong>{order.trackingCode}</strong>
+              </p>
+            ) : null}
+            {order.items.some((item) => item.product?.carrierRestriction === "JADLOG_ONLY") ? (
+              <p className="mt-2 font-medium">
+                Este pedido tem produto que só pode ser enviado pela Jadlog.
               </p>
             ) : null}
             <CarrierTracking code={order.trackingCode} variant="admin" />

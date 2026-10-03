@@ -29,45 +29,71 @@ const serverEnvSchema = z.object({
   S3_SECRET_KEY: optionalString,
   S3_PUBLIC_URL: optionalString,
   PAYMENT_PROVIDER: z.enum(["mock"]).default("mock"),
-  SHIPPING_PROVIDER: z.enum(["mock", "correios"]).default("mock"),
+  // Lista separada por vírgula: "mock" (tabela do painel) ou as transportadoras ligadas, como "correios,jadlog".
+  SHIPPING_PROVIDER: z
+    .preprocess(emptyToUndefined, z.string().default("mock"))
+    .transform((value) =>
+      value
+        .split(",")
+        .map((name) => name.trim().toLowerCase())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.enum(["mock", "correios", "jadlog"])).min(1)),
+  // Comum às transportadoras: de onde os pedidos saem e quantos dias úteis a loja leva para postar.
+  SHIPPING_ORIGIN_CEP: optionalString,
+  SHIPPING_HANDLING_DAYS: z.coerce.number().int().min(0).max(10).default(1),
   // Correios (contrato): usuário do Meu Correios, código de acesso às APIs e cartão de postagem.
   CORREIOS_USER: optionalString,
   CORREIOS_ACCESS_CODE: optionalString,
   CORREIOS_POSTING_CARD: optionalString,
   CORREIOS_CONTRACT: optionalString,
   CORREIOS_DR: z.preprocess(emptyToUndefined, z.coerce.number().int().optional()),
-  CORREIOS_ORIGIN_CEP: optionalString,
   CORREIOS_BASE_URL: z.url().default("https://api.correios.com.br"),
   CORREIOS_SERVICE_ECONOMY: z.string().default("03298"),
   CORREIOS_SERVICE_EXPRESS: z.string().default("03220"),
-  CORREIOS_HANDLING_DAYS: z.coerce.number().int().min(0).max(10).default(1),
+  // Jadlog: token fornecido pela Jadlog, CNPJ do tomador e modalidades contratadas.
+  JADLOG_TOKEN: optionalString,
+  JADLOG_CNPJ: optionalString,
+  JADLOG_ACCOUNT: optionalString,
+  JADLOG_CONTRACT: optionalString,
+  JADLOG_BASE_URL: z.url().default("https://www.jadlog.com.br"),
+  JADLOG_TRACKING_URL: z.url().default("https://prd-traffic.jadlogtech.com.br"),
+  JADLOG_MODALITY_ECONOMY: z.preprocess(emptyToUndefined, z.coerce.number().int().default(3)),
+  JADLOG_MODALITY_EXPRESS: z.preprocess(emptyToUndefined, z.coerce.number().int().optional()),
   ENABLE_PAYMENT_SIMULATOR: booleanFlag(false),
   CRON_SECRET: optionalString,
   VIACEP_ENABLED: booleanFlag(true),
 });
 
-const CORREIOS_REQUIRED = [
-  "CORREIOS_USER",
-  "CORREIOS_ACCESS_CODE",
-  "CORREIOS_POSTING_CARD",
-  "CORREIOS_ORIGIN_CEP",
-] as const;
+const REQUIRED_BY_CARRIER = {
+  correios: ["CORREIOS_USER", "CORREIOS_ACCESS_CODE", "CORREIOS_POSTING_CARD"],
+  jadlog: ["JADLOG_TOKEN", "JADLOG_CNPJ"],
+} as const;
 
 const checkedEnvSchema = serverEnvSchema.superRefine((env, context) => {
-  if (env.SHIPPING_PROVIDER !== "correios") return;
-  for (const key of CORREIOS_REQUIRED) {
-    if (!env[key])
-      context.addIssue({
-        code: "custom",
-        path: [key],
-        message: "obrigatória quando SHIPPING_PROVIDER=correios",
-      });
-  }
-  if (env.CORREIOS_ORIGIN_CEP && !/^\d{5}-?\d{3}$/.test(env.CORREIOS_ORIGIN_CEP))
+  const carriers = env.SHIPPING_PROVIDER.filter((name) => name !== "mock");
+  if (carriers.length === 0) return;
+  if (env.SHIPPING_PROVIDER.includes("mock"))
     context.addIssue({
       code: "custom",
-      path: ["CORREIOS_ORIGIN_CEP"],
-      message: "CEP de origem inválido",
+      path: ["SHIPPING_PROVIDER"],
+      message: '"mock" não combina com transportadoras: use só "mock" ou só as transportadoras',
+    });
+  for (const carrier of carriers) {
+    for (const key of REQUIRED_BY_CARRIER[carrier]) {
+      if (!env[key])
+        context.addIssue({
+          code: "custom",
+          path: [key],
+          message: `obrigatória quando SHIPPING_PROVIDER inclui ${carrier}`,
+        });
+    }
+  }
+  if (!env.SHIPPING_ORIGIN_CEP || !/^\d{5}-?\d{3}$/.test(env.SHIPPING_ORIGIN_CEP))
+    context.addIssue({
+      code: "custom",
+      path: ["SHIPPING_ORIGIN_CEP"],
+      message: "CEP de origem obrigatório (8 dígitos) quando há transportadora ligada",
     });
 });
 

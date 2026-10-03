@@ -24,42 +24,49 @@ O simulador de pagamento some sozinho em produção.
 
 **Padrão:** `SHIPPING_PROVIDER=mock`. As opções vêm das regras de **Frete e entrega** do painel (faixa de CEP, valor por peso, prazo).
 
-**Interface:** `src/server/providers/shipping/types.ts` (`ShippingProvider.quote`).
+**Transportadoras prontas, desligadas:** Correios e Jadlog. `SHIPPING_PROVIDER` aceita uma lista: `correios`, `jadlog` ou `correios,jadlog`. As variáveis estão em `.env.example`. Com alguma transportadora ligada, as credenciais dela e `SHIPPING_ORIGIN_CEP` são obrigatórios e a aplicação não sobe sem eles.
 
-### Correios (pronto, falta ligar)
+**Nenhuma das duas rodou com credenciais reais.** Os testes usam respostas simuladas. A primeira ligação precisa ser acompanhada, com pedidos de teste.
 
-`SHIPPING_PROVIDER=correios` liga preço, prazo e rastreio pelas APIs dos Correios (`api.correios.com.br`: token, preço, prazo e rastro). O código está em `src/server/providers/shipping/correios/` e foi escrito a partir da descrição oficial das APIs (`/token/v3/api-docs`, `/preco/v3/api-docs`, `/prazo/v3/api-docs`, `/srorastro/v3/api-docs`). **Ainda não rodou com credenciais reais**: os testes usam respostas simuladas. A primeira ligação deve ser feita em homologação (`CORREIOS_BASE_URL=https://apihom.correios.com.br`).
+### Como funciona com transportadora ligada
 
-**O que é preciso ter:**
+- As regras de **Frete e entrega** continuam mandando no que é da loja: onde cada modalidade é oferecida, entrega hoje, entrega agendada, retirada, frete grátis e itens só locais.
+- Nas modalidades nacionais ("econômico" e "expresso"), o valor e o prazo da regra são trocados pelos da transportadora **mais barata** entre as que podem levar a sacola (no empate, a mais rápida). O nome da transportadora entra no nome da opção, por exemplo "Envio econômico (Jadlog)", e vai gravado no pedido: a equipe sabe por onde despachar.
+- **Produto "só Jadlog"** (campo "Transportadora no envio nacional", na aba Entrega do produto): com um desses na sacola, só a Jadlog é consultada e o pedido inteiro vai por ela. Serve para volumosos e plantas que os Correios não aceitam. O pedido no painel mostra um aviso.
+- Pacote acima do limite dos Correios (100 cm por lado ou 200 cm na soma) também vai só pela Jadlog, sem precisar marcar o produto.
+- Ao prazo da transportadora soma-se `SHIPPING_HANDLING_DAYS` (dias úteis para separar e postar).
+- Frete grátis continua sendo decisão da loja: o cliente paga zero e o valor da transportadora fica como valor original.
+- O pacote é estimado pelo peso da variação e pelas medidas do produto (largura, profundidade, altura), com 4 cm de folga. Sem medidas, usa 20 × 20 × 20 cm; sem peso, 300 g. **Cadastre peso e medidas reais**, senão a cotação sai errada.
+- Transportadora fora do ar ou autenticação recusada: usa a outra; se nenhuma responder, vale a tabela do painel, para o checkout não parar. Mantenha a tabela com valores realistas.
+- Se todas responderem que não atendem o envio (CEP, peso, medidas), a modalidade não é oferecida.
+- A mesma cotação é reaproveitada por 10 minutos, na memória do servidor.
+
+**Rastreio:** a movimentação aparece na página do pedido, na área do cliente e no painel. A transportadora é reconhecida pelo formato do código (Correios: duas letras, nove dígitos, duas letras; Jadlog: só dígitos). A tarefa `rastreio-transportadoras` (a cada 2 horas, em `/api/cron/rastreio-transportadoras`) marca como entregues os pedidos com evento de entrega e o cliente recebe o e-mail.
+
+**O que ainda não faz:** gerar etiqueta e código de rastreio (pré-postagem dos Correios, inclusão de pedido na Jadlog). A equipe despacha pelo sistema da transportadora e digita o código ao marcar o pedido como enviado.
+
+### Correios
+
+Código em `src/server/providers/shipping/correios/`, escrito a partir da descrição oficial das APIs (`api.correios.com.br/{token,preco,prazo,srorastro}/v3/api-docs`). Homologação: `CORREIOS_BASE_URL=https://apihom.correios.com.br`.
 
 1. Contrato com os Correios, com cartão de postagem. Sem contrato, estas APIs não autorizam preço nem rastreio.
 2. Usuário do Meu Correios e um código de acesso às APIs, gerado no portal Correios API (cws.correios.com.br). Não é a senha de login.
 3. As APIs de preço, prazo e rastro liberadas para o cartão de postagem.
-4. Os códigos de serviço do contrato. Os padrões são `03298` (PAC) e `03220` (SEDEX); confira no contrato e ajuste `CORREIOS_SERVICE_ECONOMY` e `CORREIOS_SERVICE_EXPRESS` se forem outros.
+4. Os códigos de serviço do contrato. Os padrões são `03298` (PAC) e `03220` (SEDEX), postos de memória: confira no contrato.
 
-As variáveis estão em `.env.example` (`CORREIOS_*`). Com `SHIPPING_PROVIDER=correios`, usuário, código de acesso, cartão de postagem e CEP de origem são obrigatórios e a aplicação não sobe sem eles.
+### Jadlog
 
-**Como funciona:**
+Código em `src/server/providers/shipping/jadlog/`, escrito a partir do documento "Integração JADLOG" versão 2.3 (agosto de 2025): simulador de frete (`POST /embarcador/api/frete/valor`) e consulta de tracking (`POST prd-traffic.jadlogtech.com.br/embarcador/api/tracking/consultar`).
 
-- As regras de **Frete e entrega** continuam mandando no que é da loja: onde cada modalidade é oferecida, entrega hoje, entrega agendada, retirada, frete grátis e itens só locais.
-- Nas modalidades nacionais, o valor e o prazo da regra são trocados pelos dos Correios: "econômico" usa o PAC e "expresso" usa o SEDEX. Ao prazo dos Correios soma-se `CORREIOS_HANDLING_DAYS` (dias úteis para separar e postar).
-- Frete grátis continua sendo decisão da loja: o cliente paga zero e o valor dos Correios fica como valor original.
-- O pacote é estimado pelo peso da variação e pelas medidas do produto (largura, profundidade, altura), com 4 cm de folga. Sem medidas, usa 20 × 20 × 20 cm; sem peso, 300 g. **Cadastre peso e medidas reais**, senão a cotação sai errada.
-- Se os Correios estiverem fora do ar ou a autenticação falhar, vale a tabela do painel, para o checkout não parar. Mantenha a tabela com valores realistas.
-- Se os Correios responderem que o serviço não atende o envio (CEP, peso, medidas acima de 100 cm por lado ou 200 cm na soma), a modalidade não é oferecida.
-- A mesma cotação é reaproveitada por 10 minutos, na memória do servidor.
-
-**Rastreio:**
-
-- Quando o código de rastreio do pedido é dos Correios (duas letras, nove dígitos, duas letras), a movimentação aparece na página do pedido, na área do cliente e no painel.
-- A tarefa agendada `rastreio-correios` (a cada 2 horas, em `/api/cron/rastreio-correios`) confere os pedidos enviados e marca como entregues os que têm o evento de entrega. O cliente recebe o e-mail de pedido entregue.
-
-**O que ainda não faz:** gerar a etiqueta e o código de rastreio (API de pré-postagem). Hoje a equipe posta pelo sistema dos Correios e digita o código ao marcar o pedido como enviado.
+1. Peça à franquia Jadlog que atende a loja os dados de acesso da API: token, código do cliente e conta corrente (se for correntista). Preencha `JADLOG_TOKEN`, `JADLOG_CNPJ` e, se houver, `JADLOG_ACCOUNT` e `JADLOG_CONTRACT`.
+2. Modalidades: `JADLOG_MODALITY_ECONOMY` (padrão 3, .Package; para volumosos a Jadlog costuma usar 4, Rodoviário) e `JADLOG_MODALITY_EXPRESS` (vazio por padrão; 0 é o Expresso). Sem código no expresso, a Jadlog só cota o econômico. **A tabela de modalidades do manual não pôde ser lida** (é uma imagem): os códigos acima vêm de memória e precisam ser confirmados com a Jadlog.
+3. O peso enviado é o maior entre o real e o cubado: volume ÷ 3333 nas modalidades rodoviárias e ÷ 6000 nas aéreas. Esses divisores também vêm de memória.
+4. O token vai no cabeçalho `Authorization` com o prefixo `Bearer`. O manual mostra só `Authorization: <token>`; se a Jadlog entregar o token já com o prefixo, ele é mantido.
+5. Rastreio: o código digitado no pedido pode ser o número de rastreamento (CT-e) ou o shipmentId; a consulta tenta os dois. A entrega é reconhecida pelo status `ENTREGUE` (de memória; confirmar no primeiro pedido real).
 
 ### Outra transportadora (Melhor Envio, Frenet...)
 
-1. Crie o provider implementando `quote()`, no modelo do `CorreiosShippingProvider`.
-2. Registre em `src/server/providers/shipping/index.ts` e acrescente o nome em `SHIPPING_PROVIDER` (`src/lib/env.ts`).
+Implemente a interface `Carrier` (`src/server/providers/shipping/carriers/types.ts`), registre em `src/server/providers/shipping/index.ts` e acrescente o nome em `SHIPPING_PROVIDER` (`src/lib/env.ts`).
 
 ## 3. E-mail
 
