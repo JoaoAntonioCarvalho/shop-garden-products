@@ -5,23 +5,17 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { buttonClasses } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { cn } from "@/lib/cn";
+import { useCart } from "./cart/cart-provider";
 
 type ActionResult = { ok: boolean; message?: string };
 
-/**
- * Ações do card ligadas ao servidor. São registradas uma vez pelo layout da loja
- * (carrinho na fase 4, favoritos na fase 5), para que o card não dependa desses módulos.
- */
-type CardActions = {
-  addToCart?: (variantId: string, productName: string) => Promise<ActionResult>;
-  toggleWishlist?: (productId: string, next: boolean) => Promise<ActionResult>;
-};
+/** Ação de favoritar, registrada pelo layout da loja quando a conta do cliente existe (fase 5). */
+let toggleWishlistAction: ((productId: string, next: boolean) => Promise<ActionResult>) | undefined;
 
-const registered: CardActions = {};
-
-export function registerCardActions(actions: CardActions) {
-  Object.assign(registered, actions);
+export function registerWishlistAction(action: typeof toggleWishlistAction) {
+  toggleWishlistAction = action;
 }
 
 type WishlistToggleProps = {
@@ -44,7 +38,7 @@ export function WishlistToggle({
     const next = !pressed;
     setPressed(next);
     startTransition(async () => {
-      const result = await registered.toggleWishlist?.(productId, next);
+      const result = await toggleWishlistAction?.(productId, next);
       if (result && !result.ok) setPressed(!next);
     });
   }
@@ -97,6 +91,7 @@ export function CardAddButton({
   soldOut,
 }: CardAddButtonProps) {
   const [pending, startTransition] = useTransition();
+  const { addItem } = useCart();
   const href = `/produto/${productSlug}`;
 
   if (soldOut) {
@@ -125,7 +120,8 @@ export function CardAddButton({
       disabled={pending}
       onClick={() =>
         startTransition(async () => {
-          await registered.addToCart?.(variantId, productName);
+          const result = await addItem(variantId, 1);
+          if (!result.ok && result.message) toast(result.message, { tone: "error" });
         })
       }
     >

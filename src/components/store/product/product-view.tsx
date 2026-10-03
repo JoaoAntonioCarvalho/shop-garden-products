@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight, Expand, X, ZoomIn, ZoomOut } from "lucide-re
 import Image from "next/image";
 import { Dialog as RadixDialog } from "radix-ui";
 import { useEffect, useMemo, useRef, useState, useTransition, type ReactNode } from "react";
+import { useCart } from "@/components/store/cart/cart-provider";
+import { ShippingCalculator } from "@/components/store/shipping-calculator";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
 import { controlClasses } from "@/components/ui/input";
@@ -12,6 +14,7 @@ import { QuantityStepper } from "@/components/ui/quantity-stepper";
 import { track } from "@/lib/analytics/events";
 import { cn } from "@/lib/cn";
 import { centsToReais, formatBRL } from "@/lib/money";
+import { buyNowAction, quoteProductShippingAction } from "@/server/actions/cart";
 import type { FormResult } from "@/server/actions/leads";
 import type { PriceDisplay } from "@/server/services/pricing";
 
@@ -33,8 +36,6 @@ export type ViewVariant = {
   price: PriceDisplay;
 };
 
-export type CartActionResult = { ok: boolean; message?: string };
-
 type ProductViewProps = {
   product: { id: string; name: string; sku: string; slug: string; categoryName?: string };
   images: ViewImage[];
@@ -43,8 +44,6 @@ type ProductViewProps = {
   header: ReactNode;
   /** Blocos abaixo dos botões: entrega hoje, frete, presente, WhatsApp. */
   children?: ReactNode;
-  addToCart?: (variantId: string, quantity: number) => Promise<CartActionResult>;
-  buyNow?: (variantId: string, quantity: number) => Promise<CartActionResult>;
   notifyBackInStock: (input: {
     email: string;
     productId: string;
@@ -333,10 +332,9 @@ export function ProductView({
   variants,
   header,
   children,
-  addToCart,
-  buyNow,
   notifyBackInStock,
 }: ProductViewProps) {
+  const { addItem } = useCart();
   const firstAvailable = variants.find((variant) => variant.available > 0) ?? variants[0];
   const [variantId, setVariantId] = useState(firstAvailable?.id);
   const [quantity, setQuantity] = useState(1);
@@ -408,13 +406,20 @@ export function ProductView({
     }
   }
 
-  function run(action: ProductViewProps["addToCart"], start: typeof startAdd) {
-    if (!action || !variant) return;
-    start(async () => {
-      const result = await action(variant.id, quantity);
-      setMessage(
-        result.ok ? null : (result.message ?? "Não foi possível adicionar. Tente de novo."),
-      );
+  function add() {
+    if (!variant) return;
+    startAdd(async () => {
+      const result = await addItem(variant.id, quantity);
+      setMessage(result.ok ? null : (result.message ?? "Não foi possível adicionar. Tente de novo."));
+    });
+  }
+
+  function buy() {
+    if (!variant) return;
+    startBuy(async () => {
+      // Em caso de sucesso a ação redireciona para o checkout e não retorna.
+      const result = await buyNowAction(variant.id, quantity);
+      if (result && !result.ok) setMessage(result.message ?? "Não foi possível continuar. Tente de novo.");
     });
   }
 
@@ -424,7 +429,7 @@ export function ProductView({
       className={className}
       loading={pendingAdd}
       disabled={soldOut}
-      onClick={() => run(addToCart, startAdd)}
+      onClick={add}
     >
       Adicionar à sacola
     </Button>
@@ -518,7 +523,7 @@ export function ProductView({
               size="lg"
               variant="secondary"
               loading={pendingBuy}
-              onClick={() => run(buyNow, startBuy)}
+              onClick={buy}
             >
               Comprar agora
             </Button>
@@ -529,6 +534,14 @@ export function ProductView({
             ) : null}
           </div>
         )}
+
+        {variant ? (
+          <ShippingCalculator
+            key={`${variant.id}-${quantity}`}
+            className="mt-6"
+            quote={(cep) => quoteProductShippingAction(variant.id, quantity, cep)}
+          />
+        ) : null}
 
         {children}
       </div>
@@ -553,7 +566,7 @@ export function ProductView({
           <Button
             loading={pendingAdd}
             tabIndex={barVisible ? 0 : -1}
-            onClick={() => run(addToCart, startAdd)}
+            onClick={add}
           >
             Adicionar à sacola
           </Button>
