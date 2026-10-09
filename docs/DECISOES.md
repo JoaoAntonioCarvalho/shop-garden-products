@@ -262,3 +262,14 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **"Produto inválido"** é um terceiro destino na curadoria (`CurationStatus.INVALID`, migração `curation_invalid`, aba Inválidos): sai da fila e da loja, sem ir para a lixeira, até alguém corrigir e manter. Interpretação minha do pedido: serve para cadastro com foto, nome ou preço errados.
 - **"Não entregue pelos Correios"** usa o campo que já existia, `carrierRestriction = JADLOG_ONLY`: no envio nacional o produto só vai pela Jadlog. É uma marcação no card e na barra de ações em massa, independente da decisão de manter ou excluir.
 - **CI falhava no build:** o build gera o sitemap a partir do banco e rodava antes de as tabelas existirem (`P2021`, tabela `Category`). A etapa de migração e seed passou para antes do build. O CI nunca tinha rodado até o repositório existir no GitHub.
+
+## 2026-10-09 — Primeiro deploy na Vercel
+
+- **No ar em `shop-garden-products.vercel.app`**, com Postgres Neon (São Paulo) e fotos no Cloudflare R2. Três falhas de build até chegar lá, nenhuma reproduzível na máquina:
+  - **Fonte do Google:** o `next/font/google` falhava no build da Vercel. As fontes (Cormorant Garamond e Inter, licença OFL) passaram para `src/fonts`, com `next/font/local`.
+  - **Cliente Prisma ausente com cache de build:** com o cache restaurado, o `pnpm install` não roda o `postinstall`, e `src/generated` (fora do Git) não existe. O `vercel-build` passou a rodar `prisma generate` antes de tudo.
+  - **Imagens do bucket:** `images.remotePatterns` é montado a partir de `S3_PUBLIC_URL`.
+- **`prisma/seed/essentials.ts` (`pnpm db:seed:essentials`)**: carga de produção sem dados de teste. Substitui o plano de rodar o seed completo e remover os testes depois, que criaria no site publicado uma conta de equipe com senha conhecida.
+- **Carga do catálogo em fatias paralelas** (`--parte=i/n`, `--faltantes`): com o banco a cerca de 150 ms por consulta, a carga em série levaria mais de uma hora.
+- **Tarefa `atualizar-cache`**: a loja guarda configurações, categorias e catálogo em cache sem prazo. Depois de uma carga direta no banco, só essa tarefa (ou salvar as configurações no painel) faz o site enxergar os dados.
+- **`regions: ["gru1"]`** no `vercel.json`: as funções rodam em São Paulo, junto do banco.
