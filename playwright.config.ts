@@ -8,6 +8,9 @@ export default defineConfig({
   globalSetup: "./tests/e2e/global-setup.ts",
   fullyParallel: false,
   workers: 1,
+  // No CI o servidor de desenvolvimento compila cada página na primeira visita, e os testes
+  // longos (conta, checkout) passam dos 30 s padrão.
+  timeout: process.env.CI ? 120_000 : 30_000,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",

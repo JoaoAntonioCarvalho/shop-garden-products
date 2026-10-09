@@ -73,7 +73,7 @@ test("cliente cria conta, entra com a sacola mesclada, salva endereço, compra, 
   await dialog.getByRole("textbox", { name: /Nome do endereço/ }).fill("Casa");
   await dialog.getByRole("textbox", { name: "CEP" }).fill("01310100");
   await page
-    .waitForResponse((response) => response.url().includes("/api/cep/"))
+    .waitForResponse((response) => response.url().includes("/api/cep/"), { timeout: 10_000 })
     .catch(() => undefined);
   await page.waitForTimeout(300);
   for (const [label, value] of [
