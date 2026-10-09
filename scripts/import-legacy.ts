@@ -2,7 +2,8 @@
  * Carga inicial do catálogo do site antigo, direto no banco, para a curadoria.
  * Os produtos entram como rascunho, fora da loja, à espera da decisão do dono em /admin/curadoria.
  *
- * Uso: pnpm import:legacy data-privada/produtos.csv [--base=https://site-antigo/imagens/] [--previa]
+ * Uso: pnpm import:legacy data-privada/produtos.xml [--base=https://site-antigo/imagens/] [--previa]
+ * Aceita o XML de produtos da FastCommerce (xml-products.ehc, formato padrão) ou um CSV.
  *   --base    completa os endereços de foto que vierem sem o domínio
  *   --previa  só valida o arquivo e mostra o que seria importado
  *
@@ -14,6 +15,7 @@ import { logAudit } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { normalizeText } from "@/lib/slug";
 import type { AdminContext } from "@/server/admin/action";
+import { LEGACY_CATEGORY_ALIASES, parseLegacyFeed } from "@/server/admin/legacy-feed";
 import { decodeCsvBuffer, parseCsv } from "@/server/admin/list";
 import { detectFormat, parseImport, runImport } from "@/server/admin/product-import";
 
@@ -28,10 +30,15 @@ async function main() {
     process.exit(1);
   }
   const buffer = readFileSync(file);
-  const table = parseCsv(
-    decodeCsvBuffer(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)),
-  );
-  const [headers, ...rows] = table;
+  const isXml = file.toLowerCase().endsWith(".xml");
+  const feed = isXml ? parseLegacyFeed(new TextDecoder("windows-1252").decode(buffer)) : null;
+  const [headers, ...rows] = feed
+    ? [feed.headers, ...feed.rows]
+    : parseCsv(
+        decodeCsvBuffer(
+          buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
+        ),
+      );
   const { format, mapping } = detectFormat(headers ?? []);
   if (mapping.sku === undefined || mapping.name === undefined || mapping.price === undefined) {
     console.error(`Não reconheci as colunas de código, nome e preço. Cabeçalho: ${headers}`);
@@ -40,17 +47,26 @@ async function main() {
   console.log(`Formato: ${format}. Linhas: ${rows.length}.`);
   console.log(`Colunas reconhecidas: ${Object.keys(mapping).join(", ")}`);
 
-  // Categoria do arquivo → categoria da loja, pelo nome (inteiro ou o último nível).
+  // Categoria do arquivo → categoria da loja, pelo caminho inteiro ("Vasos > Plástico"). Só o último
+  // nível não serve: "Cerâmica" existe em Vasos e em Cachepots.
   const categories = await db.category.findMany({
     select: { id: true, name: true, parent: { select: { name: true } } },
   });
-  const byName = new Map<string, string>();
-  for (const category of categories) {
-    byName.set(normalizeText(category.name), category.id);
-    if (category.parent)
-      byName.set(normalizeText(`${category.parent.name} ${category.name}`), category.id);
-  }
-  const key = (text: string) => normalizeText(text.replace(/[>/|\\-]+/g, " "));
+  const byPath = new Map(
+    categories.map((category) => [
+      normalizeText(category.parent ? `${category.parent.name} > ${category.name}` : category.name),
+      category.id,
+    ]),
+  );
+  // No XML os níveis vêm separados por vírgula; em CSV, por ">", "/" ou "|".
+  const key = (text: string) =>
+    normalizeText(
+      text
+        .split(isXml ? "," : /[>|]/)
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .join(" > "),
+    );
   const categoryMap: Record<string, string> = {};
   const unmatched = new Map<string, number>();
   if (mapping.category !== undefined)
@@ -58,8 +74,7 @@ async function main() {
       const name = (row[mapping.category] ?? "").trim();
       if (!name) continue;
       if (!(name in categoryMap))
-        categoryMap[name] =
-          byName.get(key(name)) ?? byName.get(key(name.split(/[>/|]/).pop() ?? "")) ?? "";
+        categoryMap[name] = byPath.get(LEGACY_CATEGORY_ALIASES[key(name)] ?? key(name)) ?? "";
       if (!categoryMap[name]) unmatched.set(name, (unmatched.get(name) ?? 0) + 1);
     }
 
@@ -72,6 +87,10 @@ async function main() {
     imageBaseUrl,
     weightInKg: format === "fastcommerce",
   };
+  if (feed)
+    console.log(
+      `Só entrega em São Paulo: ${feed.localOnlySkus.length}. Com endereço antigo: ${Object.keys(feed.oldPaths).length}.`,
+    );
 
   const { products, lines } = await parseImport(input);
   const invalid = lines.filter((line) => line.errors.length);
@@ -103,6 +122,15 @@ async function main() {
   );
   for (const line of report.errors.slice(invalid.length, invalid.length + 30))
     console.log(`  ${line.name}: ${line.errors.join(" ")}`);
+
+  if (feed) {
+    // O que o site antigo só entregava na cidade de São Paulo continua assim na loja nova.
+    const local = await db.product.updateMany({
+      where: { sku: { in: feed.localOnlySkus }, curation: "PENDING" },
+      data: { deliveryScope: "LOCAL_ONLY" },
+    });
+    console.log(`Marcados como entrega só local: ${local.count}.`);
+  }
 }
 
 main()

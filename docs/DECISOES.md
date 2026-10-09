@@ -243,3 +243,15 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Script de carga em vez do assistente para o arquivo grande:** uma importação de 3000 produtos numa única chamada passa do tempo limite e do tamanho de requisição da Vercel. `scripts/import-legacy.ts` grava direto no banco de `DATABASE_URL`.
 - **70 produtos fictícios** (`LEG0001` a `LEG0070`, `isSample`) ficaram no banco de desenvolvimento para experimentar a tela. As fotos deles apontam para um domínio que não existe, de propósito.
 - **Vercel:** `vercel-build` aplica as migrações antes do build (pela conexão direta `DATABASE_URL_UNPOOLED`, quando existe), `vercel.json` declara as tarefas uma vez por dia (limite do plano Hobby) e as páginas de curadoria e importação pedem até 60 s por ação. O build foi ensaiado contra um banco recém-criado e vazio, e passou. Nenhum deploy real foi feito.
+
+## 2026-10-08 — Carga do XML de produtos do site antigo
+
+- **Fonte:** o gerador "XML de produtos" da FastCommerce (`/xml-products.ehc`, formato padrão, com descrições, referência, peso, caminho da categoria e foto ampliada), salvo pelo navegador em `data-privada/`. O `produtos.csv` do gerenciador de arquivos não serve: tem só a coluna de descrição longa e é de 2018.
+- **`src/server/admin/legacy-feed.ts`** converte o XML para o formato próprio da importação. O script `pnpm import:legacy` aceita `.xml` e `.csv`.
+- **1.155 produtos no arquivo recebido**, todos com preço e foto, em 27 categorias, todas mapeadas (tabela `LEGACY_CATEGORY_ALIASES`). O casamento de categoria passou a ser pelo caminho inteiro: só pelo último nível, "Cerâmica" de Cachepots cairia em Vasos.
+- **Só entrega em São Paulo (431 produtos):** o site antigo marcava isso com peso de 350 kg ou com o texto "toda Cidade de São Paulo". Viram `deliveryScope = LOCAL_ONLY`, e o peso falso não é importado.
+- **Referência repetida** (14 casos) ganha o id do site antigo no código.
+- **Estoque não vem no XML** sem chave de acesso: todos entraram com estoque zero. Fica pendente decidir de onde vem o estoque.
+- **As fotos baixam direto do site antigo** (testado com JPG, PNG e WebP). AVIF não é aceito pelo processamento de imagens: 1 produto fica sem foto.
+- **Endereços antigos dos produtos** são lidos do XML (`oldPaths`), mas ainda não viram redirecionamentos. A fazer para os produtos mantidos, antes de trocar o domínio.
+- **Carga feita só no banco de desenvolvimento.** Os 70 produtos fictícios da curadoria foram apagados.
