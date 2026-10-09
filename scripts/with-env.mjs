@@ -1,8 +1,8 @@
 // Roda um comando com as variáveis de um arquivo .env (os valores podem ter "&" e outros
-// caracteres que quebram o `source` do shell). Uso: node scripts/with-env.cjs .env.vercel pnpm build
-const { spawnSync } = require("node:child_process");
-const { readFileSync } = require("node:fs");
-const { parse } = require("dotenv");
+// caracteres que quebram o `source` do shell). Uso: node scripts/with-env.mjs .env.vercel pnpm build
+import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { parse } from "dotenv";
 
 const [file, command, ...args] = process.argv.slice(2);
 const result = spawnSync(command, args, {
