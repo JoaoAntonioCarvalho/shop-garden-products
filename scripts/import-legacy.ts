@@ -116,7 +116,7 @@ async function main() {
     userAgent: "scripts/import-legacy",
     audit: (entry) => logAudit({ ...entry, userId: admin.id, userAgent: "scripts/import-legacy" }),
   } as AdminContext;
-  const report = await runImport(input, context);
+  const report = await runImport(input, context, 20);
   console.log(
     `Criados: ${report.created}. Atualizados: ${report.updated}. Variações: ${report.variants}. Ignorados: ${report.skipped}.`,
   );

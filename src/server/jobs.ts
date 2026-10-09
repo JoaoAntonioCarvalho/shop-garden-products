@@ -118,6 +118,17 @@ export const JOBS: Job[] = [
       return `${result.checked} pedidos conferidos, ${result.delivered} marcados como entregues`;
     },
   },
+  {
+    key: "atualizar-cache",
+    label: "Atualizar a loja com o que está no banco",
+    description:
+      "Descarta o que a loja guarda em memória (configurações, categorias, catálogo, home e páginas). Use depois de uma carga feita direto no banco, como a importação do catálogo antigo.",
+    schedule: "Só quando precisar",
+    run: async () => {
+      invalidate("settings", "categories", "catalog", "home", "pages");
+      return "Loja atualizada";
+    },
+  },
 ];
 
 export const getJob = (key: string) => JOBS.find((job) => job.key === key) ?? null;

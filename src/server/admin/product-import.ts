@@ -322,7 +322,12 @@ export type ImportReport = {
 };
 
 /** Importa em lotes de 50 produtos. Cada lote é uma transação; um lote com erro não derruba os demais. */
-export async function runImport(input: ImportInput, context: AdminContext): Promise<ImportReport> {
+export async function runImport(
+  input: ImportInput,
+  context: AdminContext,
+  /** Lotes menores para bancos distantes, onde cada consulta demora mais. */
+  batchSize = 50,
+): Promise<ImportReport> {
   const { products, lines } = await parseImport(input);
   const report: ImportReport = {
     created: 0,
@@ -333,8 +338,8 @@ export async function runImport(input: ImportInput, context: AdminContext): Prom
   };
   const slugs: string[] = [];
 
-  for (let start = 0; start < products.length; start += 50) {
-    const batch = products.slice(start, start + 50);
+  for (let start = 0; start < products.length; start += batchSize) {
+    const batch = products.slice(start, start + batchSize);
     try {
       await db.$transaction(
         async (tx) => {

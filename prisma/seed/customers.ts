@@ -103,7 +103,8 @@ function addressFor(rng: Rng, region: Region, name: string): SeededCustomer["add
   return { ...base, cep: `${prefix}${tail()}`, district, city, state };
 }
 
-export async function seedUsers() {
+/** `testStaff: false` cria só o administrador (carga de produção, sem contas de senha conhecida). */
+export async function seedUsers({ testStaff = true }: { testStaff?: boolean } = {}) {
   const adminEmail = (process.env.ADMIN_EMAIL ?? "admin@netshopgarden.com.br").toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminPassword) {
@@ -124,6 +125,7 @@ export async function seedUsers() {
     },
     update: {},
   });
+  if (!testStaff) return log("Usuários da equipe", "admin");
   await db.user.upsert({
     where: { email: TEST_STAFF.email },
     create: {
