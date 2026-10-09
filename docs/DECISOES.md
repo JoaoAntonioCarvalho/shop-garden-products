@@ -255,3 +255,10 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **As fotos baixam direto do site antigo** (testado com JPG, PNG e WebP). AVIF não é aceito pelo processamento de imagens: 1 produto fica sem foto.
 - **Endereços antigos dos produtos** são lidos do XML (`oldPaths`), mas ainda não viram redirecionamentos. A fazer para os produtos mantidos, antes de trocar o domínio.
 - **Carga feita só no banco de desenvolvimento.** Os 70 produtos fictícios da curadoria foram apagados.
+
+## 2026-10-09 — Inválido, sem Correios e o erro do CI
+
+- **Estoque fica zero.** O dono conferiu no gerador de XML do site antigo: a quantidade não vem. A etiqueta "sem estoque" saiu dos cards da curadoria (valeria para todos); o filtro continua. No lugar entrou "Só São Paulo" para os produtos de entrega local.
+- **"Produto inválido"** é um terceiro destino na curadoria (`CurationStatus.INVALID`, migração `curation_invalid`, aba Inválidos): sai da fila e da loja, sem ir para a lixeira, até alguém corrigir e manter. Interpretação minha do pedido: serve para cadastro com foto, nome ou preço errados.
+- **"Não entregue pelos Correios"** usa o campo que já existia, `carrierRestriction = JADLOG_ONLY`: no envio nacional o produto só vai pela Jadlog. É uma marcação no card e na barra de ações em massa, independente da decisão de manter ou excluir.
+- **CI falhava no build:** o build gera o sitemap a partir do banco e rodava antes de as tabelas existirem (`P2021`, tabela `Category`). A etapa de migração e seed passou para antes do build. O CI nunca tinha rodado até o repositório existir no GitHub.

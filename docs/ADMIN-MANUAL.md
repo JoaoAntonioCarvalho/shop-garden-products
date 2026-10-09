@@ -62,9 +62,11 @@ O pedido manual baixa o estoque e entra nos relatórios com o canal escolhido (W
 Em **Catálogo > Curadoria** ficam os produtos importados do site antigo que ainda esperam uma decisão. Eles estão fora da loja até você decidir.
 
 - **Manter** coloca o produto na loja. **Destaque** (a estrela) mantém e põe o produto na frente nas categorias e na home. **Excluir** (a lixeira) tira o produto.
+- **Inválido** (o círculo cortado) separa o produto com cadastro errado: foto que não é dele, nome confuso, preço absurdo. Ele sai da fila e da loja e fica na aba **Inválidos** até alguém corrigir e clicar em Manter.
+- **Não entregue pelos Correios:** marque nos produtos que os Correios não levam (plantas, volumosos). No envio para fora da região, eles só vão pela Jadlog.
 - **Nome, preço e categoria** são editados no próprio card: clique, altere e aperte Enter.
 - **Vários de uma vez:** marque a caixinha na foto de cada produto e use a barra que aparece embaixo (manter, destacar, excluir ou mover de categoria).
-- **Revisar um por um** mostra um produto por vez, com botões grandes. No teclado: M mantém, D destaca, X exclui, seta para a direita deixa para depois e Z desfaz.
+- **Revisar um por um** mostra um produto por vez, com botões grandes. No teclado: M mantém, D destaca, I marca como inválido, X exclui, seta para a direita deixa para depois e Z desfaz.
 - **Errou?** Todo aviso traz o botão Desfazer. E tudo o que foi excluído fica na aba **Excluídos**, do mais recente para o mais antigo, com o botão Restaurar.
 - **Mostrar:** filtra os produtos sem foto, sem estoque ou com nome repetido, que costumam ser os primeiros a sair.
 - **Fotos:** um produto mantido só aparece na loja quando tem foto. As fotos do site antigo são trazidas sozinhas; se sobrar alguma, a aba Mantidos mostra o botão "Trazer fotos do site antigo".

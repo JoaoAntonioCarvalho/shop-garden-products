@@ -221,10 +221,12 @@ enum ProductStatus {
   ARCHIVED
 }
 
-/// Revisão do catálogo importado: o produto espera a decisão do dono ou já foi mantido.
+/// Revisão do catálogo importado: o produto espera a decisão do dono, foi mantido ou foi marcado como inválido.
 enum CurationStatus {
   PENDING
   KEPT
+  /// Cadastro com problema (foto, nome ou preço errados): fica fora da loja até ser corrigido.
+  INVALID
 }
 
 enum ProductType {

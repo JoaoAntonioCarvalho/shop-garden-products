@@ -13,7 +13,13 @@ import { invalidateProducts, refreshProductDerived, uniqueProductSlug } from "./
  * Excluir manda para a lixeira (aba Excluídos), de onde tudo pode ser restaurado.
  */
 
-export const CURATION_TABS = ["revisar", "mantidos", "destaques", "excluidos"] as const;
+export const CURATION_TABS = [
+  "revisar",
+  "mantidos",
+  "destaques",
+  "invalidos",
+  "excluidos",
+] as const;
 export type CurationTab = (typeof CURATION_TABS)[number];
 export const CURATION_FLAGS = ["sem-foto", "sem-estoque", "duplicados"] as const;
 export type CurationFlag = (typeof CURATION_FLAGS)[number];
@@ -34,6 +40,10 @@ export type CurationItem = {
   slug: string;
   published: boolean;
   featured: boolean;
+  /** Não pode ser enviado pelos Correios: no envio nacional, só vai pela Jadlog. */
+  noCorreios: boolean;
+  /** Entrega só na região da loja. */
+  localOnly: boolean;
   categoryId: string;
   categoryName: string | null;
   /** Preço para o campo de edição ("89,90"). Vazio quando o produto não tem variação. */
@@ -78,6 +88,7 @@ const tabWhere: Record<CurationTab, Prisma.ProductWhereInput> = {
   revisar: { curation: "PENDING", deletedAt: null },
   mantidos: { curation: "KEPT", deletedAt: null },
   destaques: { curation: "KEPT", isFeatured: true, deletedAt: null },
+  invalidos: { curation: "INVALID", deletedAt: null },
   excluidos: { deletedAt: { not: null } },
 };
 
@@ -95,16 +106,17 @@ async function duplicateIds(): Promise<string[]> {
 }
 
 export async function curationCounts(): Promise<CurationCounts> {
-  const [revisar, mantidos, destaques, excluidos, photosPending] = await Promise.all([
+  const [revisar, mantidos, destaques, invalidos, excluidos, photosPending] = await Promise.all([
     db.product.count({ where: tabWhere.revisar }),
     db.product.count({ where: tabWhere.mantidos }),
     db.product.count({ where: tabWhere.destaques }),
+    db.product.count({ where: tabWhere.invalidos }),
     db.product.count({ where: tabWhere.excluidos }),
     db.product.count({
       where: { ...tabWhere.mantidos, legacyImageUrls: { isEmpty: false } },
     }),
   ]);
-  return { revisar, mantidos, destaques, excluidos, photosPending };
+  return { revisar, mantidos, destaques, invalidos, excluidos, photosPending };
 }
 
 const stripTags = (html: string | null) =>
@@ -159,6 +171,8 @@ export async function listCuration(
         slug: true,
         status: true,
         isFeatured: true,
+        carrierRestriction: true,
+        deliveryScope: true,
         primaryCategoryId: true,
         primaryCategory: { select: { name: true } },
         minPriceCents: true,
@@ -201,6 +215,8 @@ export async function listCuration(
       slug: row.slug,
       published: row.status === "ACTIVE",
       featured: row.isFeatured,
+      noCorreios: row.carrierRestriction === "JADLOG_ONLY",
+      localOnly: row.deliveryScope === "LOCAL_ONLY",
       categoryId: row.primaryCategoryId ?? "",
       categoryName: row.primaryCategory?.name ?? null,
       price: row.variants.length ? formatCentsPlain(price) : "",
@@ -222,8 +238,11 @@ const ids = z.array(z.string().min(1).max(40)).min(1).max(500);
 
 export const decideSchema = z.object({
   ids,
-  /** keep: fica na loja. feature: fica e ganha destaque. pending: volta para a fila de revisão. */
-  decision: z.enum(["keep", "feature", "unfeature", "pending"]),
+  /**
+   * keep: fica na loja. feature: fica e ganha destaque. pending: volta para a fila de revisão.
+   * invalid: o cadastro tem problema e fica fora da loja até ser corrigido.
+   */
+  decision: z.enum(["keep", "feature", "unfeature", "pending", "invalid"]),
 });
 export const idsSchema = z.object({ ids });
 export const renameSchema = z.object({
@@ -231,6 +250,7 @@ export const renameSchema = z.object({
   name: z.string().trim().min(2, "Informe o nome do produto.").max(160),
 });
 export const priceSchema = z.object({ id: z.string().max(40), price: z.string().trim().max(20) });
+export const carrierSchema = z.object({ ids, noCorreios: z.boolean() });
 export const categorySchema = z.object({ ids, categoryId: z.string().min(1).max(40) });
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
@@ -255,10 +275,14 @@ export async function decideProducts(
 
   await db.$transaction(
     async (tx) => {
-      if (input.decision === "pending") {
+      if (input.decision === "pending" || input.decision === "invalid") {
         await tx.product.updateMany({
           where: { id: { in: targetIds } },
-          data: { curation: "PENDING", isFeatured: false, status: "DRAFT" },
+          data: {
+            curation: input.decision === "pending" ? "PENDING" : "INVALID",
+            isFeatured: false,
+            status: "DRAFT",
+          },
         });
         return;
       }
@@ -284,6 +308,7 @@ export async function decideProducts(
     feature: plural(count, "produto em destaque", "produtos em destaque"),
     unfeature: plural(count, "produto saiu dos destaques", "produtos saíram dos destaques"),
     pending: plural(count, "produto voltou para a revisão", "produtos voltaram para a revisão"),
+    invalid: plural(count, "produto marcado como inválido", "produtos marcados como inválidos"),
   }[input.decision];
   await audit({
     action: `product.curation_${input.decision}`,
@@ -480,6 +505,35 @@ export async function setProductsCategory(
       products.length === 1
         ? `Categoria alterada para ${category.name}`
         : `${plural(products.length, "produto movido", "produtos movidos")} para ${category.name}`,
+  };
+}
+
+/** Marca (ou desmarca) produtos que os Correios não levam: no envio nacional, só a Jadlog. */
+export async function setProductsCarrier(
+  input: z.output<typeof carrierSchema>,
+  { audit }: AdminContext,
+): Promise<{ message: string }> {
+  const products = await loadTargets(input.ids);
+  await db.product.updateMany({
+    where: { id: { in: products.map((product) => product.id) } },
+    data: { carrierRestriction: input.noCorreios ? "JADLOG_ONLY" : "ANY" },
+  });
+  await audit({
+    action: "product.set_carrier",
+    entityType: "Product",
+    ...(products.length === 1 ? { entityId: products[0].id } : {}),
+    diff: {
+      transportadora: input.noCorreios ? "JADLOG_ONLY" : "ANY",
+      produtos: products.map((product) => product.name).slice(0, 50),
+      total: products.length,
+    },
+  });
+  invalidateProducts(products.map((product) => product.slug).slice(0, 200));
+  const count = products.length;
+  return {
+    message: input.noCorreios
+      ? `${plural(count, "produto marcado", "produtos marcados")} como não entregue pelos Correios`
+      : `${plural(count, "produto voltou", "produtos voltaram")} a poder ir pelos Correios`,
   };
 }
 

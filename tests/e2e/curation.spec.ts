@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { db } from "./helpers";
 
 const key = `E2E-CUR-${Date.now().toString(36)}`.toUpperCase();
-const names = ["Antúrio", "Begônia", "Calatéia"].map((plant) => `${plant} ${key}`);
+const names = ["Antúrio", "Begônia", "Calatéia", "Dracena"].map((plant) => `${plant} ${key}`);
 
 test.beforeAll(async () => {
   for (const [index, name] of names.entries())
@@ -49,7 +49,7 @@ test("curadoria: editar no card, manter, excluir, restaurar da aba Excluídos e 
   await loginAdmin(page);
   await page.goto(`/admin/curadoria?busca=${key}`);
   const cards = page.getByRole("listitem").filter({ hasText: key });
-  await expect(cards).toHaveCount(3);
+  await expect(cards).toHaveCount(4);
 
   // Nome e preço são editados no próprio card e salvos ao sair do campo.
   const renamed = `Antúrio vermelho ${key}`;
@@ -61,6 +61,22 @@ test("curadoria: editar no card, manter, excluir, restaurar da aba Excluídos e 
   await expect(page.getByText("Preço alterado", { exact: true })).toBeVisible();
   await expect.poll(async () => (await product(0)).variants[0].priceCents).toBe(7450);
   expect((await product(0)).name).toBe(renamed);
+
+  // "Não entregue pelos Correios" restringe o envio nacional à Jadlog.
+  await page.getByRole("checkbox", { name: `Não entregue pelos Correios: ${renamed}` }).check();
+  await expect.poll(async () => (await product(0)).carrierRestriction).toBe("JADLOG_ONLY");
+
+  // Produto inválido sai da fila e fica na aba Inválidos, fora da loja, até alguém manter.
+  await page.getByRole("button", { name: `Marcar ${names[3]} como inválido` }).click();
+  await expect(cards).toHaveCount(3);
+  await expect.poll(async () => (await product(3)).curation).toBe("INVALID");
+  await page.getByRole("link", { name: /Inválidos/ }).click();
+  await page.waitForURL(/aba=invalidos/);
+  await expect(cards).toHaveCount(1);
+  await page.getByRole("button", { name: `Manter ${names[3]}` }).click();
+  await expect.poll(async () => (await product(3)).curation).toBe("KEPT");
+  await page.goto(`/admin/curadoria?busca=${key}`);
+  await expect(cards).toHaveCount(3);
 
   // Manter tira o produto da fila.
   await page.getByRole("button", { name: `Manter ${renamed}` }).click();

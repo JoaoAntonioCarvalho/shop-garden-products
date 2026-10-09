@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { z } from "zod";
 import { runAdmin, type AdminResult } from "@/server/admin/action";
 import {
+  carrierSchema,
   categorySchema,
   curationCounts,
   decideProducts,
@@ -15,6 +16,7 @@ import {
   renameSchema,
   restoreProducts,
   setProductPrice,
+  setProductsCarrier,
   setProductsCategory,
   trashProducts,
 } from "@/server/admin/curation";
@@ -65,6 +67,12 @@ export async function setProductPriceAction(input: z.input<typeof priceSchema>) 
 export async function setProductsCategoryAction(input: z.input<typeof categorySchema>) {
   return runAdmin("products.edit", categorySchema, input, (data, context) =>
     setProductsCategory(data, context),
+  );
+}
+
+export async function setProductsCarrierAction(input: z.input<typeof carrierSchema>) {
+  return runAdmin("products.edit", carrierSchema, input, (data, context) =>
+    setProductsCarrier(data, context),
   );
 }
 

@@ -26,6 +26,7 @@ const tabs: Array<{ key: CurationTab; label: string }> = [
   { key: "revisar", label: "A revisar" },
   { key: "mantidos", label: "Mantidos" },
   { key: "destaques", label: "Destaques" },
+  { key: "invalidos", label: "Inválidos" },
   { key: "excluidos", label: "Excluídos" },
 ];
 
@@ -53,8 +54,8 @@ export default async function CurationPage({ searchParams }: PageProps<"/admin/c
     categoryOptions(),
   ]);
 
-  const all = counts.revisar + counts.mantidos + counts.excluidos;
-  const decided = counts.mantidos + counts.excluidos;
+  const all = counts.revisar + counts.mantidos + counts.invalidos + counts.excluidos;
+  const decided = all - counts.revisar;
   const percent = all ? Math.round((decided / all) * 100) : 0;
   const pages = Math.max(1, Math.ceil(total / CURATION_PAGE_SIZE));
   const filtered = Boolean(params.q || params.categoryId || params.flag);
@@ -63,7 +64,7 @@ export default async function CurationPage({ searchParams }: PageProps<"/admin/c
     <>
       <PageHeader
         title="Curadoria"
-        description="Decida o que fica na loja. Manter publica o produto, destaque o coloca na frente, e excluir manda para a aba Excluídos, de onde dá para restaurar."
+        description="Decida o que fica na loja. Manter publica o produto, destaque o coloca na frente, inválido separa o que tem cadastro errado e excluir manda para a aba Excluídos, de onde dá para restaurar."
         actions={
           can(user, "products.import") ? (
             <Button asChild variant="outline">
@@ -82,7 +83,8 @@ export default async function CurationPage({ searchParams }: PageProps<"/admin/c
                 : `Faltam ${number.format(counts.revisar)} de ${number.format(all)} produtos`}
             </p>
             <p className="text-sm text-muted-foreground">
-              {number.format(counts.mantidos)} mantidos, {number.format(counts.excluidos)} excluídos
+              {number.format(counts.mantidos)} mantidos, {number.format(counts.invalidos)}{" "}
+              inválidos, {number.format(counts.excluidos)} excluídos
             </p>
           </div>
           <div

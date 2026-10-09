@@ -44,9 +44,10 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
-      - run: pnpm build
+      # O build gera o sitemap a partir do banco: as tabelas precisam existir antes.
       - name: Banco de desenvolvimento com os dados de teste
         run: pnpm db:deploy && pnpm db:seed
+      - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v4

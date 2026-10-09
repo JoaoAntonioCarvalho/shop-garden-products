@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Ban,
   Check,
   ChevronRight,
   ImageOff,
@@ -32,6 +33,7 @@ import {
   renameProductAction,
   restoreProductsAction,
   setProductPriceAction,
+  setProductsCarrierAction,
   setProductsCategoryAction,
   trashProductsAction,
 } from "@/server/actions/admin/curation";
@@ -39,13 +41,14 @@ import type { CurationItem, CurationTab } from "@/server/admin/curation";
 
 type Option = { value: string; label: string };
 type Permissions = { edit: boolean; price: boolean; remove: boolean; images: boolean };
-type Move = "keep" | "feature" | "unfeature" | "pending" | "trash" | "restore";
+type Move = "keep" | "feature" | "unfeature" | "pending" | "invalid" | "trash" | "restore";
 
 /** A decisão tira o produto da aba que está aberta? */
 const leavesTab: Record<CurationTab, Move[]> = {
-  revisar: ["keep", "feature", "trash"],
-  mantidos: ["pending", "trash"],
-  destaques: ["unfeature", "pending", "trash"],
+  revisar: ["keep", "feature", "invalid", "trash"],
+  mantidos: ["pending", "invalid", "trash"],
+  destaques: ["unfeature", "pending", "invalid", "trash"],
+  invalidos: ["keep", "feature", "pending", "trash"],
   excluidos: ["restore"],
 };
 
@@ -53,9 +56,12 @@ const leavesTab: Record<CurationTab, Move[]> = {
 function inverseOf(move: Move, tab: CurationTab): Move {
   if (move === "trash") return "restore";
   if (move === "restore") return "trash";
-  if (move === "pending") return "keep";
   if (move === "unfeature") return "feature";
-  return tab === "revisar" ? "pending" : "unfeature";
+  if (move === "invalid") return tab === "revisar" ? "pending" : "keep";
+  if (move === "pending") return tab === "invalidos" ? "invalid" : "keep";
+  // Manter ou destacar: volta para onde o produto estava.
+  if (tab === "revisar") return "pending";
+  return tab === "invalidos" ? "invalid" : "unfeature";
 }
 
 const deletedFormat = new Intl.DateTimeFormat("pt-BR", {
@@ -172,6 +178,43 @@ function InlineField({
   );
 }
 
+/** Marca na hora e desfaz se o servidor recusar. */
+function CarrierToggle({
+  name,
+  value,
+  disabled,
+  onSave,
+}: {
+  name: string;
+  value: boolean;
+  disabled?: boolean;
+  onSave: (value: boolean) => Promise<boolean>;
+}) {
+  const [checked, setChecked] = useState(value);
+  const [saved, setSaved] = useState(value);
+  if (saved !== value) {
+    setSaved(value);
+    setChecked(value);
+  }
+  return (
+    <label className="flex min-h-7 cursor-pointer items-center gap-2 px-1.5 text-sm">
+      <input
+        type="checkbox"
+        className="size-4 accent-[var(--primary)]"
+        aria-label={`Não entregue pelos Correios: ${name}`}
+        checked={checked}
+        disabled={disabled}
+        onChange={async (event) => {
+          const next = event.target.checked;
+          setChecked(next);
+          if (!(await onSave(next))) setChecked(!next);
+        }}
+      />
+      <span aria-hidden>Não entregue pelos Correios</span>
+    </label>
+  );
+}
+
 export function CurationBoard({
   items,
   total,
@@ -266,6 +309,7 @@ export function CurationBoard({
       if (key === "m" && permissions.edit) run("keep", [current.id]);
       else if (key === "d" && permissions.edit) run("feature", [current.id]);
       else if (key === "x" && permissions.remove) run("trash", [current.id]);
+      else if (key === "i" && permissions.edit) run("invalid", [current.id]);
       else if (key === "arrowright") setSkipped((previous) => new Set([...previous, current.id]));
       else if (key === "z") undoLast();
       else return;
@@ -352,6 +396,12 @@ export function CurationBoard({
           </option>
         ))}
       </select>
+      <CarrierToggle
+        name={item.name}
+        value={item.noCorreios}
+        disabled={!permissions.edit}
+        onSave={(noCorreios) => save(setProductsCarrierAction({ ids: [item.id], noCorreios }))}
+      />
     </>
   );
 
@@ -369,7 +419,7 @@ export function CurationBoard({
                 : "Fora da loja"}
         </Badge>
       ) : null}
-      {item.available === 0 ? <Badge variant="outline">Sem estoque</Badge> : null}
+      {item.localOnly ? <Badge variant="outline">Só São Paulo</Badge> : null}
     </div>
   );
 
@@ -495,6 +545,18 @@ export function CurationBoard({
                       >
                         <Trash2 aria-hidden />
                       </Button>
+                      {tab !== "invalidos" ? (
+                        <Button
+                          size="icon-sm"
+                          variant="outline"
+                          disabled={!permissions.edit}
+                          aria-label={`Marcar ${item.name} como inválido`}
+                          title="Produto inválido"
+                          onClick={() => run("invalid", [item.id])}
+                        >
+                          <Ban aria-hidden />
+                        </Button>
+                      ) : null}
                       <Button
                         size="icon-sm"
                         variant={item.featured ? "default" : "outline"}
@@ -506,7 +568,7 @@ export function CurationBoard({
                       >
                         <Star aria-hidden />
                       </Button>
-                      {tab === "revisar" ? (
+                      {tab === "revisar" || tab === "invalidos" ? (
                         <Button
                           size="sm"
                           className="flex-1"
@@ -585,7 +647,24 @@ export function CurationBoard({
                   </Button>
                 </span>
               ) : null}
-              {tab === "revisar" && permissions.edit ? (
+              {permissions.edit ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    if (await save(setProductsCarrierAction({ ids: chosen, noCorreios: true })))
+                      setSelected(new Set());
+                  }}
+                >
+                  Sem Correios
+                </Button>
+              ) : null}
+              {tab !== "invalidos" && permissions.edit ? (
+                <Button size="sm" variant="outline" onClick={() => run("invalid", chosen)}>
+                  Inválido
+                </Button>
+              ) : null}
+              {(tab === "revisar" || tab === "invalidos") && permissions.edit ? (
                 <>
                   <Button size="sm" variant="outline" onClick={() => run("feature", chosen)}>
                     Destacar
@@ -627,7 +706,8 @@ export function CurationBoard({
             <DialogTitle>Revisar um por um</DialogTitle>
             <DialogDescription>
               {total} {total === 1 ? "produto espera" : "produtos esperam"} a sua decisão. No
-              teclado: M mantém, D destaca, X exclui, seta para a direita pula e Z desfaz.
+              teclado: M mantém, D destaca, I marca como inválido, X exclui, seta para a direita
+              pula e Z desfaz.
             </DialogDescription>
           </DialogHeader>
           {current ? (
@@ -643,7 +723,7 @@ export function CurationBoard({
                   ) : null}
                 </div>
               </div>
-              <div className="sticky bottom-0 -mx-1 grid grid-cols-3 gap-2 bg-background px-1 py-2">
+              <div className="sticky bottom-0 -mx-1 grid grid-cols-2 gap-2 bg-background px-1 py-2 sm:grid-cols-4">
                 <Button
                   size="lg"
                   variant="outline"
@@ -653,6 +733,16 @@ export function CurationBoard({
                 >
                   <Trash2 aria-hidden />
                   Excluir
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-14"
+                  disabled={!permissions.edit}
+                  onClick={() => run("invalid", [current.id])}
+                >
+                  <Ban aria-hidden />
+                  Inválido
                 </Button>
                 <Button
                   size="lg"

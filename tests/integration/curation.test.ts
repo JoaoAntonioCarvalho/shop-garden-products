@@ -12,6 +12,7 @@ import {
   renameProduct,
   restoreProducts,
   setProductPrice,
+  setProductsCarrier,
   trashProducts,
 } from "@/server/admin/curation";
 import { detectFormat, runImport } from "@/server/admin/product-import";
@@ -192,6 +193,39 @@ describe.skipIf(!hasTestDatabase)("curadoria do catálogo importado", () => {
       isFeatured: false,
       status: "DRAFT",
     });
+  });
+
+  it("inválido tira da loja e da fila; não entregue pelos Correios restringe à Jadlog", async () => {
+    const sku = unique("CUR");
+    const [product] = await importForCuration([[sku, `Vaso ${sku}`, "10,00", "1", "", ""]]);
+    await db.product.update({
+      where: { id: product.id },
+      data: { status: "ACTIVE", curation: "KEPT", isFeatured: true },
+    });
+    await decideProducts({ ids: [product.id], decision: "invalid" }, context);
+    expect(await db.product.findUniqueOrThrow({ where: { id: product.id } })).toMatchObject({
+      curation: "INVALID",
+      status: "DRAFT",
+      isFeatured: false,
+    });
+    expect((await listCuration(parseCurationParams({ busca: sku }))).items).toHaveLength(0);
+    const invalid = await listCuration(parseCurationParams({ aba: "invalidos", busca: sku }));
+    expect(invalid.items).toHaveLength(1);
+
+    await setProductsCarrier({ ids: [product.id], noCorreios: true }, context);
+    expect(
+      (await db.product.findUniqueOrThrow({ where: { id: product.id } })).carrierRestriction,
+    ).toBe("JADLOG_ONLY");
+    const [item] = (await listCuration(parseCurationParams({ aba: "invalidos", busca: sku })))
+      .items;
+    expect(item.noCorreios).toBe(true);
+    await setProductsCarrier({ ids: [product.id], noCorreios: false }, context);
+    expect(
+      (await db.product.findUniqueOrThrow({ where: { id: product.id } })).carrierRestriction,
+    ).toBe("ANY");
+    expect(audits).toEqual(
+      expect.arrayContaining(["product.curation_invalid", "product.set_carrier"]),
+    );
   });
 
   it("aponta nomes repetidos, ignorando acentos e caixa", async () => {
