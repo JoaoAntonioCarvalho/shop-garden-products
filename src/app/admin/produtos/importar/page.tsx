@@ -5,6 +5,9 @@ import { requireAdminPage } from "@/lib/admin-guard";
 import { IMPORT_FIELDS } from "@/server/admin/product-import";
 import { categoryOptions } from "@/server/admin/product-queries";
 
+// Trazer fotos e importar levam mais que o padrão da hospedagem; as ações herdam este limite.
+export const maxDuration = 60;
+
 export const metadata: Metadata = { title: "Importar produtos" };
 
 export default async function ImportProductsPage() {

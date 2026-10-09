@@ -8,6 +8,8 @@ export default defineConfig({
     seed: "tsx prisma/seed/index.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // As migrações usam a conexão direta quando a hospedagem oferece uma (Neon, pela Vercel):
+    // a conexão com pool não segura a trava que o Prisma usa para migrar.
+    url: process.env["DATABASE_URL_UNPOOLED"] ?? process.env["DATABASE_URL"],
   },
 });

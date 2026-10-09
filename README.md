@@ -91,6 +91,20 @@ Mais em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md). O que depende do dono da l
 
 ## Deploy
 
+### Passo a passo na Vercel
+
+1. **Repositório:** envie o código para um repositório privado no GitHub e importe-o na Vercel. O framework é detectado sozinho; o build usa `vercel-build`, que aplica as migrações antes de compilar.
+2. **Banco:** em Storage, crie um Postgres Neon ligado ao projeto. Ele preenche `DATABASE_URL` e `DATABASE_URL_UNPOOLED` (usada só pelas migrações).
+3. **Imagens:** crie um bucket S3 ou Cloudflare R2 com endereço público e preencha `STORAGE_DRIVER=s3` e as variáveis `S3_*`. Sem isso, nenhum envio de foto funciona na Vercel.
+4. **Variáveis:** `AUTH_SECRET` (`openssl rand -base64 32`), `APP_URL` (o endereço https do site), `ADMIN_EMAIL`, `ADMIN_PASSWORD` e `CRON_SECRET`. `SMTP_*` quando houver e-mail contratado.
+5. **Dados iniciais:** na sua máquina, com a `DATABASE_URL` de produção e as variáveis `S3_*` no ambiente, rode `pnpm db:seed` uma vez. Ele cria o administrador, as categorias, as páginas e as regras de frete, além dos dados de teste, que saem depois em Admin > Produtos > Remover todos os produtos de teste.
+6. **Catálogo antigo:** `pnpm import:legacy data-privada/arquivo.csv`, também com a `DATABASE_URL` de produção. Depois, Admin > Curadoria.
+7. **Tarefas agendadas:** já declaradas em `vercel.json`, uma vez por dia, que é o que o plano Hobby aceita. No plano Pro, passe `expirar-pagamentos` para `*/5 * * * *` e `carrinhos-abandonados` e `rastreio-transportadoras` para `0 * * * *`.
+
+O plano Hobby da Vercel não permite uso comercial: serve para a curadoria e os testes, não para a loja vendendo.
+
+### Em qualquer hospedagem
+
 Recomendado: Vercel (ou qualquer hospedagem Node 22) + PostgreSQL gerenciado + armazenamento S3 ou R2 + SMTP.
 
 1. **Banco**: crie um PostgreSQL 16 com as extensões `unaccent` e `pg_trgm` permitidas. Rode `pnpm db:deploy` com a `DATABASE_URL` de produção. Não rode o seed em produção, a menos que queira os dados de teste para homologar.

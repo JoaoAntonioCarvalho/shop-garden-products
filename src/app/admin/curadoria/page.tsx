@@ -17,6 +17,9 @@ import {
 } from "@/server/admin/curation";
 import { categoryOptions } from "@/server/admin/product-queries";
 
+// Trazer fotos e importar levam mais que o padrão da hospedagem; as ações herdam este limite.
+export const maxDuration = 60;
+
 export const metadata: Metadata = { title: "Curadoria" };
 
 const tabs: Array<{ key: CurationTab; label: string }> = [
