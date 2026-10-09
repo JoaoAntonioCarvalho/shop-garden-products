@@ -52,8 +52,23 @@ function FormMessages({ result }: { result: AuthResult | null }) {
 
 const values = (event: FormEvent<HTMLFormElement>) => {
   event.preventDefault();
-  return Object.fromEntries(new FormData(event.currentTarget)) as Record<string, string>;
+  return Object.fromEntries(new FormData(event.currentTarget)) as Values;
 };
+
+type Values = Record<string, string>;
+
+/**
+ * Liga o envio do formulário de dois jeitos. O normal é o `onSubmit`. O `action` cobre o envio
+ * feito antes de a página ficar interativa: com uma função ali, o React segura esse envio e o
+ * repete quando a página fica pronta. Sem isso o navegador enviaria o formulário por conta
+ * própria, com a senha no endereço da página.
+ */
+function submitProps(submit: (data: Values) => void) {
+  return {
+    onSubmit: (event: FormEvent<HTMLFormElement>) => submit(values(event)),
+    action: (formData: FormData) => submit(Object.fromEntries(formData) as Values),
+  };
+}
 
 export function LoginForm({
   returnTo,
@@ -67,13 +82,12 @@ export function LoginForm({
     <form
       noValidate
       className="flex flex-col gap-4"
-      onSubmit={(event) => {
-        const data = values(event);
+      {...submitProps((data) =>
         form.run(async () => {
           track("login", { method: "email" });
           return loginAction({ email: data.email, password: data.password, returnTo });
-        });
-      }}
+        }),
+      )}
     >
       <FormMessages result={form.result} />
       <Field label="E-mail" error={form.fieldError("email")}>
@@ -159,8 +173,7 @@ export function SignupForm({
     <form
       noValidate
       className="flex flex-col gap-4"
-      onSubmit={(event) => {
-        const data = values(event);
+      {...submitProps((data) =>
         form.run(async () => {
           track("sign_up", { method: "email" });
           return signupAction({
@@ -171,8 +184,8 @@ export function SignupForm({
             marketingOptIn: data.marketingOptIn === "on",
             returnTo,
           });
-        });
-      }}
+        }),
+      )}
     >
       <FormMessages result={form.result} />
       <Field label="Nome completo" error={form.fieldError("name")}>
@@ -225,7 +238,7 @@ export function ForgotPasswordForm() {
     <form
       noValidate
       className="flex flex-col gap-4"
-      onSubmit={(event) => form.run(() => forgotPasswordAction(values(event).email))}
+      {...submitProps((data) => form.run(() => forgotPasswordAction(data.email)))}
     >
       <FormMessages result={form.result} />
       <Field label="E-mail da sua conta">
@@ -252,7 +265,7 @@ export function ResetPasswordForm({ token, after }: { token: string; after: Reac
     <form
       noValidate
       className="flex flex-col gap-4"
-      onSubmit={(event) => form.run(() => resetPasswordAction(token, values(event).password))}
+      {...submitProps((data) => form.run(() => resetPasswordAction(token, data.password)))}
     >
       <FormMessages result={form.result} />
       <PasswordField name="password" label="Nova senha" autoComplete="new-password" />
