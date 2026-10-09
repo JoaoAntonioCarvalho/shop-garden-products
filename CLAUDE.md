@@ -122,6 +122,8 @@ Atualizado ao longo do projeto.
 | Admin: produtos, importação, qualidade   | `src/server/admin/products.ts`, `product-import.ts`, `src/lib/product-quality.ts`                             |
 | Admin: listas, filtros e CSV             | `src/server/admin/list.ts`, `exporters.ts`, `src/components/admin/data-table.tsx`, `filter-bar.tsx`           |
 | Admin: formulários                       | `src/components/admin/entity-form.tsx` (`EntityForm`, `MiniForm`), `product-form.tsx`                         |
+| Curadoria do catálogo antigo e lixeira   | `src/server/admin/curation.ts`, `src/components/admin/curation-board.tsx`, `/admin/curadoria`                 |
+| Fotos do site antigo e carga inicial     | `src/server/services/legacy-images.ts`, `pnpm import:legacy <arquivo.csv>` (`scripts/import-legacy.ts`)       |
 | Relatórios                               | `src/server/admin/reports.ts`                                                                                 |
 | Tarefas agendadas                        | `src/server/jobs.ts`, `/api/cron/[tarefa]`                                                                    |
 | Screenshots do painel                    | `pnpm tsx scripts/admin-shots.ts <pasta> [largura] /admin/...`                                                |

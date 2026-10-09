@@ -176,7 +176,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
           bulk("delete", "Excluir", {
             destructive: true,
             confirm:
-              "Produtos que já foram vendidos não são excluídos: são arquivados. Os demais são apagados de vez.",
+              "Os produtos saem da loja e vão para a aba Excluídos da curadoria, de onde podem ser restaurados.",
           }),
         ]
       : []),

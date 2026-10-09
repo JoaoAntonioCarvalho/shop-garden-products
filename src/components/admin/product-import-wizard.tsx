@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { selectClass } from "@/components/admin/entity-form";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
+import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import {
   parseImportFileAction,
@@ -21,6 +22,7 @@ type Report = {
   skipped: number;
   errors: Line[];
 };
+type ImportMode = "curation" | "draft" | "publish";
 type Step = "enviar" | "colunas" | "categorias" | "previa" | "relatorio";
 
 const steps: Array<[Step, string]> = [
@@ -60,11 +62,15 @@ export function ProductImportWizard({
       : [
           ...new Set(rows.map((row) => (row[mapping.category] ?? "").trim()).filter(Boolean)),
         ].sort();
-  const payload = (publish: boolean) => ({
+  const [imageBaseUrl, setImageBaseUrl] = useState("");
+  const hasImages = mapping.image !== undefined;
+  const payload = (mode: ImportMode) => ({
     rows,
     mapping,
     categoryMap,
-    publish,
+    publish: mode === "publish",
+    forCuration: mode === "curation",
+    imageBaseUrl: hasImages ? imageBaseUrl.trim() : "",
     weightInKg: format === "fastcommerce",
   });
   const normalize = (text: string) =>
@@ -117,17 +123,17 @@ export function ProductImportWizard({
   function validate() {
     setError(null);
     startTransition(async () => {
-      const result = await validateImportAction(payload(false));
+      const result = await validateImportAction(payload("draft"));
       if (!result.ok) return setError(result.error);
       setPreview(result.data ?? null);
       setStep("previa");
     });
   }
 
-  function run(publish: boolean) {
+  function run(mode: ImportMode) {
     setError(null);
     startTransition(async () => {
-      const result = await runImportAction(payload(publish));
+      const result = await runImportAction(payload(mode));
       if (!result.ok) return setError(result.error);
       setReport(result.data ?? null);
       setStep("relatorio");
@@ -351,20 +357,43 @@ export function ProductImportWizard({
                 </tbody>
               </table>
             </div>
+            {hasImages ? (
+              <div className="flex max-w-xl flex-col gap-1">
+                <Label htmlFor="importar-base-fotos">Endereço base das fotos</Label>
+                <Input
+                  id="importar-base-fotos"
+                  type="url"
+                  placeholder="https://www.exemplo.com.br/imagens/"
+                  value={imageBaseUrl}
+                  onChange={(event) => setImageBaseUrl(event.target.value)}
+                />
+                <p className="text-sm text-muted-foreground">
+                  Preencha só se o arquivo trouxer o nome da foto sem o endereço completo. As fotos
+                  são trazidas para a loja quando o produto é mantido na curadoria.
+                </p>
+              </div>
+            ) : null}
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" onClick={() => setStep("categorias")}>
                 Voltar
               </Button>
               <Button
-                onClick={() => run(false)}
+                onClick={() => run("curation")}
                 disabled={pending || preview.products === 0}
                 aria-busy={pending || undefined}
+              >
+                Importar para a curadoria
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => run("draft")}
+                disabled={pending || preview.products === 0}
               >
                 Importar como rascunho
               </Button>
               <Button
                 variant="outline"
-                onClick={() => run(true)}
+                onClick={() => run("publish")}
                 disabled={pending || preview.products === 0}
               >
                 Importar e publicar
@@ -400,6 +429,9 @@ export function ProductImportWizard({
             ) : null}
             <Button asChild className="self-start">
               <Link href="/admin/produtos?ordem=updatedAt&dir=desc">Ver produtos</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/admin/curadoria">Abrir a curadoria</Link>
             </Button>
           </CardContent>
         </Card>

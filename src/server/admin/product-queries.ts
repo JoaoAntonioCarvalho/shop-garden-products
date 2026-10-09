@@ -46,7 +46,8 @@ export async function collectionOptions(
 /** Filtros da lista de produtos (seção 12.5). */
 export async function productWhere(params: ListParams): Promise<Prisma.ProductWhereInput> {
   const f = params.filters;
-  const and: Prisma.ProductWhereInput[] = [];
+  // O que está na lixeira só aparece na curadoria, na aba Excluídos.
+  const and: Prisma.ProductWhereInput[] = [{ deletedAt: null }];
   if (params.q)
     and.push({
       OR: [
@@ -92,7 +93,7 @@ export async function productWhere(params: ListParams): Promise<Prisma.ProductWh
       },
     });
   }
-  return and.length ? { AND: and } : {};
+  return { AND: and };
 }
 
 const money = (cents: number | null | undefined) => (cents == null ? "" : formatCentsPlain(cents));

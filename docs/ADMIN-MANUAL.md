@@ -57,6 +57,20 @@ O pedido manual baixa o estoque e entra nos relatórios com o canal escolhido (W
 
 **Produtos › Importar CSV**. Aceita a exportação do site antigo e o modelo do painel ("Baixar modelo CSV"). Etapas: enviar o arquivo, conferir as colunas, ligar as categorias do arquivo às categorias da loja, ver a prévia com os erros de cada linha e importar como rascunho ou publicado. Produto com código já cadastrado é atualizado.
 
+### Curadoria: escolher o que fica na loja
+
+Em **Catálogo > Curadoria** ficam os produtos importados do site antigo que ainda esperam uma decisão. Eles estão fora da loja até você decidir.
+
+- **Manter** coloca o produto na loja. **Destaque** (a estrela) mantém e põe o produto na frente nas categorias e na home. **Excluir** (a lixeira) tira o produto.
+- **Nome, preço e categoria** são editados no próprio card: clique, altere e aperte Enter.
+- **Vários de uma vez:** marque a caixinha na foto de cada produto e use a barra que aparece embaixo (manter, destacar, excluir ou mover de categoria).
+- **Revisar um por um** mostra um produto por vez, com botões grandes. No teclado: M mantém, D destaca, X exclui, seta para a direita deixa para depois e Z desfaz.
+- **Errou?** Todo aviso traz o botão Desfazer. E tudo o que foi excluído fica na aba **Excluídos**, do mais recente para o mais antigo, com o botão Restaurar.
+- **Mostrar:** filtra os produtos sem foto, sem estoque ou com nome repetido, que costumam ser os primeiros a sair.
+- **Fotos:** um produto mantido só aparece na loja quando tem foto. As fotos do site antigo são trazidas sozinhas; se sobrar alguma, a aba Mantidos mostra o botão "Trazer fotos do site antigo".
+
+A barra no alto mostra quantos produtos ainda faltam.
+
 ### Remover os produtos de teste
 
 A loja vem com produtos, pedidos e clientes de teste, marcados com o selo **Teste**. Quando o catálogo real estiver cadastrado: **Produtos › Remover todos os produtos de teste**, digite `REMOVER TESTES` e confirme. Sai tudo o que é de teste, e nada do que é real é alterado. No fim aparece o relatório do que foi apagado.

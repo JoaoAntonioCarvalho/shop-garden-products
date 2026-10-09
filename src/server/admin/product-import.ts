@@ -34,6 +34,9 @@ export const IMPORT_FIELDS = [
   { key: "promoEnd", column: "promo_fim", label: "Fim da promoção", required: false },
   { key: "stock", column: "estoque", label: "Estoque", required: false },
   { key: "weight", column: "peso_gramas", label: "Peso", required: false },
+  { key: "image", column: "imagem", label: "Foto principal (endereço)", required: false },
+  { key: "image2", column: "imagem_2", label: "Segunda foto (endereço)", required: false },
+  { key: "image3", column: "imagem_3", label: "Terceira foto (endereço)", required: false },
 ] as const;
 
 export type ImportFieldKey = (typeof IMPORT_FIELDS)[number]["key"];
@@ -54,7 +57,33 @@ const FASTCOMMERCE: Record<string, ImportFieldKey> = {
   estoque: "stock",
   disponivel: "status",
   idprodutopai: "parentSku",
+  imagemprod: "image",
+  imagemdet: "image2",
+  imagemamp: "image3",
 };
+
+export const MAX_LEGACY_IMAGES = 6;
+
+/**
+ * Endereços das fotos de uma linha do arquivo. A célula pode trazer vários, separados por espaço,
+ * "|" ou ";". Caminhos relativos são completados com o endereço base informado na importação.
+ */
+export function parseImageUrls(cells: string[], baseUrl: string): string[] {
+  const urls: string[] = [];
+  for (const part of cells.flatMap((cell) => cell.split(/[\s|;]+/))) {
+    const value = part.trim();
+    if (!value) continue;
+    let url: URL;
+    try {
+      url = new URL(value, baseUrl || undefined);
+    } catch {
+      continue;
+    }
+    if (url.protocol !== "http:" && url.protocol !== "https:") continue;
+    if (!urls.includes(url.href)) urls.push(url.href);
+  }
+  return urls.slice(0, MAX_LEGACY_IMAGES);
+}
 
 const clean = (header: string) => header.trim().toLowerCase();
 
@@ -92,6 +121,10 @@ export const importSchema = z.object({
   publish: z.boolean().default(false),
   /** No FastCommerce o peso vem em quilos. */
   weightInKg: z.boolean().default(false),
+  /** Os produtos novos entram como rascunho, à espera da decisão do dono na curadoria. */
+  forCuration: z.boolean().default(false),
+  /** Completa os endereços de foto que vierem sem o domínio. */
+  imageBaseUrl: z.union([z.literal(""), z.url().max(300)]).default(""),
 });
 export type ImportInput = z.output<typeof importSchema>;
 
@@ -117,6 +150,7 @@ type ParsedProduct = {
   tags: string[];
   short: string | null;
   description: string | null;
+  imageUrls: string[];
   variants: ParsedVariant[];
 };
 export type ImportLineResult = { line: number; sku: string; name: string; errors: string[] };
@@ -268,6 +302,10 @@ export async function parseImport(
           .filter(Boolean),
         short: cell(row, "short").slice(0, 160) || null,
         description: cell(row, "description") || null,
+        imageUrls: parseImageUrls(
+          [cell(row, "image"), cell(row, "image2"), cell(row, "image3")],
+          input.imageBaseUrl,
+        ),
         variants: [variant],
       });
     }
@@ -308,7 +346,8 @@ export async function runImport(input: ImportInput, context: AdminContext): Prom
                     : `<p>${item.description.replace(/\r?\n+/g, "</p><p>")}</p>`,
                 )
               : null;
-            const status = input.publish && item.active !== false ? "ACTIVE" : "DRAFT";
+            const status =
+              input.publish && !input.forCuration && item.active !== false ? "ACTIVE" : "DRAFT";
             const existing = await tx.product.findUnique({
               where: { sku: item.sku },
               include: { variants: true },
@@ -323,6 +362,11 @@ export async function runImport(input: ImportInput, context: AdminContext): Prom
                     ...(item.tags.length ? { tags: item.tags } : {}),
                     ...(item.short ? { shortDescription: item.short } : {}),
                     ...(description ? { description } : {}),
+                    // Só guarda os endereços enquanto o produto não tem fotos próprias.
+                    ...(item.imageUrls.length &&
+                    (await tx.productImage.count({ where: { productId: existing.id } })) === 0
+                      ? { legacyImageUrls: item.imageUrls }
+                      : {}),
                   },
                 })
               : await tx.product.create({
@@ -338,6 +382,8 @@ export async function runImport(input: ImportInput, context: AdminContext): Prom
                     tags: item.tags,
                     shortDescription: item.short,
                     description,
+                    legacyImageUrls: item.imageUrls,
+                    curation: input.forCuration ? "PENDING" : null,
                   },
                 });
             for (const [position, variant] of item.variants.entries()) {
@@ -410,7 +456,8 @@ export async function runImport(input: ImportInput, context: AdminContext): Prom
       atualizados: report.updated,
       variacoes: report.variants,
       ignorados: report.skipped,
-      publicado: input.publish,
+      publicado: input.publish && !input.forCuration,
+      curadoria: input.forCuration,
     },
   });
   invalidateProducts(slugs.slice(0, 200));

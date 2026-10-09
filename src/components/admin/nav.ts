@@ -22,6 +22,7 @@ export const ADMIN_NAV: Array<{ group: string; items: AdminNavItem[] }> = [
     group: "Catálogo",
     items: [
       { href: "/admin/produtos", label: "Produtos", permission: "products.view" },
+      { href: "/admin/curadoria", label: "Curadoria", permission: "products.view" },
       { href: "/admin/categorias", label: "Categorias", permission: "categories.view" },
       { href: "/admin/colecoes", label: "Coleções", permission: "collections.view" },
       {

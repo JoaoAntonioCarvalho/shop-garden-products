@@ -226,3 +226,19 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Com item bloqueado, nenhuma opção de frete é devolvida** (`quoteShipping`), então `placeOrder` recusa o pedido no servidor mesmo que o navegador tente. O botão do checkout agora remove só os itens bloqueados para aquele CEP, não todos os "só locais".
 - **Regra pura em `src/lib/delivery-areas.ts`**, com testes; `quoteShipping` busca nome e área do produto pelo id da variação, para não mudar os cinco lugares que montam os itens da cotação.
 - **Sem áreas no seed:** o dono cadastra as dele. O banco de desenvolvimento não ganhou nenhuma.
+
+## 2026-10-08 — Curadoria do catálogo antigo e lixeira
+
+- **Pedido do dono:** importar os cerca de 3000 produtos do site antigo e deixar a dona da loja escolher, de forma simples, o que fica, o que ganha destaque e o que sai, editando nome, preço e categoria, com uma aba de excluídos do mais recente para o mais antigo.
+- **Os arquivos do site antigo não estavam no projeto** e o site bloqueia leitura automática (firewall com reCAPTCHA), que não foi contornado. A carga depende do arquivo exportado do painel da FastCommerce, em `data-privada/`.
+- **`Product.curation`** (`PENDING`, `KEPT`, nulo para quem não passa por revisão), **lixeira** (`deletedAt`, `deletedById`, `statusBeforeDelete`) e **`legacyImageUrls`**, migração `curation_and_trash`.
+- **Importar para a curadoria** (opção nova no assistente e padrão do script `pnpm import:legacy`): os produtos entram como rascunho, fora da loja. "Importar e publicar" não vale nesse modo.
+- **Manter publica**, mas só quando o produto tem foto, preço e variação ativa (`publishIfReady`), para respeitar a regra de que produto publicado tem imagem com texto alternativo. Sem isso fica mantido e fora da loja, com o motivo no card.
+- **Fotos do site antigo só são baixadas para o que é mantido.** Na importação ficam anotados os endereços (colunas `ImagemProd`, `ImagemDet`, `ImagemAmp`, nomes vindos de memória, a confirmar no arquivo real). Ao manter, as primeiras são trazidas em segundo plano (`after`); o botão "Trazer fotos do site antigo" faz o resto em lotes de 3 produtos por chamada, por causa do tempo limite da hospedagem. Enquanto isso o card mostra a foto direto do endereço antigo. O texto alternativo é o nome do produto.
+- **Busca de foto só em endereço público** (`isFetchableImageUrl`): http ou https, sem localhost, sem IP literal, sem domínio interno. A lista vem de arquivo importado por administrador, mas a loja não deve buscar nada na rede interna.
+- **Excluir virou lixeira em todo o painel.** A ação em massa "Excluir" da lista de produtos apagava de vez o que não tinha pedidos; agora manda para a lixeira. O produto na lixeira fica `ARCHIVED` (some da loja pelas regras que já existiam) e fora da lista de produtos. Não há "apagar de vez": só "Remover todos os produtos de teste" apaga.
+- **Nomes repetidos** são comparados sem acento e sem caixa, por igualdade. Nomes parecidos, mas diferentes, não são apontados.
+- **Preço no card** só para produto com uma variação; com mais de uma, o card leva ao cadastro completo.
+- **Endereço do produto acompanha o nome** enquanto ele nunca foi publicado; depois de publicado, mudar o nome na curadoria não muda o endereço.
+- **Script de carga em vez do assistente para o arquivo grande:** uma importação de 3000 produtos numa única chamada passa do tempo limite e do tamanho de requisição da Vercel. `scripts/import-legacy.ts` grava direto no banco de `DATABASE_URL`.
+- **70 produtos fictícios** (`LEG0001` a `LEG0070`, `isSample`) ficaram no banco de desenvolvimento para experimentar a tela. As fotos deles apontam para um domínio que não existe, de propósito.

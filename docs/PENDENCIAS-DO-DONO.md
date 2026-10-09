@@ -82,6 +82,13 @@ Todos os valores abaixo são exemplos.
 9. Agendar as tarefas (`README.md`, "Tarefas agendadas") e definir `CRON_SECRET`.
 10. Informar os IDs do Google Analytics e do pixel da Meta, se for usar (Admin > Configurações).
 
+## Catálogo do site antigo
+
+- [ ] Exportar os produtos no painel da FastCommerce, com todas as colunas (inclusive as de imagem), e colocar o arquivo em `data-privada/`. Com ele: `pnpm import:legacy data-privada/arquivo.csv --previa` para conferir e, sem `--previa`, para gravar.
+- [ ] Conferir se as fotos do site antigo podem ser baixadas pelo endereço que vem no arquivo. Se o servidor de imagens bloquear, será preciso um arquivo com as fotos.
+- [ ] Revisar os produtos em Admin > Curadoria.
+- [ ] Criar o repositório privado no GitHub e passar o endereço, para o envio do código e a ligação com a Vercel.
+
 ## Integrações a contratar
 
 | Integração               | Situação hoje                         | O que falta                                        |

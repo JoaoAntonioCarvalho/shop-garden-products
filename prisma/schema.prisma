@@ -221,6 +221,12 @@ enum ProductStatus {
   ARCHIVED
 }
 
+/// Revisão do catálogo importado: o produto espera a decisão do dono ou já foi mantido.
+enum CurationStatus {
+  PENDING
+  KEPT
+}
+
 enum ProductType {
   NATURAL_PLANT
   ORCHID
@@ -345,6 +351,16 @@ model Product {
   /// Mantido pelo serviço de catálogo; indexado com pg_trgm.
   searchText String @default("")
 
+  /// Curadoria: nulo para produtos que não passam por revisão.
+  curation           CurationStatus?
+  /// Lixeira: o produto sai da loja e das listas, mas pode ser restaurado.
+  deletedAt          DateTime?
+  deletedById        String?
+  /// Status que o produto tinha ao ir para a lixeira, devolvido ao restaurar.
+  statusBeforeDelete ProductStatus?
+  /// Endereços das fotos no site antigo, trazidas para a loja quando o produto é mantido.
+  legacyImageUrls    String[]        @default([])
+
   isSample    Boolean   @default(false)
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
@@ -370,6 +386,8 @@ model Product {
   @@index([productType])
   @@index([isSample])
   @@index([isFeatured])
+  @@index([curation, deletedAt])
+  @@index([deletedAt])
   @@index([qualityScore])
   @@index([tags], type: Gin)
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)

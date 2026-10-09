@@ -7,6 +7,7 @@ import { formatBRL, parseBRLToCents } from "@/lib/money";
 import { can } from "@/lib/permissions";
 import { normalizeText } from "@/lib/slug";
 import { AdminError, runAdmin, type AdminResult } from "@/server/admin/action";
+import { trashProducts } from "@/server/admin/curation";
 import { tagList } from "@/server/admin/fields";
 import {
   duplicateProduct,
@@ -207,7 +208,13 @@ export async function bulkProductAction(kind: BulkKind, ids: string[], value?: s
       : kind === "price"
         ? "products.edit_price"
         : "products.edit";
-  return runAdmin(permission, idsSchema, { ids, value }, async (data, { audit }) => {
+  return runAdmin(permission, idsSchema, { ids, value }, async (data, context) => {
+    const { audit } = context;
+    if (kind === "delete") {
+      // Excluir manda para a lixeira: nada é apagado, e o histórico dos pedidos continua íntegro.
+      const result = await trashProducts(data.ids, context);
+      return { message: `${result.message}. Para desfazer, abra a aba Excluídos da curadoria.` };
+    }
     const products = await db.product.findMany({
       where: { id: { in: data.ids } },
       select: {
@@ -290,7 +297,7 @@ export async function bulkProductAction(kind: BulkKind, ids: string[], value?: s
         data: { sameDayEligible: kind === "sameDayOn" },
       });
       message = `Entrega hoje ${kind === "sameDayOn" ? "ligada" : "desligada"} em ${plural(all.length, "produto", "produtos")}`;
-    } else if (kind === "price") {
+    } else {
       const percent = percentOfInput(data.value);
       await db.$transaction(async (tx) => {
         for (const product of products) {
@@ -303,22 +310,6 @@ export async function bulkProductAction(kind: BulkKind, ids: string[], value?: s
         }
       });
       message = `Preços reajustados em ${percent}% em ${plural(all.length, "produto", "produtos")}`;
-    } else {
-      // Excluir: só o que nunca foi vendido. O restante é arquivado, para o histórico dos pedidos continuar íntegro.
-      const removable = products.filter(
-        (product) =>
-          product._count.orderItems === 0 &&
-          product.variants.every((variant) => variant.stockReserved === 0),
-      );
-      const kept = products.filter((product) => !removable.includes(product));
-      await db.product.deleteMany({
-        where: { id: { in: removable.map((product) => product.id) } },
-      });
-      await db.product.updateMany({
-        where: { id: { in: kept.map((product) => product.id) } },
-        data: { status: "ARCHIVED" },
-      });
-      message = `${plural(removable.length, "produto excluído", "produtos excluídos")}${kept.length ? `; ${plural(kept.length, "com pedidos foi arquivado", "com pedidos foram arquivados")}` : ""}`;
     }
 
     await audit({

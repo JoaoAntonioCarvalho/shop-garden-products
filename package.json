@@ -24,6 +24,7 @@
     "db:reset": "prisma migrate reset --force && pnpm db:seed",
     "db:studio": "prisma studio",
     "images:placeholders": "tsx scripts/generate-placeholders.ts",
+    "import:legacy": "tsx --require ./scripts/allow-server-only.cjs scripts/import-legacy.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
