@@ -34,8 +34,22 @@ const securityHeaders = [
     : [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }]),
 ];
 
+// Com armazenamento S3 as imagens vêm de outro endereço (bucket ou CDN), que o otimizador de
+// imagens do Next só aceita se estiver declarado aqui.
+const storageUrl = process.env.S3_PUBLIC_URL ? new URL(process.env.S3_PUBLIC_URL) : null;
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  images: {
+    remotePatterns: storageUrl
+      ? [
+          {
+            protocol: storageUrl.protocol.replace(":", "") as "http" | "https",
+            hostname: storageUrl.hostname,
+          },
+        ]
+      : [],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

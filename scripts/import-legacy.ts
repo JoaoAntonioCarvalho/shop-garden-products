@@ -6,6 +6,8 @@
  * Aceita o XML de produtos da FastCommerce (xml-products.ehc, formato padrão) ou um CSV.
  *   --base    completa os endereços de foto que vierem sem o domínio
  *   --previa  só valida o arquivo e mostra o que seria importado
+ *   --faltantes  ignora os produtos que já estão no banco (para retomar uma carga interrompida)
+ *   --parte=2/4  importa só uma fatia do arquivo, para rodar várias cargas ao mesmo tempo
  *
  * O banco é o de DATABASE_URL. O arquivo fica em data-privada/, que nunca vai para o repositório.
  */
@@ -23,6 +25,8 @@ const args = process.argv.slice(2);
 const file = args.find((arg) => !arg.startsWith("--"));
 const imageBaseUrl = args.find((arg) => arg.startsWith("--base="))?.slice(7) ?? "";
 const preview = args.includes("--previa");
+const onlyMissing = args.includes("--faltantes");
+const part = /^--parte=(\d+)\/(\d+)$/.exec(args.find((arg) => arg.startsWith("--parte=")) ?? "");
 
 async function main() {
   if (!file) {
@@ -40,6 +44,19 @@ async function main() {
         ),
       );
   const { format, mapping } = detectFormat(headers ?? []);
+  if (mapping.sku !== undefined && (onlyMissing || part)) {
+    const column = mapping.sku;
+    const existing = onlyMissing
+      ? new Set((await db.product.findMany({ select: { sku: true } })).map((item) => item.sku))
+      : new Set<string>();
+    const [index, total] = part ? [Number(part[1]) - 1, Number(part[2])] : [0, 1];
+    const kept = rows.filter(
+      (row, position) =>
+        position % total === index && !existing.has((row[column] ?? "").trim().toUpperCase()),
+    );
+    rows.length = 0;
+    rows.push(...kept);
+  }
   if (mapping.sku === undefined || mapping.name === undefined || mapping.price === undefined) {
     console.error(`Não reconheci as colunas de código, nome e preço. Cabeçalho: ${headers}`);
     process.exit(1);
