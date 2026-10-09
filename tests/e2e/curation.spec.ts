@@ -50,6 +50,8 @@ test("curadoria: editar no card, manter, excluir, restaurar da aba Excluídos e 
   await page.goto(`/admin/curadoria?busca=${key}`);
   const cards = page.getByRole("listitem").filter({ hasText: key });
   await expect(cards).toHaveCount(4);
+  // Os campos do card só salvam depois de a página ficar interativa.
+  await page.waitForLoadState("networkidle");
 
   // Nome e preço são editados no próprio card e salvos ao sair do campo.
   const renamed = `Antúrio vermelho ${key}`;
