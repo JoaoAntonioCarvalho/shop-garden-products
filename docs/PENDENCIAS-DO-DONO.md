@@ -137,7 +137,26 @@ A loja já tem caixas de e-mail no domínio, hospedadas na Locaweb (registros MX
 
 O domínio `netshopgarden.com.br` está no registro.br, mas o DNS é servido pela Rumo (`buzios.rumo.com.br` e `leblon.rumo.com.br`), a empresa do site antigo. Registros vistos em 10/10/2026: site em `201.20.10.204`, e-mail na Locaweb (4 registros MX, `pop`, `smtp`, `imap`, `mail`, `webmail`, `autodiscover`), SPF com Locaweb, Rumo e Dinamize, e `innlink` apontando para a Dinamize (newsletter).
 
-- [ ] Decidir quem altera o DNS: pedir à Rumo, ou passar o DNS para o registro.br recriando antes todos os registros de e-mail. Se o contrato do site antigo for cancelado sem isso, o e-mail da loja pode parar.
+Decisão do dono em 10/10/2026: passar o DNS para o registro.br, sem depender da Rumo, e hospedar na Vercel no plano Pro. A zona nova, montada pelos registros públicos:
+
+| Tipo  | Nome                   | Valor                                                                             |
+| ----- | ---------------------- | --------------------------------------------------------------------------------- |
+| A     | (raiz)                 | `201.20.10.204` até a virada; depois, o valor que a Vercel indicar                |
+| CNAME | `www`                  | `netshopgarden.com.br` até a virada; depois, o valor que a Vercel indicar         |
+| MX    | (raiz)                 | `mx.a`, `mx.b` e `mx.core.locaweb.com.br` (prioridade 10), `mx.jk` (20)           |
+| TXT   | (raiz)                 | `v=spf1 mx include:_spf.locaweb.com.br include:innlink.netshopgarden.com.br ~all` |
+| CNAME | `pop`                  | `mail.ita.locaweb.com.br`                                                         |
+| CNAME | `smtp`, `imap`, `mail` | `pop.netshopgarden.com.br`                                                        |
+| CNAME | `webmail`              | `webmail-seguro.com.br`                                                           |
+| CNAME | `autodiscover`         | `autodiscover.email.locaweb.com.br`                                               |
+| CNAME | `innlink`              | `netshopgarden.com.br.dnzdns.com` (Dinamize; tirar se não usar mais)              |
+| TXT   | `resend._domainkey`    | chave DKIM mostrada no Resend                                                     |
+| CNAME | `rsend`                | `rsend-sae1.forge.rmta.net`                                                       |
+| CNAME | `send`                 | `send.forge.rmta.net`                                                             |
+| TXT   | `_dmarc`               | `v=DMARC1; p=none;`                                                               |
+
+- [ ] Trocar para o DNS do registro.br e criar os registros acima. Só os registros públicos foram vistos: se a Locaweb tiver uma chave DKIM própria, ela precisa ser copiada do painel da Locaweb.
+- [ ] Passar a Vercel para o plano Pro antes de vender.
 - [ ] Apontar o domínio para a hospedagem nova, definir `APP_URL`, trocar a URL de notificação na Cielo e desligar o modo manutenção.
 
 ### Para ligar os Correios
