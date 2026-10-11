@@ -54,6 +54,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const rows = index.filter((row) => row.categoryIds.some((id) => ids.includes(id)));
   const countFor = (categoryId: string) =>
     index.filter((row) => row.categoryIds.includes(categoryId)).length;
+  // Subcategoria sem produto não aparece: a página dela estaria vazia.
+  const subcategories = children.filter((child) => countFor(child.id) > 0);
 
   const breadcrumb: BreadcrumbItem[] = [
     { label: "Início", href: "/" },
@@ -74,10 +76,10 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <p className="mt-3 measure type-body-lg text-ink-muted">{category.description}</p>
         ) : null}
 
-        {children.length > 0 ? (
+        {subcategories.length > 0 ? (
           <nav aria-label={`Subcategorias de ${category.name}`} className="mt-6">
             <ul className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1 md:mx-0 md:flex-wrap md:px-0">
-              {children.map((child) => (
+              {subcategories.map((child) => (
                 <li key={child.id} className="flex-none">
                   <Link
                     href={categoryHref(child.path)}

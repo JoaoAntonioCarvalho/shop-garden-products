@@ -89,7 +89,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/conta/ped
                           alt={item.productName}
                           fill
                           sizes="48px"
-                          className="object-cover"
+                          className="object-contain"
                         />
                       ) : null}
                     </li>

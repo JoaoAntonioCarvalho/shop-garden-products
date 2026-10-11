@@ -72,7 +72,7 @@ export function MegaMenu({ items }: { items: NavItem[] }) {
                             fill
                             sizes="280px"
                             unoptimized={item.image.url.endsWith(".svg")}
-                            className="object-cover"
+                            className="object-contain"
                           />
                         </div>
                         {item.image.caption ? (

@@ -305,3 +305,12 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Boleto saiu dos textos** (Pagamentos, Entrega e perguntas frequentes), porque a Cielo não emite.
 - **Textos jurídicos completos** em `prisma/seed/legal-pages.ts`, publicados em produção. Nenhuma cláusula tira direito do consumidor, porque cláusula assim é nula (artigo 51 do CDC) e desprotege a loja: o arrependimento de 7 dias vale também para plantas, com a condição de a planta voltar viva e bem cuidada; o foro é o do domicílio do consumidor. Sem revisão de advogado.
 - **Produtos sem foto na lixeira e redirecionamentos gravados** a pedido do dono, com a fila "A revisar" intocada.
+
+## 2026-10-11 — Imagens reais, revisão visual e rede de segurança do Pix
+
+- **Consulta ao gateway enquanto o cliente espera:** `syncPendingPayments` pergunta ao gateway, no máximo a cada 15 segundos por cobrança, se o pagamento pendente já foi pago ou recusado. É chamada pela rota de status do pedido, que a página consulta a cada 5 segundos. Sem o aviso da Cielo, o Pix pago deixa de esperar o vencimento para ser confirmado.
+- **Fotos dos 34 produtos da fila "A revisar" refeitas** a partir das fotos do site antigo: ampliadas (Real-ESRGAN), fundo recortado, branco corrigido, produto centralizado em tela branca 4:5 de 1600 × 2000 com sombra de contato. Os produtos continuam em rascunho, na fila.
+- **Ilustrações de teste trocadas** (42 categorias, 5 ocasiões, 4 coleções, 5 banners, newsletter e seção do Shopping Garden) por composições com fotos reais de produtos da loja, recortadas sobre o creme da marca (`#f3ede1`). Bancos de fotos gratuitos bloquearam o acesso automático, e foto de terceiros mostraria produto que a loja não vende. As ferramentas usadas (Python, rembg, Real-ESRGAN) ficaram fora do repositório.
+- **Foto de produto aparece inteira** (`object-contain`) em cartões, galeria, sacola, checkout e pedidos: as fotos do site antigo são horizontais e eram cortadas no quadro 4:5. Os cartões de categoria também mostram a imagem inteira, acima da faixa do nome.
+- **Subcategoria sem produto não aparece** nos atalhos da página da categoria, e as 13 categorias vazias saíram do menu em produção (voltam em Admin > Categorias).
+- **Em produção, por não serem verdade:** depoimentos de exemplo ocultados e seção desligada; cupons de exemplo desativados (só `BEMVINDO10` ficou); banners deixaram de prometer entrega no mesmo dia, que está desligada.

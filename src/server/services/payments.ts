@@ -227,6 +227,41 @@ export async function expireOverduePayments(orderId?: string): Promise<number> {
   return overdue.length;
 }
 
+/** Intervalo mínimo entre duas consultas ao gateway para a mesma cobrança. */
+const SYNC_INTERVAL_MS = 15_000;
+const lastSync = new Map<string, number>();
+
+/**
+ * Pergunta ao gateway se as cobranças pendentes de um pedido já foram pagas ou recusadas.
+ * Rede de segurança para quando o aviso do gateway atrasa ou não chega: é chamada enquanto o
+ * cliente espera na página do pedido. Devolve quantas cobranças mudaram de status.
+ */
+export async function syncPendingPayments(orderId: string, now = Date.now()): Promise<number> {
+  const pending = await db.payment.findMany({
+    where: { orderId, status: "PENDING", externalId: { not: null } },
+    select: { externalId: true, provider: true },
+  });
+  let changed = 0;
+  for (const payment of pending) {
+    const externalId = payment.externalId!;
+    if ((lastSync.get(externalId) ?? 0) > now - SYNC_INTERVAL_MS) continue;
+    if (lastSync.size > 1000) lastSync.clear();
+    lastSync.set(externalId, now);
+    const status = await getPaymentProvider(payment.provider)
+      ?.getStatus(externalId)
+      .catch(() => null);
+    if (status !== "PAID" && status !== "FAILED") continue;
+    await applyPaymentEvent({
+      externalId,
+      status,
+      raw: { reason: "confirmado na consulta ao gateway" },
+    });
+    lastSync.delete(externalId);
+    changed += 1;
+  }
+  return changed;
+}
+
 export class RetryPaymentError extends Error {}
 
 /** Nova cobrança para o mesmo pedido (cartão recusado, Pix expirado na tela). Não cria outro pedido. */

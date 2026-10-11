@@ -91,7 +91,7 @@ function Gallery({ images, productName }: { images: ViewImage[]; productName: st
                   i === index ? "border-moss-700" : "border-line hover:border-moss-500",
                 )}
               >
-                <Image src={image.url} alt="" fill sizes="72px" className="object-cover" />
+                <Image src={image.url} alt="" fill sizes="72px" className="object-contain" />
               </button>
             </li>
           ))}
@@ -134,7 +134,7 @@ function Gallery({ images, productName }: { images: ViewImage[]; productName: st
                 priority={i === 0}
                 placeholder={image.blurDataUrl ? "blur" : "empty"}
                 blurDataURL={image.blurDataUrl ?? undefined}
-                className="object-cover"
+                className="object-contain"
               />
             </button>
           ))}

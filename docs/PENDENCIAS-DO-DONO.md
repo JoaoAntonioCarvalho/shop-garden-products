@@ -50,7 +50,12 @@ Todos os valores abaixo são exemplos.
 ## Logo e fotos
 
 - Logo definitivo: hoje é um logotipo em texto. Trocar `public/brand/logo.svg` e o componente `Logo`.
-- **Fotos reais dos produtos: é a melhoria de maior impacto visual.** Hoje todas as imagens são ilustrações de teste geradas pelo seed. Padrão recomendado: fundo branco, luz natural, proporção 4:5, e uma foto em ambiente para cada produto de destaque. Enviar por Admin > Produtos > Imagens.
+- **Fotos dos produtos:** vieram do site antigo. Muitas têm a marca d'água "PhotoGrid" no canto, fundos diferentes e enquadramento desigual. As 34 da fila "A revisar" já foram refeitas no padrão novo (fundo branco, 4:5, produto centralizado); o mesmo tratamento pode ser aplicado ao catálogo inteiro.
+- **Imagens de categorias, ocasiões, coleções e banners:** em 11/10/2026 as ilustrações de teste foram trocadas por composições com fotos de produtos da loja. Podem ser substituídas por fotos em ambiente em Admin > Categorias e Admin > Banners. A seção "A loja online do Shopping Garden" pede uma foto real do Shopping Garden.
+- **Depoimentos:** os seis de exemplo foram ocultados e a seção da home foi desligada. Cadastrar depoimentos reais em Admin > Depoimentos e religar a seção em Admin > Home.
+- **Cupons:** só `BEMVINDO10` está ativo. `NETSHOPGARDENBEMVINDO` (do site antigo), `FRETEGRATIS`, `PRIMAVERA15` e `MAES25` foram desativados até a dona confirmar.
+- **Categorias sem produto** (13) saíram do menu; voltam em Admin > Categorias quando receberem produtos.
+- **Nomes de produtos em caixa alta** (por exemplo, "FORTH BOKASHI (250G)"): vieram assim do site antigo e precisam de revisão.
 - Fotos do hero (2400 × 1050 no desktop e 1200 × 1500 no celular), das categorias e das ocasiões de presente.
 
 ## Decisões de negócio
@@ -111,6 +116,7 @@ O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as crede
 - [x] Credenciais do **Silent Order Post** (`ClientId` e `ClientSecret`).
 - [x] Nome na fatura do cartão: "NETSHOPGARDEN".
 - [x] Pix de teste de R$ 1,00 pago e confirmado pela Cielo (10/10/2026).
+- [x] Rede de segurança: com a página do pedido aberta, a loja consulta a Cielo e confirma o Pix mesmo sem o aviso (11/10/2026).
 - [ ] Devolução do Pix: a Cielo negou a devolução do teste por falta de saldo na conta Pix ("Merchant with insufficient balance for return"). Perguntar à Cielo como funciona o saldo para devolução de Pix. Enquanto isso, devolução de pedido pago com Pix pode aparecer como "falhou" no painel e precisa ser feita por transferência. O R$ 1,00 do teste ficou na conta da loja.
 - [ ] Fazer uma compra de teste com cartão de verdade e devolver.
 - [ ] Gerar uma nova `MerchantKey` e um novo `ClientSecret` no site da Cielo depois dos testes: os atuais foram enviados por conversa.

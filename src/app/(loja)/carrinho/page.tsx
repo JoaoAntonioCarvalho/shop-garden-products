@@ -106,7 +106,7 @@ export default async function CartPage() {
                       alt=""
                       fill
                       sizes="112px"
-                      className="object-cover"
+                      className="object-contain"
                     />
                   ) : null}
                 </Link>

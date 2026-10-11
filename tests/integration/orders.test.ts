@@ -1,12 +1,17 @@
 import { hasTestDatabase, unique } from "./setup";
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { db } from "@/lib/db";
 import { setEmailProvider } from "@/server/providers/email";
 import type { EmailMessage } from "@/server/providers/email/types";
 import { reserveStock } from "@/server/services/inventory";
 import { InvalidTransitionError } from "@/server/services/order-status";
 import { transitionOrder } from "@/server/services/orders";
-import { applyPaymentEvent, expireOverduePayments } from "@/server/services/payments";
+import { getPaymentProvider } from "@/server/providers/payment";
+import {
+  applyPaymentEvent,
+  expireOverduePayments,
+  syncPendingPayments,
+} from "@/server/services/payments";
 
 const sent: EmailMessage[] = [];
 setEmailProvider({ send: async (message) => void sent.push(message) });
@@ -257,6 +262,28 @@ describe.skipIf(!hasTestDatabase)("pedido e pagamento (contra o Postgres de test
       raw: {},
     });
     expect((await orderOf(order.id)).status).toBe("EXPIRED");
+  });
+
+  it("sem o aviso do gateway, a consulta confirma o pagamento, sem repetir a pergunta a cada chamada", async () => {
+    const { order, variant } = await createPendingOrder();
+    const getStatus = vi.spyOn(getPaymentProvider("mock")!, "getStatus");
+    try {
+      getStatus.mockResolvedValue("PENDING");
+      expect(await syncPendingPayments(order.id, 1_000_000)).toBe(0);
+      getStatus.mockResolvedValue("PAID");
+      // Dentro do intervalo mínimo: não consulta de novo.
+      expect(await syncPendingPayments(order.id, 1_005_000)).toBe(0);
+      expect(getStatus).toHaveBeenCalledTimes(1);
+      expect(await syncPendingPayments(order.id, 1_020_000)).toBe(1);
+    } finally {
+      getStatus.mockRestore();
+    }
+    const paid = await orderOf(order.id);
+    expect(paid.status).toBe("PAID");
+    expect(paid.payments[0].status).toBe("PAID");
+    expect(await stockOf(variant.id)).toEqual({ stockOnHand: 3, stockReserved: 0 });
+    // Pedido pago não tem mais cobrança pendente para consultar.
+    expect(await syncPendingPayments(order.id, 2_000_000)).toBe(0);
   });
 
   it("pagamento recusado mantém o pedido aguardando e avisa o cliente", async () => {

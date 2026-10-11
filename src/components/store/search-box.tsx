@@ -177,7 +177,7 @@ export function SearchBox({ className }: { className?: string }) {
                     width={40}
                     height={50}
                     loading="lazy"
-                    className="h-[50px] w-10 flex-none rounded-photo bg-white object-cover"
+                    className="h-[50px] w-10 flex-none rounded-photo bg-white object-contain"
                   />
                 ) : null}
                 <span className="line-clamp-2 flex-1">{product.name}</span>

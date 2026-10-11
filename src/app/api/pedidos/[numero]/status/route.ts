@@ -1,5 +1,5 @@
 import { getOrderForViewer } from "@/server/services/order-view";
-import { expireOverduePayments } from "@/server/services/payments";
+import { expireOverduePayments, syncPendingPayments } from "@/server/services/payments";
 
 /** Status do pedido para a verificação automática na página de confirmação (a cada 5 segundos). */
 export async function GET(request: Request, context: RouteContext<"/api/pedidos/[numero]/status">) {
@@ -8,9 +8,11 @@ export async function GET(request: Request, context: RouteContext<"/api/pedidos/
   let order = await getOrderForViewer(numero, { token });
   if (!order) return Response.json({ error: "Pedido não encontrado" }, { status: 404 });
 
-  // Se o Pix ou o boleto venceu enquanto a página estava aberta, expira agora.
-  if (order.status === "PENDING_PAYMENT" && (await expireOverduePayments(order.id)) > 0) {
-    order = (await getOrderForViewer(numero, { token })) ?? order;
+  // O aviso do gateway pode não chegar: confere com ele se já foi pago. Depois, se o Pix ou o
+  // boleto venceu enquanto a página estava aberta, expira agora.
+  if (order.status === "PENDING_PAYMENT") {
+    const changed = (await syncPendingPayments(order.id)) + (await expireOverduePayments(order.id));
+    if (changed > 0) order = (await getOrderForViewer(numero, { token })) ?? order;
   }
   return Response.json(
     { status: order.status, paymentStatus: order.paymentStatus },

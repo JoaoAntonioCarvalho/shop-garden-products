@@ -175,7 +175,7 @@ function Summary({
           <li key={line.id} className="flex gap-3 py-3">
             <div className="relative aspect-4/5 w-12 flex-none overflow-hidden rounded-photo bg-white">
               {line.imageUrl ? (
-                <Image src={line.imageUrl} alt="" fill sizes="48px" className="object-cover" />
+                <Image src={line.imageUrl} alt="" fill sizes="48px" className="object-contain" />
               ) : null}
             </div>
             <div className="min-w-0 flex-1">

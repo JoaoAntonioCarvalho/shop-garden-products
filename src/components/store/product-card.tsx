@@ -72,7 +72,7 @@ export function ProductCard({
           placeholder={image.blurDataUrl ? "blur" : "empty"}
           blurDataURL={image.blurDataUrl ?? undefined}
           className={cn(
-            "object-cover",
+            "object-contain",
             product.hoverImage && "transition-opacity duration-200 md:group-hover:opacity-0",
             product.soldOut && "opacity-60",
           )}
@@ -85,7 +85,7 @@ export function ProductCard({
             sizes={sizes}
             loading="lazy"
             unoptimized={product.hoverImage.url.endsWith(".svg")}
-            className="hidden object-cover opacity-0 transition-opacity duration-200 md:block md:group-hover:opacity-100"
+            className="hidden object-contain opacity-0 transition-opacity duration-200 md:block md:group-hover:opacity-100"
           />
         ) : null}
         {badges.length > 0 ? (

@@ -88,7 +88,7 @@ export default async function AccountOrderPage({ params }: PageProps<"/conta/ped
                         alt=""
                         fill
                         sizes="56px"
-                        className="object-cover"
+                        className="object-contain"
                       />
                     ) : null}
                   </div>

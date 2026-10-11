@@ -134,5 +134,6 @@ Atualizado ao longo do projeto.
 | Plano e progresso                        | `docs/PLANO.md`                                                                                               |
 | Decisões                                 | `docs/DECISOES.md`                                                                                            |
 | Pendências do dono                       | `docs/PENDENCIAS-DO-DONO.md`                                                                                  |
+| Roteiro da virada do domínio             | `docs/VIRADA.md`                                                                                              |
 
 @AGENTS.md

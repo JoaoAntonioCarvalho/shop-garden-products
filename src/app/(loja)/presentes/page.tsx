@@ -12,7 +12,7 @@ import { getStoreSettings } from "@/server/services/settings";
 export const metadata: Metadata = pageMetadata({
   title: "Presentes",
   description:
-    "Orquídeas, arranjos, plantas e peças de decoração para presentear, com cartão com a sua mensagem e entrega no mesmo dia em São Paulo.",
+    "Orquídeas, arranjos, plantas e peças de decoração para presentear, com cartão com a sua mensagem.",
   path: "/presentes",
 });
 

@@ -253,7 +253,7 @@ export function CartProvider({
                           alt=""
                           fill
                           sizes="64px"
-                          className="object-cover"
+                          className="object-contain"
                         />
                       ) : null}
                     </Link>
