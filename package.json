@@ -27,6 +27,7 @@
     "db:studio": "prisma studio",
     "images:placeholders": "tsx scripts/generate-placeholders.ts",
     "import:legacy": "tsx --require ./scripts/allow-server-only.cjs scripts/import-legacy.ts",
+    "photos": "tsx --require ./scripts/allow-server-only.cjs scripts/product-photos.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
