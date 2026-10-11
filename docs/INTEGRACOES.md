@@ -4,21 +4,49 @@ O que está simulado, e o passo a passo para ligar o serviço real. Em todos os 
 
 ## 1. Gateway de pagamento
 
-**Hoje:** `PAYMENT_PROVIDER=mock`, em `src/server/providers/payment/mock.ts`. Gera Pix (código e QR), tokeniza o cartão no navegador e emite boleto, tudo de mentira.
+**Hoje em produção:** `PAYMENT_PROVIDER=mock`, em `src/server/providers/payment/mock.ts`. Gera Pix (código e QR), tokeniza o cartão no navegador e emite boleto, tudo de mentira. O simulador de pagamento some sozinho em produção.
 
-**Interface:** `src/server/providers/payment/types.ts` (`PaymentProvider`): criar a cobrança, consultar, estornar e validar o webhook.
+**Interface:** `src/server/providers/payment/types.ts` (`PaymentProvider`): criar a cobrança, consultar, estornar, validar o aviso e preparar a tokenização do cartão.
 
-**Para ligar um gateway (Mercado Pago, Pagar.me, Stripe, Asaas...):**
+### Cielo (escrita, falta ligar)
+
+`src/server/providers/payment/cielo.ts` usa a **API E-commerce Cielo** (a antiga Cielo 3.0): Pix e cartão de crédito dentro do site. Não há boleto: com a Cielo ligada, a opção aparece como indisponível.
+
+Conferido em 10/10/2026 no ambiente de testes da Cielo, com as credenciais públicas da documentação: Pix gerado, cartão aprovado e recusado pelo checkout no navegador, consulta, aviso e devolução. No mesmo dia, com as credenciais de produção da loja: a API respondeu, o Silent Order Post emitiu o token de acesso do cartão e um Pix de R$ 1,00 foi gerado. **Ainda não houve pagamento confirmado nem venda no cartão em produção.**
+
+**O que a loja precisa ter na Cielo.** O link de pagamento que a loja usa hoje é outro produto e não serve para cobrar dentro do site. É preciso pedir à Cielo:
+
+1. A habilitação da **API E-commerce Cielo** para o CNPJ. Ela gera o `MerchantId` e a `MerchantKey`.
+2. O **Pix** liberado nesse cadastro (no site da Cielo: Meu Cadastro > Autorizações > PIX).
+3. As credenciais do **Silent Order Post** (`ClientId` e `ClientSecret`), que permitem trocar o cartão por um token no navegador. Elas aparecem em E-commerce > Credenciais só depois que o suporte a desenvolvedores vincula o serviço à conta.
+4. Opcional, mas recomendado: antifraude e autenticação 3DS, que reduzem contestação de compra.
+
+**Variáveis** (`.env.example`): `PAYMENT_PROVIDER=cielo`, `CIELO_ENV` (`sandbox` ou `production`), `CIELO_MERCHANT_ID`, `CIELO_MERCHANT_KEY`, `CIELO_CLIENT_ID`, `CIELO_CLIENT_SECRET`, `CIELO_WEBHOOK_SECRET` e, se quiser, `CIELO_SOFT_DESCRIPTOR` (nome na fatura, até 13 caracteres). Com `PAYMENT_PROVIDER=cielo`, a loja não sobe sem as cinco primeiras.
+
+**Aviso de pagamento.** No site da Cielo, cadastre a URL de notificação `https://<domínio>/api/webhooks/payments/cielo` e um cabeçalho `x-webhook-secret` com o mesmo valor de `CIELO_WEBHOOK_SECRET` (um texto longo e aleatório). O aviso da Cielo não é assinado e traz só o identificador: a loja confere o cabeçalho e busca o status na API.
+
+**Como funciona.**
+
+- **Cartão:** o formulário pede ao servidor um token de acesso de uso único e envia o cartão direto do navegador para a Cielo, que devolve um token de pagamento. Número, validade e CVV não passam pelo servidor da loja. A venda é capturada na hora.
+- **Pix:** a confirmação chega pelo aviso. Antes de expirar um Pix, a loja pergunta à Cielo se ele foi pago.
+- **Gateway fora do ar:** o pedido é criado, fica com pagamento não aprovado e a página dele oferece nova tentativa.
+- **Devolução:** Admin > Pedido > Reembolsar chama o cancelamento da Cielo. No Pix, a Cielo só devolve se houver saldo na conta Pix.
+
+**O que falta conferir com a conta real.**
+
+- **Prazo do Pix.** A loja expira o Pix no prazo de Admin > Configurações (hoje 20 minutos), mas não foi encontrado na documentação como dizer esse prazo à Cielo. Se o cliente pagar um QR Code depois de a loja ter expirado o pedido, o dinheiro entra e o pedido continua expirado: a equipe precisa reativar ou devolver à mão. Perguntar à Cielo qual é o prazo do QR Code e como configurá-lo.
+- **Devolução de Pix** pelo mesmo cancelamento do cartão: a documentação diz que é pela API, sem detalhar. Testar com um Pix real.
+- **Parcelamento:** as parcelas sem juros da loja precisam estar liberadas no cadastro da Cielo.
+- Um pedido real de cada tipo, com devolução, antes de divulgar.
+
+### Outro gateway
 
 1. Crie `src/server/providers/payment/<gateway>.ts` implementando `PaymentProvider`.
 2. Registre em `src/server/providers/payment/index.ts` e acrescente o nome ao `PAYMENT_PROVIDER` em `src/lib/env.ts`.
-3. **Cartão:** troque a tokenização de `src/components/store/checkout/card-form.tsx` pelo SDK do gateway. O número, a validade e o CVV continuam sem passar pelo servidor da loja; só o token é enviado.
-4. **Webhook:** aponte o gateway para `/api/webhooks/payments/<gateway>`. O provider valida a assinatura; `applyPaymentEvent` já é idempotente e cuida de status, estoque e e-mails.
-5. Guarde as chaves em variáveis de ambiente do servidor, nunca com `NEXT_PUBLIC_` (a chave pública do SDK é a única exceção).
+3. **Cartão:** acrescente o tipo de tokenização em `CardTokenization` e trate-o em `src/components/store/checkout/card-form.tsx`. O número, a validade e o CVV continuam sem passar pelo servidor da loja.
+4. **Aviso:** aponte o gateway para `/api/webhooks/payments/<gateway>`. `applyPaymentEvent` já é idempotente e cuida de status, estoque e e-mails.
+5. Guarde as chaves em variáveis de ambiente do servidor, nunca com `NEXT_PUBLIC_`.
 6. Libere os domínios do gateway na CSP (`next.config.ts`).
-7. Teste no ambiente de homologação do gateway: aprovado, recusado, Pix expirado, estorno e webhook repetido.
-
-O simulador de pagamento some sozinho em produção.
 
 ## 2. Frete por transportadora
 
@@ -71,6 +99,8 @@ Implemente a interface `Carrier` (`src/server/providers/shipping/carriers/types.
 ## 3. E-mail
 
 **Hoje:** SMTP por Nodemailer; em desenvolvimento, Mailpit.
+
+**Recomendado para esta loja: Resend**, por SMTP (`smtp.resend.com`, porta 465, usuário `resend`, senha = chave de API). O plano gratuito cobre 3.000 e-mails por mês e 100 por dia, e um pedido gera de 3 a 5 e-mails. Ele só envia: para receber em `contato@`, a loja precisa de uma caixa de entrada à parte (Zoho Mail tem plano gratuito com domínio próprio; Google Workspace é pago).
 
 **Produção:** qualquer SMTP transacional (Amazon SES, Resend, Brevo, Postmark). Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` e `EMAIL_FROM`, e publique SPF, DKIM e DMARC no domínio. Para usar uma API em vez de SMTP, implemente `EmailProvider` em `src/server/providers/email`.
 

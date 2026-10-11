@@ -44,6 +44,7 @@ export const RATE_LIMITS = {
   search: [60, 60],
   coupon: [20, 10 * 60],
   cep: [30, 60],
+  cardToken: [15, 10 * 60],
 } as const;
 
 export async function rateLimit(

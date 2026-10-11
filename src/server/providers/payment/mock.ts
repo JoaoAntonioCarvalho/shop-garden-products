@@ -5,6 +5,7 @@ import {
   type BoletoResult,
   type CardChargeResult,
   type CardToken,
+  type CardTokenization,
   type OrderForPayment,
   type PaymentProvider,
   type PixChargeResult,
@@ -75,9 +76,9 @@ export function buildMockPixPayload(
  * Gateway simulado. Nenhum dinheiro é movimentado. A arquitetura é a de um gateway real:
  * a cobrança é criada aqui e a confirmação chega pelo webhook assinado.
  */
-// TODO(integracao): criar um provider real (Mercado Pago, Pagar.me, Stripe...) implementando PaymentProvider.
 export class MockPaymentProvider implements PaymentProvider {
   readonly name = "mock";
+  readonly supportsBoleto = true;
 
   /** Consulta de status: no mock, a "verdade do gateway" é o que está gravado no próprio banco. */
   constructor(
@@ -148,6 +149,10 @@ export class MockPaymentProvider implements PaymentProvider {
       boletoDueDate: options.dueDate,
       raw: { mock: true, kind: "boleto" },
     };
+  }
+
+  async cardTokenization(): Promise<CardTokenization> {
+    return { kind: "mock" };
   }
 
   async getStatus(externalId: string): Promise<ProviderPaymentStatus> {

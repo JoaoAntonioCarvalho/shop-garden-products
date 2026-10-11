@@ -274,3 +274,26 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Tarefa `atualizar-cache`**: a loja guarda configurações, categorias e catálogo em cache sem prazo. Depois de uma carga direta no banco, só essa tarefa (ou salvar as configurações no painel) faz o site enxergar os dados.
 - **`regions: ["gru1"]`** no `vercel.json`: as funções rodam em São Paulo, junto do banco.
 - **Login enviado antes de a página ficar interativa:** os formulários de acesso (entrar, criar conta, esqueci a senha, redefinir) só tratavam o envio no `onSubmit`. Um clique antes da hidratação fazia o navegador enviar o formulário por GET, com a senha no endereço da página. Agora o formulário também tem uma função em `action`, e o React segura o envio antecipado e o repete quando a página fica pronta. Coberto por `tests/e2e/auth.spec.ts`. Os demais formulários da loja (contato, newsletter, cupom) têm o mesmo padrão antigo, mas não carregam senha; ficaram como estavam.
+
+## 2026-10-10 — Depois da curadoria
+
+- **Resultado da curadoria em produção (conferido no banco, só leitura):** dos 1.155 produtos, 1.031 estão publicados (34 em destaque), 87 foram para a lixeira, 3 foram mantidos mas estão fora da loja por falta de foto e 34 continuam na fila "A revisar". Nenhum inválido. 418 foram marcados como "não entregue pelos Correios" e 420 são de entrega só em São Paulo.
+- **Os 34 que faltam** são quase toda a categoria Fibra de coco (18), vasos Japi de polietileno (7), plástico (4), cerâmica (3), acessórios (2) e vidro (1). Ficam na fila até a dona decidir.
+- **Os 3 sem foto:** em dois (`481618` e `523929`) o endereço da foto no site antigo responde 404; no terceiro (`409203`) a foto é AVIF, que o processamento não aceita. Precisam de foto enviada pelo painel.
+- **Redirecionamento dos endereços antigos de produto:** `pnpm import:legacy <arquivo.xml> --redirecionamentos` cria, para cada produto publicado, a regra do endereço antigo para `/produto/slug` (nota "Produto do site antigo"). Pode ser rodado de novo: só cria o que falta e só corrige o destino das regras que ele mesmo criou. Produto excluído não ganha regra e continua caindo na busca pelo nome, como já acontecia. **Ainda não foi rodado em produção** (a prévia mostra 1.031 regras a criar): rodar quando a fila estiver zerada, antes de trocar o domínio.
+- **Estoque inicial de 10 unidades em todos os 1.155 produtos**, a pedido do dono, para a loja poder vender. Feito direto no banco de produção, numa transação: um movimento de ajuste por variação e um registro de auditoria (`inventory.bulk_adjust`). Inclui os da fila e os da lixeira, para que manter ou restaurar depois não gere produto sem estoque. O número é provisório: a quantidade real continua pendente. A fila "A revisar" (34) não foi tocada: a dona ainda não decidiu.
+- **Produção sem e-mail:** as variáveis `SMTP_*` e `EMAIL_FROM` não estão na Vercel, então nenhum e-mail sai (confirmação de pedido, redefinição de senha). Precisa ser resolvido antes de abrir.
+
+## 2026-10-10 — Pagamento pela Cielo
+
+- **A cliente já é Cielo** (usa o link de pagamento) e quer pagar dentro do site, com Pix. O produto certo é a **API E-commerce Cielo**, que é outra habilitação: o usuário e a senha do site da Cielo não servem como credencial.
+- **`CieloPaymentProvider`** escrito a partir da documentação oficial e conferido no ambiente de testes da Cielo (credenciais públicas da documentação), inclusive pelo checkout no navegador. Produção continua em `mock` até as credenciais chegarem.
+- **Cartão por token no navegador (Silent Order Post), sem o script da Cielo:** o script oficial só faz um POST de formulário para o endereço de tokenização; a loja faz o mesmo POST no próprio formulário, sem carregar código de terceiros no checkout. A CSP libera só `connect-src` para os dois endereços. O cartão não passa pelo servidor da loja, o que mantém a loja fora do escopo mais pesado do PCI.
+- **Captura na hora** (`Capture: true`). Sem antifraude nem 3DS por enquanto: dependem de contratação.
+- **Sem boleto na Cielo:** exigiria convênio com banco. `supportsBoleto` no provider desliga a opção no checkout e é conferido de novo no servidor.
+- **Aviso sem assinatura:** a Cielo manda só o identificador. A loja exige um cabeçalho secreto (cadastrado no site da Cielo) e sempre consulta o status na API.
+- **Gateway fora do ar não perde o pedido** (`chargeOrder`): antes, um erro do provider depois de criar o pedido virava erro 500 com o pedido já gravado. Agora o pedido fica com pagamento não aprovado e pode ser pago pela página dele.
+- **Cartão pendente não é recusa:** só o status de recusa marca o pedido como não aprovado e manda o e-mail; resposta pendente espera o aviso.
+- **Antes de expirar um Pix ou boleto, a loja consulta o gateway** e confirma o pagamento se ele já entrou.
+- **Risco conhecido, Pix pago depois de expirado:** não encontrei como informar o prazo do QR Code à Cielo. Detalhe em `INTEGRACOES.md`, seção 1.
+- **E-mail:** recomendado o Resend por SMTP, sem código novo. Nada contratado ainda.

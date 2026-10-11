@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { LEGACY_FEED_HEADERS, parseLegacyFeed } from "@/server/admin/legacy-feed";
+import {
+  LEGACY_FEED_HEADERS,
+  legacyProductRedirects,
+  parseLegacyFeed,
+} from "@/server/admin/legacy-feed";
 
 const product = (fields: string) => `<produto>${fields}</produto>`;
 const xml = `<?xml version='1.0' encoding='ISO-8859-1'?>
@@ -65,5 +69,19 @@ describe("XML de produtos do site antigo", () => {
       ABC1: "/vaso-azul-11",
       "ABC1-12": "/prod,idproduto,12,planta",
     });
+  });
+
+  it("redireciona o endereço antigo só dos produtos recebidos, com a chave normalizada", () => {
+    const oldPaths = { ...feed.oldPaths, XYZ9: "/Vaso-Verde-99/" };
+    expect(
+      legacyProductRedirects(oldPaths, [
+        { sku: "ABC1", slug: "vaso-de-ceramica-e-barro" },
+        { sku: "XYZ9", slug: "vaso-verde" },
+        { sku: "FC13", slug: "substrato-50-l" },
+      ]),
+    ).toEqual([
+      { fromPath: "/vaso-azul-11", toPath: "/produto/vaso-de-ceramica-e-barro" },
+      { fromPath: "/vaso-verde-99", toPath: "/produto/vaso-verde" },
+    ]);
   });
 });

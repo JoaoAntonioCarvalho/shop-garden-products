@@ -22,7 +22,7 @@ import { boletoAvailability } from "./checkout-rules";
 import { sendOrderEmail } from "./emails";
 import { InsufficientStockError, reserveStock, stockShortageMessage } from "./inventory";
 import { nextOrderNumber } from "./orders";
-import { createPaymentForOrder } from "./payments";
+import { BOLETO_UNSUPPORTED_REASON, boletoSupported, chargeOrder } from "./payments";
 import { getInstallments } from "./pricing";
 import { getStoreSettings } from "./settings";
 import { quoteShipping } from "./shipping";
@@ -145,6 +145,8 @@ export async function placeOrder(
 
   // 4. Regras do meio de pagamento.
   if (input.payment.method === "BOLETO") {
+    if (!boletoSupported())
+      return { ok: false, kind: "invalid", errors: [`Boleto: ${BOLETO_UNSUPPORTED_REASON}`] };
     const boleto = boletoAvailability({
       option,
       deliveryDate: input.shipping.deliveryDate,
@@ -339,7 +341,7 @@ export async function placeOrder(
   }
 
   // 9. Cobrança e e-mail de pedido recebido. O cartão aprovado já deixa o pedido pago.
-  await createPaymentForOrder(order.id, {
+  await chargeOrder(order.id, {
     method: input.payment.method,
     installments,
     card: input.payment.card ?? null,

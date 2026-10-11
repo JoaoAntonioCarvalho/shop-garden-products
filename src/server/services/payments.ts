@@ -3,10 +3,11 @@ import type { Prisma } from "@/generated/prisma/client";
 import { addBusinessDays, zonedParts } from "@/lib/dates";
 import { db } from "@/lib/db";
 import { appUrl } from "@/lib/seo/metadata";
-import { activePaymentProvider } from "@/server/providers/payment";
+import { activePaymentProvider, getPaymentProvider } from "@/server/providers/payment";
 import { MOCK_SIGNATURE_HEADER, signMockWebhook } from "@/server/providers/payment/mock";
 import type {
   CardToken,
+  CardTokenization,
   ProviderPaymentStatus,
   WebhookEvent,
 } from "@/server/providers/payment/types";
@@ -22,6 +23,18 @@ export type PaymentInput = {
 };
 
 const BOLETO_BUSINESS_DAYS = 3;
+
+/** Falso quando o gateway ativo não emite boleto (Cielo). */
+export function boletoSupported(): boolean {
+  return activePaymentProvider().supportsBoleto;
+}
+
+export const BOLETO_UNSUPPORTED_REASON = "Indisponível no momento. Pague com Pix ou cartão.";
+
+/** O que o navegador precisa para trocar o cartão pelo token do gateway. */
+export function cardTokenization(): Promise<CardTokenization> {
+  return activePaymentProvider().cardTokenization();
+}
 
 /** Cria a cobrança no provider e grava o Payment. Cartão aprovado já marca o pedido como pago. */
 export async function createPaymentForOrder(orderId: string, input: PaymentInput) {
@@ -95,13 +108,28 @@ export async function createPaymentForOrder(orderId: string, input: PaymentInput
     const payment = await db.payment.create({ data });
     if (charge.status === "PAID") {
       await applyPaymentEvent({ externalId: charge.externalId, status: "PAID", raw: charge.raw });
-    } else {
+    } else if (charge.status === "FAILED") {
       await db.order.update({ where: { id: orderId }, data: { paymentStatus: "FAILED" } });
       await sendOrderEmail(orderId, "payment-failed");
     }
     return db.payment.findUniqueOrThrow({ where: { id: payment.id } });
   }
   return db.payment.create({ data });
+}
+
+/**
+ * Cria a cobrança sem derrubar o pedido se o gateway estiver fora do ar: o pedido fica com o
+ * pagamento como não aprovado, e a página dele oferece nova tentativa. Devolve false nesse caso.
+ */
+export async function chargeOrder(orderId: string, input: PaymentInput): Promise<boolean> {
+  try {
+    await createPaymentForOrder(orderId, input);
+    return true;
+  } catch (error) {
+    console.error("[pagamento] o gateway não criou a cobrança", orderId, error);
+    await db.order.update({ where: { id: orderId }, data: { paymentStatus: "FAILED" } });
+    return false;
+  }
 }
 
 const FINAL_STATUSES: ProviderPaymentStatus[] = [
@@ -174,15 +202,27 @@ export async function expireOverduePayments(orderId?: string): Promise<number> {
         { method: "BOLETO", boletoDueDate: { lt: today } },
       ],
     },
-    select: { externalId: true },
+    select: { externalId: true, provider: true },
   });
   for (const payment of overdue) {
-    if (payment.externalId)
+    if (!payment.externalId) continue;
+    // O aviso do gateway pode atrasar: antes de expirar, pergunta a ele se o cliente já pagou.
+    const status = await getPaymentProvider(payment.provider)
+      ?.getStatus(payment.externalId)
+      .catch(() => null);
+    if (status === "PAID") {
       await applyPaymentEvent({
         externalId: payment.externalId,
-        status: "EXPIRED",
-        raw: { reason: "expirado" },
+        status: "PAID",
+        raw: { reason: "confirmado na consulta ao gateway" },
       });
+      continue;
+    }
+    await applyPaymentEvent({
+      externalId: payment.externalId,
+      status: "EXPIRED",
+      raw: { reason: "expirado" },
+    });
   }
   return overdue.length;
 }
@@ -197,6 +237,8 @@ export async function retryPayment(orderId: string, input: PaymentInput) {
   });
   if (order.status !== "PENDING_PAYMENT")
     throw new RetryPaymentError("Este pedido não está mais aguardando pagamento.");
+  if (input.method === "BOLETO" && !boletoSupported())
+    throw new RetryPaymentError(`Boleto: ${BOLETO_UNSUPPORTED_REASON}`);
   const settings = await getStoreSettings();
 
   // O desconto do Pix depende do meio de pagamento: recalcula o total para o novo meio.
@@ -225,7 +267,10 @@ export async function retryPayment(orderId: string, input: PaymentInput) {
       totalCents: totals.totalCents,
     },
   });
-  return createPaymentForOrder(orderId, input);
+  if (!(await chargeOrder(orderId, input)))
+    throw new RetryPaymentError(
+      "Não foi possível gerar o pagamento agora. Tente de novo em alguns minutos.",
+    );
 }
 
 /**

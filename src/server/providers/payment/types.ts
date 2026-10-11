@@ -48,8 +48,19 @@ export type WebhookEvent = {
 
 export class WebhookSignatureError extends Error {}
 
+/**
+ * Como o navegador troca o cartão pelo token. No simulado, o token é inventado no próprio
+ * navegador; na Cielo, o cartão vai direto para ela, com um token de acesso de uso único.
+ */
+export type CardTokenization =
+  { kind: "mock" } | { kind: "cielo"; url: string; accessToken: string };
+
 export interface PaymentProvider {
   readonly name: string;
+  /** Falso quando o gateway não emite boleto: a opção some do checkout. */
+  readonly supportsBoleto: boolean;
+  /** Prepara a tokenização do cartão no navegador. Chamado a cada tentativa de pagamento. */
+  cardTokenization(): Promise<CardTokenization>;
   /** Payload copia e cola, QR Code e expiração. */
   createPixCharge(
     order: OrderForPayment,

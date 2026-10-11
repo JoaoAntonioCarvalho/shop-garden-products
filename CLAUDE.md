@@ -108,7 +108,7 @@ Atualizado ao longo do projeto.
 | Estoque (reserva, baixa, liberação)      | `src/server/services/inventory.ts`                                                                            |
 | Estados do pedido                        | `order-status.ts` (puro) e `orders.ts` (`transitionOrder`)                                                    |
 | Criação do pedido                        | `src/server/services/checkout.ts` (`placeOrder`)                                                              |
-| Pagamentos e webhook                     | `src/server/services/payments.ts`, `src/server/providers/payment/`, `/api/webhooks/payments/[provider]`       |
+| Pagamentos e webhook                     | `src/server/services/payments.ts`, `src/server/providers/payment/` (mock, cielo), `/api/webhooks/payments/`   |
 | E-mails                                  | `src/server/services/emails.ts`, `src/components/email/`                                                      |
 | Auditoria                                | `src/lib/audit.ts` (`logAudit`)                                                                               |
 | Autenticação                             | `src/lib/auth.ts` (Auth.js), `src/lib/credentials.ts`, `src/lib/session.ts` (`getCurrentUser`, `requireUser`) |
@@ -123,7 +123,7 @@ Atualizado ao longo do projeto.
 | Admin: listas, filtros e CSV             | `src/server/admin/list.ts`, `exporters.ts`, `src/components/admin/data-table.tsx`, `filter-bar.tsx`           |
 | Admin: formulários                       | `src/components/admin/entity-form.tsx` (`EntityForm`, `MiniForm`), `product-form.tsx`                         |
 | Curadoria do catálogo antigo e lixeira   | `src/server/admin/curation.ts`, `src/components/admin/curation-board.tsx`, `/admin/curadoria`                 |
-| Fotos do site antigo e carga inicial     | `src/server/services/legacy-images.ts`, `pnpm import:legacy <arquivo.csv>` (`scripts/import-legacy.ts`)       |
+| Fotos do site antigo e carga inicial     | `src/server/services/legacy-images.ts`, `pnpm import:legacy <arquivo>` (`--redirecionamentos` pós-curadoria)  |
 | Relatórios                               | `src/server/admin/reports.ts`                                                                                 |
 | Tarefas agendadas                        | `src/server/jobs.ts`, `/api/cron/[tarefa]`                                                                    |
 | Screenshots do painel                    | `pnpm tsx scripts/admin-shots.ts <pasta> [largura] /admin/...`                                                |

@@ -86,22 +86,50 @@ Todos os valores abaixo são exemplos.
 
 - [ ] Exportar os produtos no painel da FastCommerce, com todas as colunas (inclusive as de imagem), e colocar o arquivo em `data-privada/`. Com ele: `pnpm import:legacy data-privada/arquivo.csv --previa` para conferir e, sem `--previa`, para gravar.
 - [ ] Conferir se as fotos do site antigo podem ser baixadas pelo endereço que vem no arquivo. Se o servidor de imagens bloquear, será preciso um arquivo com as fotos.
-- [ ] Revisar os produtos em Admin > Curadoria.
+- [ ] Revisar os produtos em Admin > Curadoria. Em 10/10/2026: 1.031 na loja, 87 excluídos e **34 ainda na fila "A revisar"** (quase toda a categoria Fibra de coco e os vasos Japi).
+- [ ] Enviar foto de 3 produtos mantidos que ficaram fora da loja porque a foto não veio do site antigo: `409203` (Home spray lavanda absoluta), `481618` (Salsão MDPT15) e `523929` (Vaso bari branco). Admin > Produtos > Imagens.
+- [ ] **Informar o estoque real.** Em 10/10/2026 todos os produtos receberam 10 unidades, como valor provisório para a loja poder vender. Ajustar em Admin > Estoque, ou decidir se a quantidade virá do Bling.
+- [ ] Depois da fila zerada: `pnpm import:legacy data-privada/prod/xml-products.xml --redirecionamentos` no banco de produção, para os endereços antigos dos produtos levarem à página nova.
 - [ ] Criar o repositório privado no GitHub e passar o endereço, para o envio do código e a ligação com a Vercel.
 
 ## Integrações a contratar
 
 | Integração               | Situação hoje                         | O que falta                                        |
 | ------------------------ | ------------------------------------- | -------------------------------------------------- |
-| Gateway de pagamento     | Simulado (Pix, cartão, boleto)        | Escolher o gateway e implementar o provider        |
+| Gateway de pagamento     | Cielo escrita, credenciais conferidas | Testes reais e ligar na loja (ver abaixo)          |
 | Transportadora           | Correios e Jadlog prontos, desligados | Credenciais de cada uma (ver abaixo)               |
-| E-mail transacional      | SMTP local (Mailpit)                  | Contratar um SMTP e configurar o domínio           |
+| E-mail transacional      | Nenhum em produção                    | Criar conta no Resend e configurar o domínio       |
 | Armazenamento de imagens | Pasta local                           | Bucket S3 ou R2 em produção                        |
 | Nota fiscal              | Não há                                | Ligar ao Bling, que a loja já usa (ver abaixo)     |
 | Etiquetas e rastreio     | Código de rastreio digitado no pedido | Depende da transportadora ou do Bling (ver abaixo) |
 | WhatsApp Business API    | Links e mensagens copiadas à mão      | Só se quiser mensagens automáticas                 |
 
 O passo a passo de cada uma está em `docs/INTEGRACOES.md`.
+
+### Para ligar a Cielo
+
+O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as credenciais de produção da loja foram conferidas na Cielo: a API E-commerce respondeu, o Silent Order Post emitiu o token do cartão e um Pix de R$ 1,00 foi gerado. A loja continua com o pagamento simulado até os testes abaixo.
+
+- [x] **API E-commerce Cielo** habilitada, com `MerchantId` e `MerchantKey`.
+- [x] **Pix** autorizado no cadastro (desde 06/08/2024).
+- [x] Credenciais do **Silent Order Post** (`ClientId` e `ClientSecret`).
+- [x] Nome na fatura do cartão: "NETSHOPGARDEN".
+- [ ] Pagar o Pix de teste de R$ 1,00 e conferir a confirmação e a devolução.
+- [ ] Fazer uma compra de teste com cartão de verdade e devolver.
+- [ ] Gerar uma nova `MerchantKey` e um novo `ClientSecret` no site da Cielo depois dos testes: os atuais foram enviados por conversa.
+- [ ] Confirmar o parcelamento sem juros (a loja oferece até 6x) e as taxas do contrato: no sem juros, quem paga a taxa do parcelamento é a loja.
+- [ ] Perguntar o prazo de validade do QR Code do Pix e se dá para configurá-lo.
+- [ ] Perguntar sobre antifraude e 3DS (opcionais).
+- [ ] Depois do domínio no ar: cadastrar no site da Cielo a URL de notificação e o cabeçalho secreto (`docs/INTEGRACOES.md`, seção 1).
+
+Boleto deixa de ser oferecido com a Cielo.
+
+### Para ligar o e-mail
+
+- [ ] Criar a conta no Resend (gratuito até 3.000 e-mails por mês) e adicionar o domínio.
+- [ ] Publicar no registro.br os registros de DNS que o Resend mostrar (SPF e DKIM).
+- [ ] Trazer a chave de API, para as variáveis `SMTP_*` na Vercel.
+- [ ] Decidir onde a loja vai ler o `contato@`: o Resend só envia. Zoho Mail tem plano gratuito com domínio próprio.
 
 ### Para ligar os Correios
 
@@ -160,10 +188,9 @@ A base antiga de clientes e assinantes **não** deve ser importada para disparos
 
 ### `TODO(integracao)`: pontos de provedor real
 
-| Onde                                                | O quê                                             |
-| --------------------------------------------------- | ------------------------------------------------- |
-| `src/server/providers/payment/index.ts` e `mock.ts` | Registrar o provider do gateway real              |
-| `src/components/store/checkout/card-form.tsx`       | Trocar a tokenização simulada pelo SDK do gateway |
-| `src/server/providers/shipping/index.ts`            | Cotação real de frete                             |
-| `src/server/providers/email/index.ts`               | Envio por API (Resend, SES), se não for usar SMTP |
-| `src/server/services/rate-limit.ts`                 | Redis ou Upstash, para tráfego alto               |
+| Onde                                     | O quê                                             |
+| ---------------------------------------- | ------------------------------------------------- |
+| `src/server/providers/payment/cielo.ts`  | Ligar na loja depois dos testes reais             |
+| `src/server/providers/shipping/index.ts` | Cotação real de frete                             |
+| `src/server/providers/email/index.ts`    | Envio por API (Resend, SES), se não for usar SMTP |
+| `src/server/services/rate-limit.ts`      | Redis ou Upstash, para tráfego alto               |

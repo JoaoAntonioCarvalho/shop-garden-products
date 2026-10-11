@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import { getEnv } from "@/lib/env";
+import { CieloPaymentProvider } from "./cielo";
 import { MockPaymentProvider } from "./mock";
 import type { PaymentProvider } from "./types";
 
@@ -11,7 +13,18 @@ const providers: Record<string, () => PaymentProvider> = {
       });
       return payment?.status ?? null;
     }),
-  // TODO(integracao): registrar aqui o provider do gateway real (ver docs/INTEGRACOES.md).
+  cielo: () => {
+    const env = getEnv();
+    return new CieloPaymentProvider({
+      environment: env.CIELO_ENV,
+      merchantId: env.CIELO_MERCHANT_ID ?? "",
+      merchantKey: env.CIELO_MERCHANT_KEY ?? "",
+      clientId: env.CIELO_CLIENT_ID,
+      clientSecret: env.CIELO_CLIENT_SECRET,
+      webhookSecret: env.CIELO_WEBHOOK_SECRET,
+      softDescriptor: env.CIELO_SOFT_DESCRIPTOR,
+    });
+  },
 };
 
 const instances = new Map<string, PaymentProvider>();

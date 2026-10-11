@@ -4,6 +4,8 @@
  * quais produtos só são entregues em São Paulo e o endereço antigo de cada um.
  */
 
+import { normalizeRedirectPath } from "@/lib/redirects";
+
 export const LEGACY_FEED_HEADERS = [
   "sku_produto",
   "nome",
@@ -105,6 +107,25 @@ export function parseLegacyFeed(xml: string): LegacyFeed {
     ]);
   }
   return feed;
+}
+
+/**
+ * Redirecionamentos do endereço antigo de cada produto para a página dele na loja nova.
+ * Só entra quem está na lista recebida (os produtos publicados); o resto continua caindo na busca.
+ */
+export function legacyProductRedirects(
+  oldPaths: Record<string, string>,
+  products: { sku: string; slug: string }[],
+): { fromPath: string; toPath: string }[] {
+  const redirects = new Map<string, string>();
+  for (const product of products) {
+    const oldPath = oldPaths[product.sku];
+    if (!oldPath) continue;
+    const fromPath = normalizeRedirectPath(oldPath);
+    const toPath = `/produto/${product.slug}`;
+    if (fromPath !== toPath && !redirects.has(fromPath)) redirects.set(fromPath, toPath);
+  }
+  return [...redirects].map(([fromPath, toPath]) => ({ fromPath, toPath }));
 }
 
 /**

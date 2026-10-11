@@ -8,6 +8,8 @@
  *   --previa  só valida o arquivo e mostra o que seria importado
  *   --faltantes  ignora os produtos que já estão no banco (para retomar uma carga interrompida)
  *   --parte=2/4  importa só uma fatia do arquivo, para rodar várias cargas ao mesmo tempo
+ *   --redirecionamentos  não importa nada: cria os redirecionamentos do endereço antigo dos produtos
+ *                        que estão na loja (rodar depois da curadoria; com --previa só mostra)
  *
  * O banco é o de DATABASE_URL. O arquivo fica em data-privada/, que nunca vai para o repositório.
  */
@@ -17,7 +19,11 @@ import { logAudit } from "@/lib/audit";
 import { db } from "@/lib/db";
 import { normalizeText } from "@/lib/slug";
 import type { AdminContext } from "@/server/admin/action";
-import { LEGACY_CATEGORY_ALIASES, parseLegacyFeed } from "@/server/admin/legacy-feed";
+import {
+  LEGACY_CATEGORY_ALIASES,
+  legacyProductRedirects,
+  parseLegacyFeed,
+} from "@/server/admin/legacy-feed";
 import { decodeCsvBuffer, parseCsv } from "@/server/admin/list";
 import { detectFormat, parseImport, runImport } from "@/server/admin/product-import";
 
@@ -26,7 +32,58 @@ const file = args.find((arg) => !arg.startsWith("--"));
 const imageBaseUrl = args.find((arg) => arg.startsWith("--base="))?.slice(7) ?? "";
 const preview = args.includes("--previa");
 const onlyMissing = args.includes("--faltantes");
+const redirectsOnly = args.includes("--redirecionamentos");
 const part = /^--parte=(\d+)\/(\d+)$/.exec(args.find((arg) => arg.startsWith("--parte=")) ?? "");
+
+const REDIRECT_NOTE = "Produto do site antigo";
+
+/** Endereço antigo → página nova, para os produtos que a curadoria deixou na loja. */
+async function syncProductRedirects(oldPaths: Record<string, string>) {
+  const products = await db.product.findMany({
+    where: { sku: { in: Object.keys(oldPaths) }, status: "ACTIVE", deletedAt: null },
+    select: { sku: true, slug: true },
+  });
+  const wanted = legacyProductRedirects(oldPaths, products);
+  const existing = new Map(
+    (
+      await db.redirect.findMany({
+        where: { fromPath: { in: wanted.map((item) => item.fromPath) } },
+        select: { fromPath: true, toPath: true, note: true },
+      })
+    ).map((item) => [item.fromPath, item]),
+  );
+  const toCreate = wanted.filter((item) => !existing.has(item.fromPath));
+  // Só corrige o destino do que este script criou; o que foi cadastrado no painel fica como está.
+  const toUpdate = wanted.filter((item) => {
+    const current = existing.get(item.fromPath);
+    return current && current.note === REDIRECT_NOTE && current.toPath !== item.toPath;
+  });
+  console.log(
+    `Produtos na loja com endereço antigo: ${products.length}. A criar: ${toCreate.length}. A corrigir: ${toUpdate.length}. Já certos: ${wanted.length - toCreate.length - toUpdate.length}.`,
+  );
+  if (preview) {
+    for (const item of toCreate.slice(0, 10)) console.log(`  ${item.fromPath} → ${item.toPath}`);
+    return;
+  }
+  await db.redirect.createMany({
+    data: toCreate.map((item) => ({ ...item, note: REDIRECT_NOTE })),
+    skipDuplicates: true,
+  });
+  for (const item of toUpdate)
+    await db.redirect.update({ where: { fromPath: item.fromPath }, data: { toPath: item.toPath } });
+  const admin = await db.user.findFirst({
+    where: { role: "ADMIN" },
+    orderBy: { createdAt: "asc" },
+  });
+  await logAudit({
+    userId: admin?.id,
+    action: "redirect.import",
+    entityType: "Redirect",
+    diff: { criados: toCreate.length, corrigidos: toUpdate.length },
+    userAgent: "scripts/import-legacy",
+  });
+  console.log("Redirecionamentos gravados.");
+}
 
 async function main() {
   if (!file) {
@@ -43,6 +100,11 @@ async function main() {
           buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength),
         ),
       );
+  if (redirectsOnly) {
+    if (!feed) throw new Error("Os redirecionamentos dependem do XML do site antigo.");
+    await syncProductRedirects(feed.oldPaths);
+    return;
+  }
   const { format, mapping } = detectFormat(headers ?? []);
   if (mapping.sku !== undefined && (onlyMissing || part)) {
     const column = mapping.sku;

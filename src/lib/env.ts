@@ -28,7 +28,15 @@ const serverEnvSchema = z.object({
   S3_ACCESS_KEY: optionalString,
   S3_SECRET_KEY: optionalString,
   S3_PUBLIC_URL: optionalString,
-  PAYMENT_PROVIDER: z.enum(["mock"]).default("mock"),
+  PAYMENT_PROVIDER: z.enum(["mock", "cielo"]).default("mock"),
+  // Cielo (API E-commerce): credenciais da loja, as da tokenização do cartão e o segredo do aviso.
+  CIELO_ENV: z.enum(["sandbox", "production"]).default("sandbox"),
+  CIELO_MERCHANT_ID: optionalString,
+  CIELO_MERCHANT_KEY: optionalString,
+  CIELO_CLIENT_ID: optionalString,
+  CIELO_CLIENT_SECRET: optionalString,
+  CIELO_WEBHOOK_SECRET: optionalString,
+  CIELO_SOFT_DESCRIPTOR: optionalString,
   // Lista separada por vírgula: "mock" (tabela do painel) ou as transportadoras ligadas, como "correios,jadlog".
   SHIPPING_PROVIDER: z
     .preprocess(emptyToUndefined, z.string().default("mock"))
@@ -70,7 +78,23 @@ const REQUIRED_BY_CARRIER = {
   jadlog: ["JADLOG_TOKEN", "JADLOG_CNPJ"],
 } as const;
 
+const REQUIRED_BY_CIELO = [
+  "CIELO_MERCHANT_ID",
+  "CIELO_MERCHANT_KEY",
+  "CIELO_CLIENT_ID",
+  "CIELO_CLIENT_SECRET",
+  "CIELO_WEBHOOK_SECRET",
+] as const;
+
 const checkedEnvSchema = serverEnvSchema.superRefine((env, context) => {
+  if (env.PAYMENT_PROVIDER === "cielo")
+    for (const key of REQUIRED_BY_CIELO)
+      if (!env[key])
+        context.addIssue({
+          code: "custom",
+          path: [key],
+          message: "obrigatória quando PAYMENT_PROVIDER é cielo",
+        });
   const carriers = env.SHIPPING_PROVIDER.filter((name) => name !== "mock");
   if (carriers.length === 0) return;
   if (env.SHIPPING_PROVIDER.includes("mock"))

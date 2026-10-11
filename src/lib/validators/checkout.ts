@@ -97,7 +97,8 @@ export const shippingChoiceSchema = z.object({
 });
 
 export const cardTokenSchema = z.object({
-  token: z.string().regex(/^mock_tok_[a-z0-9]{8,}$/i),
+  // Token do gateway simulado ou da Cielo (um GUID); o provider confere de novo.
+  token: z.string().regex(/^(mock_tok_[a-z0-9]{8,}|[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i),
   brand: z.string().min(1).max(20),
   last4: z.string().regex(/^\d{4}$/),
 });

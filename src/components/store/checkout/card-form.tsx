@@ -15,6 +15,7 @@ import {
   passesLuhn,
 } from "@/lib/validators/card";
 import { onlyDigits } from "@/lib/validators/cpf";
+import { cardTokenizationAction } from "@/server/actions/checkout";
 
 /** Cartões de teste do gateway simulado. O resultado depende dos quatro últimos dígitos. */
 export const TEST_CARDS = [
@@ -33,17 +34,54 @@ type CardFormProps = {
   submitLabel: string;
 };
 
+type CardFields = { number: string; name: string; expiry: string; cvv: string };
+
+const CARD_ERROR = "Não foi possível validar o cartão. Confira os dados ou tente outro cartão.";
+
 /**
- * Formulário de cartão. O número, a validade e o CVV ficam só neste componente: o que sai daqui
- * é um token com a bandeira e os quatro últimos dígitos. Nada mais vai para o servidor.
+ * Troca o cartão por um token. O número, a validade e o CVV saem deste componente só para o
+ * gateway (na Cielo, direto do navegador para ela): para o servidor da loja vai o token, com a
+ * bandeira e os quatro últimos dígitos.
  */
-// TODO(integracao): substituir pelo SDK de tokenização do gateway (Mercado Pago, Pagar.me, Stripe etc.)
-function tokenize(number: string): CardTokenData {
-  const digits = onlyDigits(number);
-  const random = Array.from(crypto.getRandomValues(new Uint8Array(12)), (byte) =>
-    byte.toString(16).padStart(2, "0"),
-  ).join("");
-  return { token: `mock_tok_${random}`, brand: detectCardBrand(digits), last4: digits.slice(-4) };
+async function tokenize(card: CardFields): Promise<CardTokenData | { error: string }> {
+  const digits = onlyDigits(card.number);
+  const summary = { brand: detectCardBrand(digits), last4: digits.slice(-4) };
+  const session = await cardTokenizationAction().catch(() => null);
+  if (!session) return { error: CARD_ERROR };
+  if (!session.ok) return { error: session.error };
+
+  if (session.tokenization.kind === "mock") {
+    const random = Array.from(crypto.getRandomValues(new Uint8Array(12)), (byte) =>
+      byte.toString(16).padStart(2, "0"),
+    ).join("");
+    return { token: `mock_tok_${random}`, ...summary };
+  }
+
+  // Cielo (Silent Order Post): validade em MM/AAAA e nome só com letras sem acento.
+  const [month = "", year = ""] = card.expiry.split("/");
+  const body = new URLSearchParams({
+    HolderName: card.name
+      .normalize("NFD")
+      .replace(/[^a-zA-Z ]/g, "")
+      .trim()
+      .slice(0, 64),
+    RawNumber: digits,
+    Expiration: `${month}/${year.length === 2 ? `20${year}` : year}`,
+    SecurityCode: card.cvv,
+    AccessToken: session.tokenization.accessToken,
+  });
+  try {
+    const response = await fetch(session.tokenization.url, {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body,
+    });
+    const result = (await response.json()) as { PaymentToken?: string };
+    if (response.status !== 201 || !result.PaymentToken) return { error: CARD_ERROR };
+    return { token: result.PaymentToken, ...summary };
+  } catch {
+    return { error: CARD_ERROR };
+  }
 }
 
 export function CardForm({ installments, showTestCards, onTokenized, submitLabel }: CardFormProps) {
@@ -53,9 +91,10 @@ export function CardForm({ installments, showTestCards, onTokenized, submitLabel
   const [cvv, setCvv] = useState("");
   const [count, setCount] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pending, setPending] = useState(false);
   const brand = detectCardBrand(number);
 
-  function submit() {
+  async function submit() {
     const next: Record<string, string> = {};
     if (!passesLuhn(number))
       next.number = "Este número de cartão não é válido. Confira os dígitos.";
@@ -70,7 +109,14 @@ export function CardForm({ installments, showTestCards, onTokenized, submitLabel
           : "O código de segurança tem 3 dígitos.";
     setErrors(next);
     if (Object.keys(next).length > 0) return;
-    onTokenized(tokenize(number), Math.min(count, installments.length || 1));
+    setPending(true);
+    const token = await tokenize({ number, name, expiry, cvv });
+    setPending(false);
+    if ("error" in token) {
+      setErrors({ form: token.error });
+      return;
+    }
+    onTokenized(token, Math.min(count, installments.length || 1));
   }
 
   return (
@@ -127,8 +173,9 @@ export function CardForm({ installments, showTestCards, onTokenized, submitLabel
           ))}
         </Select>
       </Field>
-      <Button onClick={submit} className="self-start">
-        {submitLabel}
+      {errors.form ? <Alert tone="error">{errors.form}</Alert> : null}
+      <Button onClick={submit} disabled={pending} className="self-start">
+        {pending ? "Validando o cartão" : submitLabel}
       </Button>
     </div>
   );

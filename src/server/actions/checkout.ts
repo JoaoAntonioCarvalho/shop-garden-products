@@ -18,6 +18,12 @@ import {
 import { placeOrder, type PlaceOrderResult } from "@/server/services/checkout";
 import { boletoAvailability, type BoletoAvailability } from "@/server/services/checkout-rules";
 import { requestNow } from "@/server/clock";
+import {
+  BOLETO_UNSUPPORTED_REASON,
+  boletoSupported,
+  cardTokenization,
+} from "@/server/services/payments";
+import type { CardTokenization } from "@/server/providers/payment/types";
 import { getInstallments } from "@/server/services/pricing";
 import { rateLimit, rateLimitMessage } from "@/server/services/rate-limit";
 import { getStoreSettings } from "@/server/services/settings";
@@ -110,13 +116,15 @@ export async function checkoutQuoteAction(
     blockedByLocalOnly,
     contact,
     totals,
-    boleto: boletoAvailability({
-      option,
-      deliveryDate: parsed.data.deliveryDate,
-      hasPerishable: base.hasPerishable,
-      holidays: settings.holidays,
-      now,
-    }),
+    boleto: boletoSupported()
+      ? boletoAvailability({
+          option,
+          deliveryDate: parsed.data.deliveryDate,
+          hasPerishable: base.hasPerishable,
+          holidays: settings.holidays,
+          now,
+        })
+      : { available: false, reason: BOLETO_UNSUPPORTED_REASON },
     installments: Array.from({ length: maxInstallments }, (_, index) => ({
       count: index + 1,
       valueCents: Math.round(totals.CREDIT_CARD.totalCents / (index + 1)),
@@ -207,4 +215,24 @@ export async function placeOrderAction(input: PlaceOrderInput): Promise<PlaceOrd
     now: await requestNow(),
     utm: (await readUtm()) ?? (cart.utm as never) ?? null,
   });
+}
+
+/**
+ * Prepara a troca do cartão pelo token do gateway. Chamado pelo formulário de cartão a cada
+ * tentativa: na Cielo, o token de acesso vale para um cartão só.
+ */
+export async function cardTokenizationAction(): Promise<
+  { ok: true; tokenization: CardTokenization } | { ok: false; error: string }
+> {
+  const limit = await rateLimit("cardToken", clientIpHash(await headers()));
+  if (!limit.allowed) return { ok: false, error: rateLimitMessage(limit) };
+  try {
+    return { ok: true, tokenization: await cardTokenization() };
+  } catch {
+    return {
+      ok: false,
+      error:
+        "Não foi possível iniciar o pagamento com cartão agora. Tente de novo ou pague com Pix.",
+    };
+  }
 }
