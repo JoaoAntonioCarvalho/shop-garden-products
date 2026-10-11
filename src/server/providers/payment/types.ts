@@ -47,6 +47,8 @@ export type WebhookEvent = {
 };
 
 export class WebhookSignatureError extends Error {}
+/** Chamada autêntica, mas sem pagamento para tratar (o teste que o gateway faz ao cadastrar a URL). */
+export class WebhookIgnoredError extends Error {}
 
 /**
  * Como o navegador troca o cartão pelo token. No simulado, o token é inventado no próprio

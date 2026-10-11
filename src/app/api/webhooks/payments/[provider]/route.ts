@@ -1,5 +1,5 @@
 import { getPaymentProvider } from "@/server/providers/payment";
-import { WebhookSignatureError } from "@/server/providers/payment/types";
+import { WebhookIgnoredError, WebhookSignatureError } from "@/server/providers/payment/types";
 import { applyPaymentEvent } from "@/server/services/payments";
 
 /**
@@ -20,6 +20,8 @@ export async function POST(
   } catch (error) {
     if (error instanceof WebhookSignatureError)
       return Response.json({ error: error.message }, { status: 401 });
+    if (error instanceof WebhookIgnoredError)
+      return Response.json({ received: true, handled: false });
     throw error;
   }
 

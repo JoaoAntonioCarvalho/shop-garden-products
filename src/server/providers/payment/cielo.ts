@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import {
+  WebhookIgnoredError,
   WebhookSignatureError,
   type BoletoResult,
   type CardChargeResult,
@@ -291,14 +292,15 @@ export class CieloPaymentProvider implements PaymentProvider {
     )
       throw new WebhookSignatureError("Aviso da Cielo sem o cabeçalho esperado");
 
-    let payload: { PaymentId?: unknown; ChangeType?: unknown };
+    // Ao salvar a URL, a Cielo faz uma chamada de teste e só aceita o cadastro se receber 200.
+    let payload: { PaymentId?: unknown; ChangeType?: unknown } | null = null;
     try {
       payload = JSON.parse(await request.text());
     } catch {
-      throw new WebhookSignatureError("Corpo do aviso inválido");
+      // corpo vazio ou sem JSON: tratado abaixo
     }
-    if (typeof payload.PaymentId !== "string" || !/^[0-9a-f-]{36}$/i.test(payload.PaymentId))
-      throw new WebhookSignatureError("Aviso sem identificador de pagamento");
+    if (typeof payload?.PaymentId !== "string" || !/^[0-9a-f-]{36}$/i.test(payload.PaymentId))
+      throw new WebhookIgnoredError("Aviso sem identificador de pagamento");
     return {
       externalId: payload.PaymentId,
       status: await this.getStatus(payload.PaymentId),

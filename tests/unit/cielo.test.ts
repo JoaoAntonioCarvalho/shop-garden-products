@@ -7,7 +7,7 @@ import {
   cieloDenialReason,
   mapCieloStatus,
 } from "@/server/providers/payment/cielo";
-import { WebhookSignatureError } from "@/server/providers/payment/types";
+import { WebhookIgnoredError, WebhookSignatureError } from "@/server/providers/payment/types";
 
 const config = {
   environment: "sandbox" as const,
@@ -268,11 +268,15 @@ describe("Cielo: consulta, devolução e aviso", () => {
     expect(event).toMatchObject({ externalId: PAYMENT_ID, status: "PAID" });
   });
 
-  it("recusa aviso sem identificador válido", async () => {
-    const provider = new CieloPaymentProvider(config, fakeFetch({}).fetcher);
-    await expect(
-      provider.parseWebhook(notice("segredo-do-aviso", { PaymentId: "../outra-coisa" })),
-    ).rejects.toBeInstanceOf(WebhookSignatureError);
+  it("ignora, sem consultar a Cielo, o aviso autêntico sem identificador válido", async () => {
+    const { fetcher, calls } = fakeFetch({});
+    const provider = new CieloPaymentProvider(config, fetcher);
+    for (const body of [{ PaymentId: "../outra-coisa" }, {}]) {
+      await expect(provider.parseWebhook(notice("segredo-do-aviso", body))).rejects.toBeInstanceOf(
+        WebhookIgnoredError,
+      );
+    }
+    expect(calls).toHaveLength(0);
   });
 });
 
