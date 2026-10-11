@@ -297,3 +297,11 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Antes de expirar um Pix ou boleto, a loja consulta o gateway** e confirma o pagamento se ele já entrou.
 - **Risco conhecido, Pix pago depois de expirado:** não encontrei como informar o prazo do QR Code à Cielo. Detalhe em `INTEGRACOES.md`, seção 1.
 - **E-mail:** recomendado o Resend por SMTP, sem código novo. Nada contratado ainda.
+
+## 2026-10-10 — Cielo em produção, textos jurídicos e redirecionamentos
+
+- **Cielo ligada na loja publicada**, ainda em modo manutenção. Um Pix real de R$ 1,00 foi gerado e pago. A devolução foi negada pela Cielo por falta de saldo na conta Pix, com resposta 200 e status "pago": a devolução só conta como feita com status 10 ou 11, ou status 2 com `ReasonCode` 0.
+- **Aviso da Cielo sem pagamento responde 200** quando o cabeçalho secreto confere: a Cielo testa o endereço ao cadastrar a URL.
+- **Boleto saiu dos textos** (Pagamentos, Entrega e perguntas frequentes), porque a Cielo não emite.
+- **Textos jurídicos completos** em `prisma/seed/legal-pages.ts`, publicados em produção. Nenhuma cláusula tira direito do consumidor, porque cláusula assim é nula (artigo 51 do CDC) e desprotege a loja: o arrependimento de 7 dias vale também para plantas, com a condição de a planta voltar viva e bem cuidada; o foro é o do domicílio do consumidor. Sem revisão de advogado.
+- **Produtos sem foto na lixeira e redirecionamentos gravados** a pedido do dono, com a fila "A revisar" intocada.

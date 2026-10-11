@@ -42,7 +42,7 @@ Todos os valores abaixo são exemplos.
 
 - **Texto de SEO e FAQ de cada categoria principal** (`prisma/seed/categories.ts`, ou Admin > Categorias): rascunhos escritos para pessoas, sem listas de palavras-chave. Revisar o conteúdo e o tom.
 - **Páginas institucionais** (`prisma/seed/pages.ts`, ou Admin > Páginas): Sobre, Entrega e prazos, Pagamentos.
-- **MODELO: revisar com advogado** antes de publicar: Trocas e devoluções, Política de privacidade, Política de cookies, Termos de uso. Na política de privacidade falta o nome do encarregado de dados.
+- **Textos jurídicos** (Trocas e devoluções, Política de privacidade, Política de cookies, Termos de uso): versão completa escrita em 10/10/2026 e publicada (`prisma/seed/legal-pages.ts`, ou Admin > Páginas). Não foi revisada por advogado: a revisão continua recomendada. Pontos que dependem da resposta da dona: prazo de 48 horas para avisar avaria e planta em mau estado, reembolso em até 10 dias úteis, cobrança de nova entrega, substituição de itens de arranjo, compra só por maiores de 18 anos. Como a loja é microempresa, a política indica um canal de atendimento em vez de um encarregado de dados (Resolução CD/ANPD 2/2022).
 - **Perguntas frequentes da página de Ajuda** (Admin > Ajuda).
 - **Texto "Sobre a Net Shop Garden" da home** (Admin > Home).
 - **Linha Carol Costa:** confirmar a descrição da coleção e quais produtos fazem parte dela.
@@ -82,10 +82,10 @@ Todos os valores abaixo são exemplos.
 
 - [ ] Exportar os produtos no painel da FastCommerce, com todas as colunas (inclusive as de imagem), e colocar o arquivo em `data-privada/`. Com ele: `pnpm import:legacy data-privada/arquivo.csv --previa` para conferir e, sem `--previa`, para gravar.
 - [ ] Conferir se as fotos do site antigo podem ser baixadas pelo endereço que vem no arquivo. Se o servidor de imagens bloquear, será preciso um arquivo com as fotos.
-- [ ] Revisar os produtos em Admin > Curadoria. Em 10/10/2026: 1.031 na loja, 87 excluídos e **34 ainda na fila "A revisar"** (quase toda a categoria Fibra de coco e os vasos Japi).
-- [ ] Enviar foto de 3 produtos mantidos que ficaram fora da loja porque a foto não veio do site antigo: `409203` (Home spray lavanda absoluta), `481618` (Salsão MDPT15) e `523929` (Vaso bari branco). Admin > Produtos > Imagens.
+- [ ] Revisar os produtos em Admin > Curadoria. Em 10/10/2026: 1.031 na loja, 90 na lixeira e **34 na fila "A revisar"** (quase toda a categoria Fibra de coco e os vasos Japi), que ficam lá por decisão da dona.
+- [x] Os 3 produtos mantidos sem foto (`409203`, `481618` e `523929`) foram para a lixeira em 10/10/2026. Dá para restaurar em Admin > Curadoria > Lixeira.
 - [ ] **Informar o estoque real.** Em 10/10/2026 todos os produtos receberam 10 unidades, como valor provisório para a loja poder vender. Ajustar em Admin > Estoque, ou decidir se a quantidade virá do Bling.
-- [ ] Depois da fila zerada: `pnpm import:legacy data-privada/prod/xml-products.xml --redirecionamentos` no banco de produção, para os endereços antigos dos produtos levarem à página nova.
+- [x] Redirecionamentos dos 1.031 produtos publicados gravados em produção em 10/10/2026. Se algum produto da fila "A revisar" for publicado depois, rodar de novo `pnpm import:legacy data-privada/prod/xml-products.xml --redirecionamentos`.
 - [ ] Criar o repositório privado no GitHub e passar o endereço, para o envio do código e a ligação com a Vercel.
 
 ## Integrações a contratar
@@ -124,10 +124,21 @@ Boleto deixa de ser oferecido com a Cielo.
 
 ### Para ligar o e-mail
 
-- [ ] Criar a conta no Resend (gratuito até 3.000 e-mails por mês) e adicionar o domínio.
-- [ ] Publicar no registro.br os registros de DNS que o Resend mostrar (SPF e DKIM).
-- [ ] Trazer a chave de API, para as variáveis `SMTP_*` na Vercel.
-- [ ] Decidir onde a loja vai ler o `contato@`: o Resend só envia. Zoho Mail tem plano gratuito com domínio próprio.
+A chave do Resend está no `.env.vercel` (variáveis `SMTP_*`). A chave só envia e-mails: o domínio precisa ser cadastrado pelo site do Resend.
+
+- [x] Criar a conta no Resend e trazer a chave de API.
+- [ ] No Resend, em Domains, adicionar `netshopgarden.com.br` (região São Paulo) e copiar os registros de DNS.
+- [ ] Publicar esses registros no DNS do domínio. Eles ficam em subdomínios (`send` e `resend._domainkey`) e não mexem no e-mail atual.
+- [ ] Colocar as variáveis `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` e `EMAIL_FROM` na Vercel e publicar de novo.
+
+A loja já tem caixas de e-mail no domínio, hospedadas na Locaweb (registros MX). O Resend só envia os e-mails automáticos; as respostas dos clientes continuam chegando na Locaweb.
+
+### Domínio e DNS
+
+O domínio `netshopgarden.com.br` está no registro.br, mas o DNS é servido pela Rumo (`buzios.rumo.com.br` e `leblon.rumo.com.br`), a empresa do site antigo. Registros vistos em 10/10/2026: site em `201.20.10.204`, e-mail na Locaweb (4 registros MX, `pop`, `smtp`, `imap`, `mail`, `webmail`, `autodiscover`), SPF com Locaweb, Rumo e Dinamize, e `innlink` apontando para a Dinamize (newsletter).
+
+- [ ] Decidir quem altera o DNS: pedir à Rumo, ou passar o DNS para o registro.br recriando antes todos os registros de e-mail. Se o contrato do site antigo for cancelado sem isso, o e-mail da loja pode parar.
+- [ ] Apontar o domínio para a hospedagem nova, definir `APP_URL`, trocar a URL de notificação na Cielo e desligar o modo manutenção.
 
 ### Para ligar os Correios
 
