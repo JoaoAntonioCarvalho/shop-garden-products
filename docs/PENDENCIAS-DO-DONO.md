@@ -114,7 +114,8 @@ O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as crede
 - [x] **Pix** autorizado no cadastro (desde 06/08/2024).
 - [x] Credenciais do **Silent Order Post** (`ClientId` e `ClientSecret`).
 - [x] Nome na fatura do cartão: "NETSHOPGARDEN".
-- [ ] Pagar o Pix de teste de R$ 1,00 e conferir a confirmação e a devolução.
+- [x] Pix de teste de R$ 1,00 pago e confirmado pela Cielo (10/10/2026).
+- [ ] Devolução do Pix: a Cielo negou a devolução do teste por falta de saldo na conta Pix ("Merchant with insufficient balance for return"). Perguntar à Cielo como funciona o saldo para devolução de Pix. Enquanto isso, devolução de pedido pago com Pix pode aparecer como "falhou" no painel e precisa ser feita por transferência. O R$ 1,00 do teste ficou na conta da loja.
 - [ ] Fazer uma compra de teste com cartão de verdade e devolver.
 - [ ] Gerar uma nova `MerchantKey` e um novo `ClientSecret` no site da Cielo depois dos testes: os atuais foram enviados por conversa.
 - [ ] Confirmar o parcelamento sem juros (a loja oferece até 6x) e as taxas do contrato: no sem juros, quem paga a taxa do parcelamento é a loja.

@@ -220,6 +220,20 @@ describe("Cielo: consulta, devolução e aviso", () => {
     expect(calls[1].init.method).toBe("PUT");
   });
 
+  it("devolução negada com resposta 200 e status pago não conta como devolvida", async () => {
+    const denied = { Status: 2, ReasonCode: 7, ReasonMessage: "Denied", ReturnCode: "422" };
+    const partial = { Status: 2, ReasonCode: 0, ReasonMessage: "Successful", ReturnCode: "0" };
+    for (const [body, ok] of [
+      [denied, false],
+      [partial, true],
+    ] as const) {
+      const { fetcher } = fakeFetch({ "/void": () => json(body) });
+      expect(await new CieloPaymentProvider(config, fetcher).refund(PAYMENT_ID, 100)).toMatchObject(
+        { ok },
+      );
+    }
+  });
+
   it("devolução recusada não lança erro", async () => {
     const { fetcher } = fakeFetch({
       "/void": () => json([{ Code: 308, Message: "Transaction not available to void" }], 400),

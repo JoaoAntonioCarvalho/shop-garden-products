@@ -258,15 +258,18 @@ export class CieloPaymentProvider implements PaymentProvider {
     return mapCieloStatus(body.Payment);
   }
 
-  /** Cancelamento total ou parcial. No Pix, a Cielo só devolve se houver saldo na conta Pix. */
+  /** Cancelamento total ou parcial. No Pix, a Cielo só devolve se houver saldo na conta Pix dela. */
   async refund(externalId: string, amountCents: number): Promise<RefundResult> {
     try {
       const body = (await this.call(
         `${this.hosts.api}/1/sales/${encodeURIComponent(externalId)}/void?amount=${amountCents}`,
         { method: "PUT" },
-      )) as { Status?: number } | null;
+      )) as { Status?: number; ReasonCode?: number } | null;
+      const status = body?.Status ?? -1;
       return {
-        ok: [2, 10, 11].includes(body?.Status ?? -1),
+        // Na devolução parcial o status continua 2 (pago). A Cielo também responde 200 com status 2
+        // quando nega a devolução (Pix sem saldo): o que diferencia é o ReasonCode, 0 quando aceita.
+        ok: status === 10 || status === 11 || (status === 2 && body?.ReasonCode === 0),
         raw: (body ?? {}) as Record<string, unknown>,
       };
     } catch (error) {

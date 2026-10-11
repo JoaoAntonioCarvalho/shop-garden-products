@@ -12,7 +12,7 @@ O que está simulado, e o passo a passo para ligar o serviço real. Em todos os 
 
 `src/server/providers/payment/cielo.ts` usa a **API E-commerce Cielo** (a antiga Cielo 3.0): Pix e cartão de crédito dentro do site. Não há boleto: com a Cielo ligada, a opção aparece como indisponível.
 
-Conferido em 10/10/2026 no ambiente de testes da Cielo, com as credenciais públicas da documentação: Pix gerado, cartão aprovado e recusado pelo checkout no navegador, consulta, aviso e devolução. No mesmo dia, com as credenciais de produção da loja: a API respondeu, o Silent Order Post emitiu o token de acesso do cartão e um Pix de R$ 1,00 foi gerado. **Ainda não houve pagamento confirmado nem venda no cartão em produção.**
+Conferido em 10/10/2026 no ambiente de testes da Cielo, com as credenciais públicas da documentação: Pix gerado, cartão aprovado e recusado pelo checkout no navegador, consulta, aviso e devolução. No mesmo dia, com as credenciais de produção da loja: a API respondeu, o Silent Order Post emitiu o token de acesso do cartão e um Pix de R$ 1,00 foi gerado. O Pix foi pago e a consulta devolveu "pago". A devolução desse Pix foi negada pela Cielo por falta de saldo na conta Pix, com resposta 200 e status 2: o provider só considera devolvido com status 10 ou 11, ou status 2 com `ReasonCode` 0. **Ainda não houve venda no cartão em produção, nem aviso de pagamento recebido.**
 
 **O que a loja precisa ter na Cielo.** O link de pagamento que a loja usa hoje é outro produto e não serve para cobrar dentro do site. É preciso pedir à Cielo:
 
