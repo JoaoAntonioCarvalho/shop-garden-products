@@ -253,7 +253,7 @@ export async function placeOrder(
           estimatedDeliveryFrom: estimatedFrom,
           estimatedDeliveryTo: estimatedTo,
           giftMessage: cart.giftMessage,
-          giftWrap: cart.giftWrap,
+          giftWrap: view.giftWrap,
           channel: "SITE",
           utmSource: context.utm?.source ?? null,
           utmMedium: context.utm?.medium ?? null,

@@ -314,3 +314,13 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Foto de produto aparece inteira** (`object-contain`) em cartões, galeria, sacola, checkout e pedidos: as fotos do site antigo são horizontais e eram cortadas no quadro 4:5. Os cartões de categoria também mostram a imagem inteira, acima da faixa do nome.
 - **Subcategoria sem produto não aparece** nos atalhos da página da categoria, e as 13 categorias vazias saíram do menu em produção (voltam em Admin > Categorias).
 - **Em produção, por não serem verdade:** depoimentos de exemplo ocultados e seção desligada; cupons de exemplo desativados (só `BEMVINDO10` ficou); banners deixaram de prometer entrega no mesmo dia, que está desligada.
+
+## 2026-10-11: respostas da dona sobre atendimento, entrega e trocas
+
+- **Sem entrega no mesmo dia e sem embalagem paga.** As regras de "Entrega hoje" foram desligadas e os textos que a prometiam (categorias, home, Sobre, Entrega, Ajuda) foram reescritos. A embalagem para presente ganhou a chave `giftWrapEnabled` (desligada): a opção some da sacola e o valor nunca é cobrado, mesmo que a sacola antiga tenha a marcação. O cartão com mensagem continua, com o pedido de aviso pelo WhatsApp.
+- **Retirada na loja ligada**, no Shopping Garden. Quando um item não pode ser entregue no CEP, a cotação passa a devolver só a retirada, com o aviso explicando. A retirada não conta como "entrega local" na checagem de itens só locais, senão o aviso nunca apareceria.
+- **Entrega própria** usa a modalidade agendada: data a partir de 3 dias, de segunda a sexta. A tabela de valores por região ainda não veio; a regra de exemplo continua.
+- **Cupom de boas-vindas** passou a `BEMVINDO5`, 5%. O cupom antigo não tinha nenhum uso nem lead, então foi renomeado em vez de criar outro.
+- **Equipe** pode alterar preço (`products.edit_price`), além de estoque e clientes. Continua sem acesso à seção Sistema.
+- **Trocas:** reembolso do cartão segue o prazo da bandeira; Pix é devolvido quando o produto chega e é conferido; arranjo sob medida só pelo WhatsApp, com montagem depois do pagamento. O custo do envio na desistência não foi escrito como sendo do cliente: no arrependimento do artigo 49 do CDC ele é do fornecedor, e a cláusula contrária exporia a loja. O texto pede contato antes do envio, e a decisão ficou nas pendências.
+- **Bling** continua sendo o sistema de nota fiscal. A integração segue pendente (`docs/INTEGRACOES.md`, seção 5).

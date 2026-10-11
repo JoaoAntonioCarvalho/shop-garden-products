@@ -33,13 +33,13 @@ describe("matriz de permissões (seção 12.2)", () => {
     expect(can(staff, "orders.export")).toBe(false);
   });
 
-  it("STAFF no catálogo: vê e edita estoque e imagens; sem excluir e sem alterar preço", () => {
+  it("STAFF no catálogo: vê e edita estoque, preço e imagens; sem excluir e sem editar o cadastro", () => {
     expect(can(staff, "products.view")).toBe(true);
     expect(can(staff, "products.edit_images")).toBe(true);
     expect(can(staff, "inventory.adjust")).toBe(true);
+    expect(can(staff, "products.edit_price")).toBe(true);
     for (const permission of [
       "products.edit",
-      "products.edit_price",
       "products.delete",
       "products.view_cost",
       "products.remove_samples",

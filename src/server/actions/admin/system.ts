@@ -70,6 +70,7 @@ const settingsSchema = z.object({
   maxInstallments: int("o número de parcelas", 1, 12),
   minInstallmentCents: money("a parcela mínima"),
   freeShippingThresholdCents: money("o valor do frete grátis"),
+  giftWrapEnabled: bool(),
   giftWrapPriceCents: money("o preço da embalagem para presente"),
   pixExpirationMinutes: int("a validade do Pix", 5, 1440),
   cartExpirationDays: int("a validade da sacola", 1, 90),

@@ -30,6 +30,8 @@ export type StoreSettings = {
   maxInstallments: number;
   minInstallmentCents: number;
   freeShippingThresholdCents: number;
+  /** A loja oferece embalagem para presente paga. Desligada, a opção some da sacola. */
+  giftWrapEnabled: boolean;
   giftWrapPriceCents: number;
   sameDay: {
     enabled: boolean;
@@ -66,14 +68,15 @@ export const storeConfig: StoreSettings = {
   phoneDisplay: "(11) 95581-7159", // TODO(dono): confirmar
   email: "contato@netshopgarden.com.br", // TODO(dono): confirmar (e-mail em domínio próprio)
   notificationEmail: "contato@netshopgarden.com.br", // TODO(dono): confirmar
-  businessHours: "Segunda a sexta, das 9h às 17h", // TODO(dono): confirmar sábado
-  instagram: "", // TODO(dono): informar a URL do perfil
+  businessHours: "Segunda a sexta, das 9h às 17h. Sábado, das 9h às 14h30",
+  instagram: "https://www.instagram.com/netshopgarden",
   partnerClaim: "Parceira oficial de e-commerce do Shopping Garden, desde 1999 em São Paulo", // TODO(dono): confirmar
   pixDiscountPercent: 5, // TODO(dono): confirmar
   maxInstallments: 6, // TODO(dono): confirmar
   minInstallmentCents: 3000, // TODO(dono): confirmar
   freeShippingThresholdCents: 29900, // TODO(dono): confirmar
-  giftWrapPriceCents: 1500, // TODO(dono): confirmar
+  giftWrapEnabled: false, // a loja não tem embalagem para presente paga (resposta da dona, 11/10/2026)
+  giftWrapPriceCents: 1500,
   sameDay: {
     enabled: true,
     cutoffTime: "14:00", // TODO(dono): confirmar

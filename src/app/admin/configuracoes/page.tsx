@@ -89,6 +89,12 @@ const fields: FieldDef[] = [
     section: "Regras comerciais",
   },
   {
+    name: "giftWrapEnabled",
+    label: "Oferecer embalagem para presente paga na sacola",
+    type: "checkbox",
+    section: "Regras comerciais",
+  },
+  {
     name: "giftWrapPriceCents",
     label: "Embalagem para presente (R$)",
     type: "money",

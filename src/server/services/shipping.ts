@@ -11,6 +11,7 @@ import { normalizeCep } from "@/lib/validators/cep";
 import { getShippingProvider, loadShippingRules } from "@/server/providers/shipping";
 import { isBlockedByLocalOnly } from "@/server/providers/shipping/mock";
 import type { ShippingOption, ShippingQuoteItem } from "@/server/providers/shipping/types";
+import { shippingKindOf } from "./checkout-rules";
 import type { CouponData } from "./coupons";
 
 export type ShippingQuote = {
@@ -92,14 +93,16 @@ export async function quoteShipping(input: {
   const blockedItems = cep
     ? findBlockedItems(cep, restrictions, !isBlockedByLocalOnly(quoteInput, rules))
     : [];
-  // Com item que não vai para o CEP, nenhuma opção é oferecida: o pedido não pode ser fechado assim.
-  if (blockedItems.length > 0)
+  // Com item que não vai para o CEP, a única saída oferecida é a retirada na loja, se estiver ligada.
+  if (blockedItems.length > 0) {
+    const pickup = options.filter((option) => shippingKindOf(option.code) === "pickup");
     return {
-      options: [],
+      options: pickup,
       blockedByLocalOnly: true,
       blockedItems,
-      notice: blockedCartNotice(blockedItems),
+      notice: blockedCartNotice(blockedItems, pickup.length > 0),
     };
+  }
 
   return {
     options: applyFreeShippingCoupon(options, input.freeShippingCoupon ?? null),

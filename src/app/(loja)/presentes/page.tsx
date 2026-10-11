@@ -31,7 +31,14 @@ export default async function GiftsPage() {
 
   const benefits = [
     { icon: PenLine, text: "Cartão com a sua mensagem, sem custo" },
-    { icon: Gift, text: `Embalagem para presente por ${formatBRL(settings.giftWrapPriceCents)}` },
+    ...(settings.giftWrapEnabled
+      ? [
+          {
+            icon: Gift,
+            text: `Embalagem para presente por ${formatBRL(settings.giftWrapPriceCents)}`,
+          },
+        ]
+      : [{ icon: Gift, text: "Arranjos já saem da loja embalados para presentear" }]),
     ...(settings.sameDay.enabled
       ? [
           {

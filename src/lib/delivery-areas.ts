@@ -104,14 +104,16 @@ export function blockedSentences(items: BlockedItem[]): string {
 }
 
 const CONTACT_HINT = "Para receber em outro lugar, fale com a gente pelo WhatsApp.";
+const PICKUP_HINT =
+  "Você pode retirar na loja ou, para receber em outro lugar, falar com a gente pelo WhatsApp.";
 
-/** Aviso na página do produto. */
-export const blockedProductNotice = (items: BlockedItem[]): string =>
-  `${blockedSentences(items)} ${CONTACT_HINT}`;
+/** Aviso na página do produto. Com retirada na loja ligada, ela é oferecida como saída. */
+export const blockedProductNotice = (items: BlockedItem[], pickupAvailable = false): string =>
+  `${blockedSentences(items)} ${pickupAvailable ? PICKUP_HINT : CONTACT_HINT}`;
 
 /** Aviso na sacola e no checkout: os outros itens só podem seguir sem o que está bloqueado. */
-export const blockedCartNotice = (items: BlockedItem[]): string =>
-  `${blockedSentences(items)} ${CONTACT_HINT} Para ver as opções de envio para este CEP, remova da sacola o que não pode ser enviado.`;
+export const blockedCartNotice = (items: BlockedItem[], pickupAvailable = false): string =>
+  `${blockedSentences(items)} ${pickupAvailable ? PICKUP_HINT : CONTACT_HINT} Para ver as ${pickupAvailable ? "outras " : ""}opções de envio para este CEP, remova da sacola o que não pode ser enviado.`;
 
 /** Mensagem que já vai escrita no WhatsApp. */
 export const blockedContactMessage = (items: BlockedItem[], cep: string): string =>

@@ -96,6 +96,12 @@ describe("itens que não vão para o CEP", () => {
     expect(blockedCartNotice(blocked)).toBe(
       "Palmeira ráfis tem entrega só nesta área: São Paulo, capital. Orquídea branca e Arranjo de rosas têm entrega só nesta área: Grande São Paulo. Para receber em outro lugar, fale com a gente pelo WhatsApp. Para ver as opções de envio para este CEP, remova da sacola o que não pode ser enviado.",
     );
+    expect(blockedProductNotice([blocked[0]], true)).toBe(
+      "Palmeira ráfis tem entrega só nesta área: São Paulo, capital. Você pode retirar na loja ou, para receber em outro lugar, falar com a gente pelo WhatsApp.",
+    );
+    expect(blockedCartNotice([blocked[0]], true)).toContain(
+      "Para ver as outras opções de envio para este CEP",
+    );
     expect(blockedContactMessage(blocked, "22041001")).toBe(
       "Olá! Quero receber Palmeira ráfis, Orquídea branca e Arranjo de rosas no CEP 22041-001. Vocês conseguem entregar?",
     );

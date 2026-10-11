@@ -141,7 +141,7 @@ export function computeShippingOptions(
   return options;
 }
 
-/** O carrinho tem itens só locais e o CEP não é atendido por nenhuma regra local. */
+/** O carrinho tem itens só locais e o CEP não é atendido por nenhuma regra de entrega local (retirada não conta). */
 export function isBlockedByLocalOnly(
   input: ShippingQuoteInput,
   rules: ShippingRuleData[],
@@ -151,6 +151,7 @@ export function isBlockedByLocalOnly(
   return !rules.some(
     (rule) =>
       rule.isActive &&
+      rule.method !== "PICKUP" &&
       rule.allowsLocalOnlyProducts &&
       isCepInRange(cep, rule.cepStart, rule.cepEnd),
   );

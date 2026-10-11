@@ -282,6 +282,22 @@ describe("opções de frete", () => {
     expect(isBlockedByLocalOnly({ ...rio, cep: "01310-100" }, rules)).toBe(false);
   });
 
+  it("retirada na loja: é a única opção para item só local fora da área, e não conta como entrega local", () => {
+    const withPickup = [
+      ...rules,
+      rule({
+        code: "retirada",
+        name: "Retirada na loja",
+        method: "PICKUP",
+        allowsLocalOnlyProducts: true,
+        position: 50,
+      }),
+    ];
+    const rio = { cep: "22041-001", items: [plant], subtotalCents: 10000, now: saturdayMorning };
+    expect(codes(computeShippingOptions(rio, withPickup, settings))).toEqual(["retirada"]);
+    expect(isBlockedByLocalOnly(rio, withPickup)).toBe(true);
+  });
+
   it("regra inativa não aparece; CEP inválido não devolve nada", () => {
     expect(codes(quote("01310-100", [vase], saturdayMorning))).not.toContain("retirada");
     expect(quote("123", [vase], saturdayMorning)).toEqual([]);

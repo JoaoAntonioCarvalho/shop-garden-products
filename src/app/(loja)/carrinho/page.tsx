@@ -150,7 +150,7 @@ export default async function CartPage() {
             <GiftOptions
               giftMessage={view.giftMessage}
               giftWrap={view.giftWrap}
-              giftWrapPriceCents={settings.giftWrapPriceCents}
+              giftWrapPriceCents={settings.giftWrapEnabled ? settings.giftWrapPriceCents : null}
             />
           </div>
         </div>

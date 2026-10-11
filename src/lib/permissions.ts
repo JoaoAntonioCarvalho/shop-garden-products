@@ -24,7 +24,7 @@ export const PERMISSIONS = {
   "products.view": ["ADMIN", "STAFF"],
   "products.edit": ["ADMIN"],
   "products.edit_images": ["ADMIN", "STAFF"],
-  "products.edit_price": ["ADMIN"],
+  "products.edit_price": ["ADMIN", "STAFF"],
   "products.view_cost": ["ADMIN"],
   "products.delete": ["ADMIN"],
   "products.import": ["ADMIN"],

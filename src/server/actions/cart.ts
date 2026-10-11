@@ -311,7 +311,7 @@ export async function quoteProductShippingAction(
     now: await requestNow(),
   });
   const notice = quote.blockedByLocalOnly
-    ? blockedProductNotice(quote.blockedItems)
+    ? blockedProductNotice(quote.blockedItems, quote.options.length > 0)
     : (quote.notice ?? undefined);
   return {
     ok: true,

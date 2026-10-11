@@ -11,7 +11,8 @@ O detalhe de cada integração está em `docs/INTEGRACOES.md`, e a zona de DNS c
 | Salvar a URL de notificação na Cielo (falta confirmar no aplicativo Cielo Gestão)                | Dona | Um Pix de teste muda o pedido para pago sozinho                    |
 | Comprar com cartão de verdade no site e cancelar o pedido com devolução                          | Dev  | Estorno aparece no pedido e na Cielo                               |
 | Gerar nova `MerchantKey`, novo `ClientSecret` e nova chave do Resend, e trocar na Vercel         | Dev  | Um Pix de teste continua funcionando                               |
-| Responder as perguntas de entrega, preços, trocas e equipe                                       | Dona | Regras de frete e áreas de entrega cadastradas em Admin > Frete    |
+| Trazer a tabela de frete da entrega própria por região e as regras dos Correios do site antigo   | Dona | Regras de frete e áreas de entrega cadastradas em Admin > Frete    |
+| Confirmar o e-mail de atendimento (o informado, `@gmail.com.br`, não recebe mensagens)           | Dona | Admin > Configurações                                              |
 | Conferir os textos de Entrega, Trocas, Privacidade e Termos com as respostas (e com um advogado) | Dona | Admin > Páginas                                                    |
 | Decidir os 34 produtos da fila "A revisar"                                                       | Dona | Admin > Curadoria com a fila vazia                                 |
 | Informar o estoque real (hoje todos os produtos têm 10 unidades)                                 | Dona | Admin > Estoque                                                    |

@@ -444,14 +444,15 @@ export async function buildCartView(
     coupon = { ...result, code: cart.couponCode };
   }
 
-  const giftWrapCents = cart.giftWrap ? settings.giftWrapPriceCents : 0;
+  const giftWrap = cart.giftWrap && settings.giftWrapEnabled;
+  const giftWrapCents = giftWrap ? settings.giftWrapPriceCents : 0;
   return {
     id: cart.id,
     lines,
     itemCount: lines.reduce((sum, line) => sum + line.quantity, 0),
     subtotalCents,
     coupon,
-    giftWrap: cart.giftWrap,
+    giftWrap,
     giftMessage: cart.giftMessage,
     shippingCep: cart.shippingCep,
     email: cart.email,

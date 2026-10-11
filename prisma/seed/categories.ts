@@ -35,7 +35,7 @@ export const seedCategories: SeedCategory[] = [
     showOnHome: true,
     seoTitle: "Plantas naturais com entrega em São Paulo",
     seoDescription:
-      "Orquídeas, folhagens, flores em vasos, suculentas e temperos com curadoria Shopping Garden. Entrega no mesmo dia em São Paulo.",
+      "Orquídeas, folhagens, flores em vasos, suculentas e temperos com curadoria Shopping Garden. Entrega própria em São Paulo.",
     seoContent: `<h2>Plantas naturais escolhidas uma a uma</h2>
 <p>Cada planta da Net Shop Garden sai do Shopping Garden, centro de jardinagem de São Paulo desde 1999. Antes de seguir para a sua casa, ela é conferida por quem cuida de plantas todos os dias: folhas firmes, raízes saudáveis e substrato na umidade certa.</p>
 <p>Trabalhamos com orquídeas, folhagens para ambientes internos, flores em vasos, cactos, suculentas e ervas para a cozinha. Em cada página você encontra a ficha botânica da planta, com luz ideal, frequência de rega, porte na entrega e se ela é segura para pets.</p>
@@ -45,7 +45,7 @@ export const seedCategories: SeedCategory[] = [
 <h3>Plantas e animais de estimação</h3>
 <p>Algumas espécies comuns em decoração são tóxicas quando mastigadas por cães e gatos. Na ficha botânica indicamos quando a planta é segura e quando precisa ficar fora do alcance. O filtro "pet friendly" mostra apenas as seguras.</p>
 <h2>Entrega de plantas vivas</h2>
-<p>Plantas naturais são entregues na Grande São Paulo, por equipe própria, em embalagem que protege vaso, hastes e folhas. Em pedidos feitos até o horário de corte, a entrega acontece no mesmo dia na capital. Você também pode agendar a data e o período que preferir.</p>
+<p>Plantas naturais são entregues na Grande São Paulo, por equipe própria, em embalagem que protege vaso, hastes e folhas. Você escolhe a data da entrega no checkout, ou retira o pedido na loja.</p>
 <p>Não enviamos plantas vivas por transportadora para outras regiões, porque o tempo de viagem compromete a qualidade. Para outros estados, veja nossas flores e plantas artificiais, vasos e cachepots.</p>`,
     faq: [
       {
@@ -69,9 +69,9 @@ export const seedCategories: SeedCategory[] = [
           "Zamioculca, espada-de-são-jorge, jiboia e suculentas toleram bem alguns dias sem rega e se adaptam a ambientes internos. Use o filtro de nível de cuidado para ver as opções fáceis.",
       },
       {
-        pergunta: "Posso receber no mesmo dia?",
+        pergunta: "Em quanto tempo recebo?",
         resposta:
-          "Sim, na capital de São Paulo, para pedidos feitos até o horário de corte informado na página do produto, de segunda a sábado.",
+          "A entrega própria na Grande São Paulo é feita em até 3 dias úteis, de segunda a sexta. Você também pode retirar o pedido na loja depois do e-mail de confirmação.",
       },
     ],
     children: [
@@ -79,14 +79,14 @@ export const seedCategories: SeedCategory[] = [
         name: "Orquídeas",
         slug: "orquideas",
         description:
-          "Phalaenopsis, Cymbidium e Dendrobium em flor, selecionadas no Shopping Garden. Entrega no mesmo dia em São Paulo.",
+          "Phalaenopsis, Cymbidium e Dendrobium em flor, selecionadas no Shopping Garden. Entrega própria em São Paulo.",
         legacyPaths: ["/decoracao/orquideas-naturais-86355227"],
         illustration: "orchid",
         filters: ["plantas"],
         showOnHome: true,
-        seoTitle: "Orquídeas naturais com entrega hoje em São Paulo",
+        seoTitle: "Orquídeas naturais com entrega em São Paulo",
         seoDescription:
-          "Orquídeas Phalaenopsis, Cymbidium e Dendrobium em flor, com curadoria Shopping Garden e entrega no mesmo dia em São Paulo.",
+          "Orquídeas Phalaenopsis, Cymbidium e Dendrobium em flor, com curadoria Shopping Garden e entrega própria em São Paulo.",
         seoContent: `<h2>Orquídeas em flor, prontas para presentear</h2>
 <p>A orquídea é a planta mais pedida da Net Shop Garden, e por um bom motivo: floresce por semanas, ocupa pouco espaço e fica bem em qualquer ambiente. Selecionamos cada vaso no Shopping Garden, escolhendo plantas com hastes firmes, botões ainda por abrir e folhas sem manchas, para que a floração dure mais na sua casa.</p>
 <h2>Qual orquídea escolher</h2>
@@ -95,7 +95,7 @@ export const seedCategories: SeedCategory[] = [
 <h3>Como cuidar depois que as flores caem</h3>
 <p>Quando a floração termina, a planta continua viva e saudável. Corte a haste seca acima do segundo nó, mantenha a rega semanal e deixe o vaso perto de uma janela iluminada. Com adubo próprio para orquídeas a cada quinze dias, novas hastes costumam surgir em alguns meses.</p>
 <h2>Entrega e embalagem</h2>
-<p>As orquídeas viajam em embalagem que mantém as hastes presas e protegidas. Na capital de São Paulo, pedidos feitos até o horário de corte chegam no mesmo dia. Se for presente, inclua um cartão com a sua mensagem na sacola, sem custo.</p>`,
+<p>As orquídeas viajam em embalagem que mantém as hastes presas e protegidas. Na Grande São Paulo, a entrega é feita por equipe própria, e você também pode retirar o pedido na loja. Se for presente, inclua um cartão com a sua mensagem na sacola, sem custo.</p>`,
         faq: [
           {
             pergunta: "Orquídea precisa de sol direto?",
@@ -190,17 +190,17 @@ export const seedCategories: SeedCategory[] = [
     seoContent: `<h2>Arranjos montados à mão</h2>
 <p>Um arranjo bem feito muda a mesa, a recepção ou a sala de quem recebe. Os arranjos da Net Shop Garden são montados por floristas do Shopping Garden, que combinam orquídeas, flores, folhagens e recipientes de cerâmica, vidro e madeira.</p>
 <h2>Arranjos naturais e artificiais</h2>
-<p>Os arranjos naturais usam plantas e flores vivas e são entregues na Grande São Paulo, no mesmo dia para pedidos feitos até o horário de corte. São a escolha para presentear em datas especiais e para eventos.</p>
+<p>Os arranjos naturais usam plantas e flores vivas e são entregues na Grande São Paulo por equipe própria, ou retirados na loja. São a escolha para presentear em datas especiais e para eventos.</p>
 <p>Os arranjos artificiais usam flores e folhagens de toque realista. Não precisam de rega nem de luz, mantêm a aparência por anos e podem ser enviados para todo o Brasil. Funcionam bem em escritórios, consultórios, casas de praia e ambientes com pouca claridade.</p>
 <h3>Como escolher o tamanho</h3>
 <p>Para centro de mesa de jantar, prefira arranjos baixos, que não atrapalham a conversa. Para aparadores e recepções, os arranjos altos, com hastes de orquídea, criam mais presença. Em cada página informamos altura e largura para você conferir se cabe no espaço.</p>
 <h2>Arranjos sob medida</h2>
-<p>Se você imagina algo específico, com determinada cor, tamanho ou recipiente, montamos um arranjo exclusivo. Envie a ideia pelo WhatsApp, com fotos de referência se tiver, e retornamos com sugestões e orçamento.</p>`,
+<p>Se você imagina algo específico, com determinada cor, tamanho ou recipiente, montamos um arranjo exclusivo. Envie a ideia pelo WhatsApp, com fotos de referência se tiver, e retornamos com sugestões e orçamento. O arranjo é combinado e pago pelo WhatsApp, e a montagem começa depois do pagamento.</p>`,
     faq: [
       {
         pergunta: "Vocês montam arranjos sob medida?",
         resposta:
-          "Sim. Conte pelo WhatsApp a ocasião, as cores e o orçamento. Nossa equipe envia sugestões e o prazo de montagem.",
+          "Sim. Conte pelo WhatsApp a ocasião, as cores e o orçamento. Nossa equipe envia sugestões e o prazo. O arranjo é combinado e pago pelo WhatsApp, e a montagem começa depois do pagamento.",
       },
       {
         pergunta: "Quanto tempo dura um arranjo natural?",
@@ -215,7 +215,7 @@ export const seedCategories: SeedCategory[] = [
       {
         pergunta: "Posso incluir um cartão com mensagem?",
         resposta:
-          "Sim. Na sacola, marque a opção de cartão e escreva sua mensagem. O cartão é gratuito.",
+          "Sim. Na sacola, marque a opção de cartão e escreva sua mensagem. O cartão é gratuito. Depois de fechar o pedido, avise a gente também pelo WhatsApp.",
       },
     ],
     children: [
@@ -638,7 +638,7 @@ export const seedCategories: SeedCategory[] = [
 <h2>Linha Conceito</h2>
 <p>A Linha Conceito reúne peças de design em pequenas tiragens: esculturas de cerâmica e vasos esculturais que funcionam como objeto de arte, com ou sem plantas. São boas opções de presente para casa nova.</p>
 <h2>Presentes</h2>
-<p>Velas, difusores e objetos de decoração podem ser enviados para todo o Brasil, com embalagem para presente e cartão com a sua mensagem.</p>`,
+<p>Velas, difusores e objetos de decoração podem ser enviados para todo o Brasil, com cartão com a sua mensagem.</p>`,
     faq: [
       {
         pergunta: "Quanto tempo dura um difusor de varetas?",
@@ -655,9 +655,9 @@ export const seedCategories: SeedCategory[] = [
         resposta: "Sim, com embalagem reforçada para peças frágeis.",
       },
       {
-        pergunta: "Posso pedir embalagem para presente?",
+        pergunta: "Posso enviar como presente?",
         resposta:
-          "Sim. Na sacola, marque a embalagem para presente e, se quiser, inclua um cartão com a sua mensagem.",
+          "Sim. Na sacola, inclua um cartão com a sua mensagem, sem custo. No checkout, informe o nome e o telefone de quem vai receber.",
       },
     ],
     children: [

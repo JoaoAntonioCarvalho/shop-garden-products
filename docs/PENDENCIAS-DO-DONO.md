@@ -12,27 +12,48 @@ Razão social, CNPJ e endereço são exigidos no rodapé pelo Decreto 7.962/2013
 
 ## Contatos
 
-| Item                   | Valor atual                                                                    | Onde trocar                      |
-| ---------------------- | ------------------------------------------------------------------------------ | -------------------------------- |
-| WhatsApp               | 5511955817159, exibido como (11) 95581-7159                                    | `whatsapp`, `phoneDisplay`       |
-| E-mail                 | contato@netshopgarden.com.br (sugestão em domínio próprio; precisa ser criado) | `email` e `EMAIL_FROM` no `.env` |
-| Horário de atendimento | Segunda a sexta, das 9h às 17h (confirmar sábado)                              | `businessHours`                  |
-| Instagram              | [URL]                                                                          | `instagram`                      |
+Respondidos pela dona em 11/10/2026 e gravados em produção.
+
+| Item                   | Valor atual                                                        | Onde trocar                      |
+| ---------------------- | ------------------------------------------------------------------ | -------------------------------- |
+| WhatsApp               | 5511955817159, exibido como (11) 95581-7159 (confirmado)           | `whatsapp`, `phoneDisplay`       |
+| E-mail                 | contato@netshopgarden.com.br (**pendente**, ver abaixo)            | `email` e `EMAIL_FROM` no `.env` |
+| Horário de atendimento | Segunda a sexta, das 9h às 17h. Sábado, das 9h às 14h30            | `businessHours`                  |
+| Instagram              | https://www.instagram.com/netshopgarden                            | `instagram`                      |
+| Endereço (rodapé)      | Av. República do Líbano, 789, sala 1, Ibirapuera, São Paulo, SP    | `address`                        |
+| Retirada na loja       | Av. dos Bandeirantes, 5900, Shopping Garden, São Paulo, até as 18h | Admin > Frete, regra `retirada`  |
+
+- [ ] **E-mail de atendimento:** a dona informou `netshopgarden@gmail.com.br`, mas o domínio `gmail.com.br` não recebe e-mails (não é o Gmail). Confirmar o endereço certo, provavelmente `@gmail.com` ou uma caixa `@netshopgarden.com.br` na Locaweb. Até lá o site mostra `contato@netshopgarden.com.br`, que precisa existir.
 
 ## Regras comerciais
 
-Todos os valores abaixo são exemplos.
+Confirmadas pela dona em 11/10/2026.
 
-| Item                            | Valor atual                                         | Onde trocar                              |
-| ------------------------------- | --------------------------------------------------- | ---------------------------------------- |
-| Desconto no Pix                 | 5%                                                  | `pixDiscountPercent`                     |
-| Parcelamento                    | até 6x sem juros, parcela mínima de R$ 30           | `maxInstallments`, `minInstallmentCents` |
-| Frete grátis                    | acima de R$ 299, entrega local e econômica nacional | `freeShippingThresholdCents`             |
-| Embalagem para presente         | R$ 15                                               | `giftWrapPriceCents`                     |
-| Entrega no mesmo dia            | pedidos até 14h, segunda a sábado, capital de SP    | `sameDay`                                |
-| Cupom de boas-vindas            | BEMVINDO10, 10% na primeira compra                  | `welcomeCoupon`                          |
-| Preços e faixas de CEP do frete | exemplos                                            | Admin > Frete                            |
-| Feriados sem entrega            | feriados nacionais                                  | Admin > Frete > Feriados                 |
+| Item                    | Valor atual                                                            | Onde trocar                              |
+| ----------------------- | ---------------------------------------------------------------------- | ---------------------------------------- |
+| Desconto no Pix         | 5%                                                                     | `pixDiscountPercent`                     |
+| Parcelamento            | até 6x sem juros, parcela mínima de R$ 50                              | `maxInstallments`, `minInstallmentCents` |
+| Frete grátis            | a partir de R$ 399                                                     | `freeShippingThresholdCents`             |
+| Embalagem para presente | não há; a opção foi desligada. Cartão com mensagem continua, sem custo | `giftWrapEnabled`                        |
+| Entrega no mesmo dia    | não há; regras desligadas                                              | `sameDay`, Admin > Frete                 |
+| Cupom de boas-vindas    | `BEMVINDO5`, 5% na primeira compra                                     | `welcomeCoupon`, Admin > Cupons          |
+| Bandeiras de cartão     | as que a Cielo aceita                                                  | contrato da Cielo                        |
+| Feriados sem entrega    | feriados nacionais                                                     | Admin > Frete > Feriados                 |
+
+## Entrega: o que falta
+
+A dona explicou o funcionamento em 11/10/2026. Já está no site: retirada na loja ligada (inclusive para produto que não é entregue no CEP do cliente), entrega própria de segunda a sexta com data a partir de 3 dias depois do pedido, e os textos de Entrega, Trocas e Ajuda.
+
+- [ ] **Tabela de frete da entrega própria por região.** O site antigo tinha uma faixa de valor para cada região. Hoje há uma regra única de exemplo (R$ 19,90 na Grande São Paulo). Trazer a tabela (print do painel da FastCommerce serve) para cadastrar em Admin > Frete, uma regra por faixa de CEP.
+- [ ] **Regras dos Correios do site antigo.** Pegar na FastCommerce o contrato, os serviços e as regras usadas. Os valores do envio nacional no site ainda são de exemplo.
+- [ ] **Jadlog:** a loja tem contrato. Faltam os dados de acesso da API (seção "Para ligar a Jadlog").
+- [ ] **Entrega própria sem escolha de data.** A dona trabalha com "até 3 dias úteis, avisamos antes". O site pede que o cliente escolha a data (a partir de 3 dias). Confirmar se serve ou se a escolha de data deve sair.
+- [ ] **Devolução por desistência:** a dona quer que o cliente pague o envio de volta. No arrependimento em 7 dias de compra online, o entendimento dos tribunais e do Procon é que esse custo é da loja. O texto publicado não promete pagar nem cobra: pede contato antes do envio. Decidir com advogado.
+
+## Equipe
+
+- [ ] Criar em Admin > Usuários o acesso único da equipe, com o papel "Equipe". Esse papel vê pedidos e clientes, ajusta estoque e, desde 11/10/2026, altera preço na lista de produtos. Não acessa configurações, frete, usuários nem auditoria. Com senha compartilhada, a auditoria não distingue quem fez cada alteração.
+- [ ] Estoque: a dona controla direto no site, em Admin > Estoque (ajuste por produto, em lote e inventário).
 
 ## Textos a revisar
 
@@ -53,7 +74,7 @@ Todos os valores abaixo são exemplos.
 - **Fotos dos produtos:** vieram do site antigo. Muitas têm a marca d'água "PhotoGrid" no canto, fundos diferentes e enquadramento desigual. As 34 da fila "A revisar" já foram refeitas no padrão novo (fundo branco, 4:5, produto centralizado); o mesmo tratamento pode ser aplicado ao catálogo inteiro.
 - **Imagens de categorias, ocasiões, coleções e banners:** em 11/10/2026 as ilustrações de teste foram trocadas por composições com fotos de produtos da loja. Podem ser substituídas por fotos em ambiente em Admin > Categorias e Admin > Banners. A seção "A loja online do Shopping Garden" pede uma foto real do Shopping Garden.
 - **Depoimentos:** os seis de exemplo foram ocultados e a seção da home foi desligada. Cadastrar depoimentos reais em Admin > Depoimentos e religar a seção em Admin > Home.
-- **Cupons:** só `BEMVINDO10` está ativo. `NETSHOPGARDENBEMVINDO` (do site antigo), `FRETEGRATIS`, `PRIMAVERA15` e `MAES25` foram desativados até a dona confirmar.
+- **Cupons:** só `BEMVINDO5` (5% na primeira compra) está ativo. `NETSHOPGARDENBEMVINDO` (do site antigo), `FRETEGRATIS`, `PRIMAVERA15` e `MAES25` foram desativados até a dona confirmar.
 - **Categorias sem produto** (13) saíram do menu; voltam em Admin > Categorias quando receberem produtos.
 - **Nomes de produtos em caixa alta** (por exemplo, "FORTH BOKASHI (250G)"): vieram assim do site antigo e precisam de revisão.
 - Fotos do hero (2400 × 1050 no desktop e 1200 × 1500 no celular), das categorias e das ocasiões de presente.
@@ -66,8 +87,6 @@ Todos os valores abaixo são exemplos.
 
 - **Carol Costa:** confirmar se o nome pode ser usado na coleção "Linha Carol Costa" e quais produtos fazem parte dela.
 - **Boleto:** hoje não é oferecido para plantas vivas, entrega hoje e entrega agendada em menos de 3 dias úteis. Confirmar.
-- **Embalagem para presente e mensagem do cartão:** confirmar se a loja oferece e o preço.
-- **Retirada na loja:** a regra existe, desligada. Ligar em Admin > Frete se houver retirada.
 - **Modo manutenção, cupom de boas-vindas e textos do pop-up:** revisar em Admin > Configurações antes de divulgar o site.
 
 ## Antes de ir ao ar

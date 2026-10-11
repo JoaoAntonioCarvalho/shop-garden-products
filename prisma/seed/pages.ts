@@ -9,7 +9,7 @@ import { legalPages } from "./legal-pages";
  * legal-pages.ts e ainda não foram revisados por advogado.
  */
 
-const pages: Array<{
+export const pages: Array<{
   slug: string;
   title: string;
   seoDescription: string;
@@ -27,10 +27,10 @@ const pages: Array<{
 <p>Tudo o que está no site passa pelas mãos da equipe do Shopping Garden. As plantas são escolhidas uma a uma no dia do envio: folhas firmes, raízes saudáveis e, no caso das orquídeas, botões ainda por abrir, para a floração durar mais na sua casa. Os vasos e cachepots são selecionados pelo acabamento e conferidos antes de embalar.</p>
 <h2>Embalagem própria para plantas e peças frágeis</h2>
 <p>Plantas viajam em embalagem que protege o vaso, as hastes e as folhas. Peças de cerâmica, porcelana e vidro são embaladas individualmente, com proteção contra impacto. Se algo chegar com avaria, resolvemos.</p>
-<h2>Entrega no mesmo dia em São Paulo</h2>
-<p>Na capital, pedidos feitos até {{corte}}, de segunda a sábado, chegam no mesmo dia. Você também pode agendar a data e o período de entrega em toda a Grande São Paulo.</p>
+<h2>Entrega própria e retirada na loja</h2>
+<p>Em São Paulo, a entrega é feita por equipe própria, em até 3 dias úteis, e você também pode retirar o pedido no Shopping Garden. Vasos, objetos e itens de jardinagem seguem pelos Correios e por transportadora para o restante do Brasil. Os detalhes estão em <a href="/entrega">Entrega e prazos</a>.</p>
 <h2>Arranjos sob medida</h2>
-<p>Se você procura algo que não está no site, fale com a gente pelo WhatsApp. Nossa equipe de floristas monta arranjos exclusivos e busca nas lojas a planta ou a peça que você precisa.</p>
+<p>Se você procura um arranjo diferente dos que estão no site, fale com a gente pelo WhatsApp. O arranjo é combinado e pago por lá, e a montagem começa depois do pagamento.</p>
 <h2>Atendimento</h2>
 <p>WhatsApp {{telefone}} e e-mail {{email}}. {{horario}}.</p>`,
   },
@@ -38,20 +38,22 @@ const pages: Array<{
     slug: "entrega",
     title: "Entrega e prazos",
     seoDescription:
-      "Modalidades de entrega da Net Shop Garden: entrega no mesmo dia em São Paulo, entrega agendada na Grande SP e envio para todo o Brasil.",
+      "Modalidades de entrega da Net Shop Garden: entrega própria na Grande São Paulo, retirada na loja e envio para todo o Brasil.",
     footerGroup: "ajuda",
-    content: `<h2>Entrega hoje em São Paulo</h2>
-<p>Para endereços na capital de São Paulo, pedidos com pagamento aprovado até {{corte}} são entregues no mesmo dia, até as 20h, de segunda a sábado. Em domingos e feriados não há entrega no mesmo dia.</p>
-<h2>Entrega agendada na Grande São Paulo</h2>
-<p>Você escolhe a data, nos próximos 14 dias úteis, e o período: manhã ou tarde. A entrega é feita por equipe própria. O frete é grátis para pedidos acima de {{freteGratis}}.</p>
+    content: `<h2>Entrega própria em São Paulo</h2>
+<p>Na Grande São Paulo, a entrega é feita por equipe própria. Você escolhe a data no checkout, a partir de 3 dias úteis depois do pedido: é o tempo de separar e conferir cada item. As entregas acontecem de segunda a sexta, em horário comercial, e avisamos você antes de sair. O valor depende da região e aparece ao informar o CEP.</p>
+<h2>Retirada na loja</h2>
+<p>Você pode retirar o pedido sem custo no Shopping Garden: Av. dos Bandeirantes, 5900, São Paulo. Aguarde o e-mail avisando que o pedido está pronto para retirada antes de ir até a loja. A retirada é feita até as 18h.</p>
 <h2>Envio para todo o Brasil</h2>
-<p>Vasos, cachepots, flores e plantas artificiais, objetos de decoração, aromas e itens de jardinagem seguem por transportadora para todas as regiões, nas modalidades econômica e expressa. O prazo e o valor aparecem ao informar o CEP no produto, na sacola ou no checkout. No envio econômico, o frete é grátis acima de {{freteGratis}}.</p>
-<h2>Plantas vivas só na Grande São Paulo</h2>
-<p>Plantas naturais, orquídeas e arranjos naturais são entregues apenas na Grande São Paulo. O tempo de viagem por transportadora compromete a qualidade da planta, e preferimos não arriscar.</p>
+<p>Vasos, cachepots, flores e plantas artificiais, objetos de decoração, aromas e itens de jardinagem seguem pelos Correios. Peças mais volumosas vão por transportadora (Jadlog). O prazo e o valor aparecem ao informar o CEP no produto, na sacola ou no checkout.</p>
+<h2>Frete grátis</h2>
+<p>O frete é grátis em pedidos a partir de {{freteGratis}}, nas modalidades indicadas ao informar o CEP.</p>
+<h2>Produtos que não seguem pelos Correios</h2>
+<p>Plantas naturais, orquídeas, arranjos naturais e itens pesados ou muito volumosos, como sacos de terra de 25 kg, não são enviados pelos Correios nem por transportadora. Para esses produtos há duas opções: entrega própria, nas regiões atendidas, ou retirada na loja. Se o seu CEP não for atendido, fale com a gente pelo WhatsApp {{telefone}}.</p>
 <h2>Prazo de entrega</h2>
 <p>O prazo começa a contar depois da aprovação do pagamento. Pagamentos por Pix e cartão são aprovados em minutos.</p>
 <h2>Se não houver ninguém para receber</h2>
-<p>Nas entregas locais, nosso entregador liga para o telefone informado. Se não conseguir contato, o pedido volta para a loja e combinamos uma nova data pelo WhatsApp. A segunda tentativa pode ter custo de frete.</p>
+<p>Nas entregas próprias, falamos com você pelo telefone informado antes de sair. Se não houver ninguém para receber, o pedido volta para a loja e combinamos uma nova data pelo WhatsApp. A segunda tentativa pode ter custo de frete.</p>
 <h2>Acompanhe o pedido</h2>
 <p>Você recebe um e-mail a cada mudança de status e pode consultar a qualquer momento em <a href="/rastreio">Rastrear pedido</a>.</p>`,
   },
@@ -73,7 +75,7 @@ const pages: Array<{
   ...legalPages,
 ];
 
-const faq: Array<[group: string, question: string, answer: string]> = [
+export const faq: Array<[group: string, question: string, answer: string]> = [
   [
     "Pedidos",
     "Como acompanho o meu pedido?",
@@ -97,27 +99,37 @@ const faq: Array<[group: string, question: string, answer: string]> = [
   [
     "Entrega",
     "Vocês entregam no mesmo dia?",
-    "Sim, na capital de São Paulo, para pedidos com pagamento aprovado até {{corte}}, de segunda a sábado.",
+    "Não. A entrega própria na Grande São Paulo é feita em até 3 dias úteis, de segunda a sexta, em horário comercial. Se tiver pressa, você pode retirar o pedido na loja assim que receber o e-mail de confirmação.",
   ],
   [
     "Entrega",
     "Plantas são entregues fora de São Paulo?",
-    "Não. Plantas vivas, orquídeas e arranjos naturais são entregues apenas na Grande São Paulo. Os demais produtos seguem para todo o Brasil.",
+    "Não. Plantas vivas, orquídeas e arranjos naturais são entregues por equipe própria nas regiões atendidas ou retirados na loja. Se o seu CEP não for atendido, fale com a gente pelo WhatsApp {{telefone}}. Os demais produtos seguem para todo o Brasil.",
   ],
   [
     "Entrega",
     "Posso agendar a entrega?",
-    "Sim. Na Grande São Paulo você escolhe a data e o período, manhã ou tarde.",
+    "Sim. Na entrega própria da Grande São Paulo você escolhe a data no checkout, a partir de 3 dias úteis depois do pedido, de segunda a sexta.",
+  ],
+  [
+    "Entrega",
+    "Posso retirar na loja?",
+    "Sim, sem custo. O endereço é Av. dos Bandeirantes, 5900, Shopping Garden, São Paulo. Aguarde o e-mail avisando que o pedido está pronto antes de ir. A retirada é feita até as 18h.",
+  ],
+  [
+    "Pedidos",
+    "Vocês fazem arranjos sob encomenda?",
+    "Pelo site, não. Para um arranjo diferente dos que estão na loja, fale com a gente pelo WhatsApp {{telefone}}: combinamos por lá, e a montagem começa depois do pagamento.",
   ],
   [
     "Entrega",
     "A partir de que valor o frete é grátis?",
-    "Acima de {{freteGratis}}, na entrega agendada da Grande São Paulo e no envio econômico para o restante do Brasil.",
+    "Em pedidos a partir de {{freteGratis}}, nas modalidades indicadas ao informar o CEP.",
   ],
   [
     "Entrega",
     "Posso enviar como presente?",
-    "Sim. Na sacola, inclua um cartão com a sua mensagem, sem custo, e, se quiser, a embalagem para presente por {{embalagemPresente}}. No checkout, informe o nome e o telefone de quem vai receber.",
+    "Sim. Os arranjos já saem da loja embalados para presentear. Na sacola, você pode incluir um cartão com a sua mensagem, sem custo; depois de fechar o pedido, avise a gente também pelo WhatsApp. No checkout, informe o nome e o telefone de quem vai receber.",
   ],
   [
     "Pagamento",
@@ -137,17 +149,17 @@ const faq: Array<[group: string, question: string, answer: string]> = [
   [
     "Trocas",
     "O produto chegou quebrado. O que eu faço?",
-    "Envie fotos da peça e da embalagem em até 48 horas pelo WhatsApp {{telefone}}. Fazemos a troca ou devolvemos o valor, sem custo.",
+    "Fale com a gente pelo WhatsApp {{telefone}} em até 48 horas, com fotos da peça e da embalagem. Resolvemos da melhor forma: troca ou devolução do valor.",
   ],
   [
     "Trocas",
     "Posso devolver se me arrepender?",
-    "Sim, em até 7 dias corridos depois de receber, com o produto sem uso e na embalagem original.",
+    "Sim, em até 7 dias corridos depois de receber, com o produto sem uso e na embalagem original. Fale com a gente pelo WhatsApp ou pelo e-mail antes de enviar. No caso de plantas, entre em contato o quanto antes.",
   ],
   [
     "Trocas",
     "A planta chegou murcha. Vocês trocam?",
-    "Sim, se você avisar com fotos em até 48 horas depois da entrega.",
+    "Fale com a gente pelo WhatsApp {{telefone}} ou pelo e-mail {{email}}, com fotos, em até 48 horas depois da entrega. Resolvemos da melhor forma.",
   ],
   [
     "Cuidados com plantas",

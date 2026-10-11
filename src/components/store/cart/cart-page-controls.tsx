@@ -148,7 +148,8 @@ export function GiftOptions({
 }: {
   giftMessage: string | null;
   giftWrap: boolean;
-  giftWrapPriceCents: number;
+  /** Nulo quando a loja não oferece embalagem para presente. */
+  giftWrapPriceCents: number | null;
 }) {
   const router = useRouter();
   const [withCard, setWithCard] = useState(Boolean(giftMessage));
@@ -182,7 +183,9 @@ export function GiftOptions({
           />
           <span className="type-small text-ink">
             Incluir cartão com mensagem
-            <span className="block text-ink-muted">Gratuito. Escrevemos a sua mensagem à mão.</span>
+            <span className="block text-ink-muted">
+              Sem custo. Depois de fechar o pedido, avise a gente também pelo WhatsApp.
+            </span>
           </span>
         </label>
         {withCard ? (
@@ -206,23 +209,25 @@ export function GiftOptions({
             </p>
           </div>
         ) : null}
-        <label className="flex min-h-11 cursor-pointer items-start gap-3 py-2.5">
-          <input
-            type="checkbox"
-            className="control-check"
-            checked={wrap}
-            onChange={(event) => {
-              setWrap(event.target.checked);
-              save({ giftMessage: withCard ? message : "", giftWrap: event.target.checked });
-            }}
-          />
-          <span className="type-small text-ink">
-            Embalagem para presente
-            <span className="block text-ink-muted tabular-nums">
-              {formatBRL(giftWrapPriceCents)}
+        {giftWrapPriceCents !== null ? (
+          <label className="flex min-h-11 cursor-pointer items-start gap-3 py-2.5">
+            <input
+              type="checkbox"
+              className="control-check"
+              checked={wrap}
+              onChange={(event) => {
+                setWrap(event.target.checked);
+                save({ giftMessage: withCard ? message : "", giftWrap: event.target.checked });
+              }}
+            />
+            <span className="type-small text-ink">
+              Embalagem para presente
+              <span className="block text-ink-muted tabular-nums">
+                {formatBRL(giftWrapPriceCents)}
+              </span>
             </span>
-          </span>
-        </label>
+          </label>
+        ) : null}
       </div>
     </fieldset>
   );
