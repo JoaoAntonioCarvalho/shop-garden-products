@@ -155,7 +155,7 @@ Decisão do dono em 10/10/2026: passar o DNS para o registro.br, sem depender da
 | CNAME | `send`                 | `send.forge.rmta.net`                                                             |
 | TXT   | `_dmarc`               | `v=DMARC1; p=none;`                                                               |
 
-- [ ] Trocar para o DNS do registro.br e criar os registros acima. Só os registros públicos foram vistos: se a Locaweb tiver uma chave DKIM própria, ela precisa ser copiada do painel da Locaweb.
+- [ ] **No dia da virada** (decisão de 11/10/2026: não trocar antes, para o site novo entrar de uma vez): trocar para o DNS do registro.br e criar os registros acima, começando pelo A, pelo `www` e pelos quatro MX. O e-mail automático do site só funciona depois disso. Só os registros públicos foram vistos: se a Locaweb tiver uma chave DKIM própria, ela precisa ser copiada do painel da Locaweb.
 - [ ] Passar a Vercel para o plano Pro antes de vender.
 - [ ] Apontar o domínio para a hospedagem nova, definir `APP_URL`, trocar a URL de notificação na Cielo e desligar o modo manutenção.
 
