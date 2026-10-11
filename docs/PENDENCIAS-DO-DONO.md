@@ -6,11 +6,7 @@ A lista de marcações `TODO(dono)` e `TODO(integracao)` do código está no fim
 
 ## Dados da empresa
 
-| Item              | Valor atual          | Onde trocar                                                          |
-| ----------------- | -------------------- | -------------------------------------------------------------------- |
-| Razão social      | [RAZÃO SOCIAL]       | `src/config/store.config.ts` → `legalName`, ou Admin > Configurações |
-| CNPJ              | [00.000.000/0001-00] | `cnpj`                                                               |
-| Endereço completo | [Endereço completo]  | `address`                                                            |
+Razão social, CNPJ e endereço já estão preenchidos em produção (Admin > Configurações). Conferir se o endereço está completo, com cidade, estado e CEP.
 
 Razão social, CNPJ e endereço são exigidos no rodapé pelo Decreto 7.962/2013.
 
@@ -96,7 +92,7 @@ Todos os valores abaixo são exemplos.
 
 | Integração               | Situação hoje                         | O que falta                                        |
 | ------------------------ | ------------------------------------- | -------------------------------------------------- |
-| Gateway de pagamento     | Cielo escrita, credenciais conferidas | Testes reais e ligar na loja (ver abaixo)          |
+| Gateway de pagamento     | Cielo ligada na loja publicada        | Aviso de pagamento e teste do cartão (ver abaixo)  |
 | Transportadora           | Correios e Jadlog prontos, desligados | Credenciais de cada uma (ver abaixo)               |
 | E-mail transacional      | Nenhum em produção                    | Criar conta no Resend e configurar o domínio       |
 | Armazenamento de imagens | Pasta local                           | Bucket S3 ou R2 em produção                        |
@@ -108,7 +104,7 @@ O passo a passo de cada uma está em `docs/INTEGRACOES.md`.
 
 ### Para ligar a Cielo
 
-O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as credenciais de produção da loja foram conferidas na Cielo: a API E-commerce respondeu, o Silent Order Post emitiu o token do cartão e um Pix de R$ 1,00 foi gerado. A loja continua com o pagamento simulado até os testes abaixo.
+O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as credenciais de produção da loja foram conferidas na Cielo: a API E-commerce respondeu, o Silent Order Post emitiu o token do cartão e um Pix de R$ 1,00 foi gerado. Desde 10/10/2026 a loja publicada cobra pela Cielo de verdade (`PAYMENT_PROVIDER=cielo` na Vercel); com o modo manutenção ligado, só a equipe logada chega ao checkout.
 
 - [x] **API E-commerce Cielo** habilitada, com `MerchantId` e `MerchantKey`.
 - [x] **Pix** autorizado no cadastro (desde 06/08/2024).
@@ -121,7 +117,8 @@ O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as crede
 - [ ] Confirmar o parcelamento sem juros (a loja oferece até 6x) e as taxas do contrato: no sem juros, quem paga a taxa do parcelamento é a loja.
 - [ ] Perguntar o prazo de validade do QR Code do Pix e se dá para configurá-lo.
 - [ ] Perguntar sobre antifraude e 3DS (opcionais).
-- [ ] Depois do domínio no ar: cadastrar no site da Cielo a URL de notificação e o cabeçalho secreto (`docs/INTEGRACOES.md`, seção 1).
+- [ ] URL de notificação na Cielo: preenchida em 10/10/2026 com o endereço da Vercel e o cabeçalho secreto, mas falta a dona confirmar pelo aplicativo Cielo Gestão. Sem isso, o site não fica sabendo que um Pix foi pago. Trocar a URL quando o domínio definitivo entrar (`docs/INTEGRACOES.md`, seção 1).
+- [ ] Depois da URL salva: comprar com Pix e conferir que o pedido muda para pago sozinho.
 
 Boleto deixa de ser oferecido com a Cielo.
 
@@ -191,7 +188,7 @@ A base antiga de clientes e assinantes **não** deve ser importada para disparos
 
 | Onde                                     | O quê                                             |
 | ---------------------------------------- | ------------------------------------------------- |
-| `src/server/providers/payment/cielo.ts`  | Ligar na loja depois dos testes reais             |
+| `src/server/providers/payment/cielo.ts`  | Conferir o aviso de pagamento e o cartão          |
 | `src/server/providers/shipping/index.ts` | Cotação real de frete                             |
 | `src/server/providers/email/index.ts`    | Envio por API (Resend, SES), se não for usar SMTP |
 | `src/server/services/rate-limit.ts`      | Redis ou Upstash, para tráfego alto               |

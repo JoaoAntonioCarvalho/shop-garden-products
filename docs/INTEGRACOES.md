@@ -4,7 +4,7 @@ O que está simulado, e o passo a passo para ligar o serviço real. Em todos os 
 
 ## 1. Gateway de pagamento
 
-**Hoje em produção:** `PAYMENT_PROVIDER=mock`, em `src/server/providers/payment/mock.ts`. Gera Pix (código e QR), tokeniza o cartão no navegador e emite boleto, tudo de mentira. O simulador de pagamento some sozinho em produção.
+**Hoje em produção:** `PAYMENT_PROVIDER=cielo` (desde 10/10/2026, com a loja em modo manutenção). **Em desenvolvimento:** `PAYMENT_PROVIDER=mock`, em `src/server/providers/payment/mock.ts`. Gera Pix (código e QR), tokeniza o cartão no navegador e emite boleto, tudo de mentira. O simulador de pagamento some sozinho em produção.
 
 **Interface:** `src/server/providers/payment/types.ts` (`PaymentProvider`): criar a cobrança, consultar, estornar, validar o aviso e preparar a tokenização do cartão.
 
