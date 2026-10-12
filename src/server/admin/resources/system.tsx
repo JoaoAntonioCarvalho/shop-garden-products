@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { formatBRL, formatCentsPlain } from "@/lib/money";
 import { normalizeRedirectInput } from "@/lib/redirects";
 import { formatCep, normalizeCep } from "@/lib/validators/cep";
+import { readWeightTiers, type WeightTier } from "@/server/providers/shipping/mock";
 import {
   bool,
   int,
@@ -44,6 +45,41 @@ const cepField = (label: string) =>
     .transform((value) => normalizeCep(value) ?? "")
     .pipe(z.string().length(8, `Informe ${label} com 8 dígitos.`));
 
+/** "1 = 21,00" por linha: até quantos quilos e o valor do frete. Vazio = sem tabela por peso. */
+const weightTiersField = z
+  .string()
+  .optional()
+  .default("")
+  .transform((text, context) => {
+    const tiers: WeightTier[] = [];
+    for (const line of text.split(/\r?\n/).map((item) => item.trim())) {
+      if (!line) continue;
+      const match =
+        /^(\d+(?:[.,]\d+)?)\s*(?:kg)?\s*[=:;]\s*(?:R\$\s*)?(\d+(?:[.,]\d{1,2})?)$/i.exec(line);
+      const kg = match ? Number(match[1].replace(",", ".")) : 0;
+      if (!match || kg <= 0) {
+        context.addIssue({
+          code: "custom",
+          message: `Não entendi a linha "${line}". Use o formato 1 = 21,00 (até 1 kg, R$ 21,00).`,
+        });
+        return z.NEVER;
+      }
+      tiers.push({
+        upToGrams: Math.round(kg * 1000),
+        feeCents: Math.round(Number(match[2].replace(",", ".")) * 100),
+      });
+    }
+    return tiers.sort((a, b) => a.upToGrams - b.upToGrams);
+  });
+
+const formatWeightTiers = (value: unknown) =>
+  readWeightTiers(value)
+    .map(
+      (tier) =>
+        `${String(tier.upToGrams / 1000).replace(".", ",")} = ${formatCentsPlain(tier.feeCents)}`,
+    )
+    .join("\n");
+
 const ruleSchema = z
   .object({
     name: requiredText("o nome", 80),
@@ -65,6 +101,16 @@ const ruleSchema = z
     cepEnd: cepField("o CEP final"),
     baseFeeCents: money("a taxa base"),
     feePerKgCents: money("o valor por quilo"),
+    weightTiers: weightTiersField,
+    maxWeightGrams: z.preprocess(
+      (value) => (value === "" || value == null ? null : String(value).replace(",", ".")),
+      z.coerce
+        .number("Informe o peso máximo em quilos.")
+        .positive("Informe o peso máximo em quilos.")
+        .max(1000)
+        .transform((kg) => Math.round(kg * 1000))
+        .nullable(),
+    ),
     freeAboveCents: optionalMoney(),
     usesStoreFreeThreshold: bool(),
     minDays: int("o prazo mínimo", 0, 90),
@@ -129,7 +175,7 @@ export const shippingRuleResource = defineResource<RuleRecord>({
         </>
       ),
       range: `${formatCep(rule.cepStart)} a ${formatCep(rule.cepEnd)}`,
-      price: `${formatBRL(rule.baseFeeCents)}${rule.feePerKgCents ? ` + ${formatBRL(rule.feePerKgCents)} por kg` : ""}${rule.usesStoreFreeThreshold ? ", grátis acima do valor da loja" : rule.freeAboveCents ? `, grátis acima de ${formatBRL(rule.freeAboveCents)}` : ""}`,
+      price: `${readWeightTiers(rule.weightTiers).length ? `Por peso, a partir de ${formatBRL(readWeightTiers(rule.weightTiers)[0].feeCents)}` : `${formatBRL(rule.baseFeeCents)}${rule.feePerKgCents ? ` + ${formatBRL(rule.feePerKgCents)} por kg` : ""}`}${rule.usesStoreFreeThreshold ? ", grátis acima do valor da loja" : rule.freeAboveCents ? `, grátis acima de ${formatBRL(rule.freeAboveCents)}` : ""}`,
       days:
         rule.method === "SAME_DAY"
           ? `No dia, pedidos até ${rule.cutoffTime ?? "o corte da loja"}`
@@ -196,7 +242,29 @@ export const shippingRuleResource = defineResource<RuleRecord>({
         wide: true,
       },
       { name: "baseFeeCents", label: "Taxa base (R$)", type: "money", section: "Valor" },
-      { name: "feePerKgCents", label: "Valor por quilo (R$)", type: "money", section: "Valor" },
+      {
+        name: "feePerKgCents",
+        label: "Valor por quilo (R$)",
+        type: "money",
+        section: "Valor",
+        help: "Com tabela por peso, vale por quilo acima da última faixa.",
+      },
+      {
+        name: "weightTiers",
+        label: "Tabela por peso",
+        type: "textarea",
+        section: "Valor",
+        wide: true,
+        rows: 11,
+        help: "Uma faixa por linha, no formato 1 = 21,00 (até 1 kg, R$ 21,00). Com a tabela preenchida, a taxa base não é usada. Vazio: taxa base mais valor por quilo.",
+      },
+      {
+        name: "maxWeightGrams",
+        label: "Peso máximo do pedido (kg)",
+        type: "text",
+        section: "Valor",
+        help: "Acima desse peso a regra não é oferecida. Vazio: sem limite.",
+      },
       { name: "freeAboveCents", label: "Grátis acima de (R$)", type: "money", section: "Valor" },
       {
         name: "usesStoreFreeThreshold",
@@ -232,6 +300,10 @@ export const shippingRuleResource = defineResource<RuleRecord>({
       allowsLocalOnlyProducts: rule?.allowsLocalOnlyProducts ?? false,
       baseFeeCents: formatCentsPlain(rule?.baseFeeCents ?? 0),
       feePerKgCents: formatCentsPlain(rule?.feePerKgCents ?? 0),
+      weightTiers: formatWeightTiers(rule?.weightTiers),
+      maxWeightGrams: rule?.maxWeightGrams
+        ? String(rule.maxWeightGrams / 1000).replace(".", ",")
+        : "",
       freeAboveCents: rule?.freeAboveCents != null ? formatCentsPlain(rule.freeAboveCents) : "",
       usesStoreFreeThreshold: rule?.usesStoreFreeThreshold ?? false,
       minDays: rule?.minDays ?? 0,
