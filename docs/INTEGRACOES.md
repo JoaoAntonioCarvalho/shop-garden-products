@@ -23,7 +23,7 @@ Conferido em 10/10/2026 no ambiente de testes da Cielo, com as credenciais públ
 
 **Variáveis** (`.env.example`): `PAYMENT_PROVIDER=cielo`, `CIELO_ENV` (`sandbox` ou `production`), `CIELO_MERCHANT_ID`, `CIELO_MERCHANT_KEY`, `CIELO_CLIENT_ID`, `CIELO_CLIENT_SECRET`, `CIELO_WEBHOOK_SECRET` e, se quiser, `CIELO_SOFT_DESCRIPTOR` (nome na fatura, até 13 caracteres). Com `PAYMENT_PROVIDER=cielo`, a loja não sobe sem as cinco primeiras.
 
-**Aviso de pagamento.** No site da Cielo, cadastre a URL de notificação `https://<domínio>/api/webhooks/payments/cielo` e um cabeçalho `x-webhook-secret` com o mesmo valor de `CIELO_WEBHOOK_SECRET` (um texto longo e aleatório). O aviso da Cielo não é assinado e traz só o identificador: a loja confere o cabeçalho e busca o status na API.
+**Aviso de pagamento.** No site da Cielo, cadastre a URL de notificação `https://<domínio>/api/webhooks/payments/cielo` e um cabeçalho `webhooksecret` (o painel da Cielo só aceita letras no nome) com o mesmo valor de `CIELO_WEBHOOK_SECRET` (um texto longo e aleatório). O aviso da Cielo não é assinado e traz só o identificador: a loja confere o cabeçalho e busca o status na API.
 
 **Como funciona.**
 

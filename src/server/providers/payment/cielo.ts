@@ -26,7 +26,9 @@ import {
 // TODO(integracao): ligar na loja depois de um Pix pago e de uma venda no cartão em produção.
 
 /** Cabeçalho que a Cielo envia no aviso de pagamento, cadastrado no site dela junto com a URL. */
-export const CIELO_WEBHOOK_HEADER = "x-webhook-secret";
+// O painel da Cielo só aceita letras no nome do cabeçalho (sem hífen, número ou espaço).
+export const CIELO_WEBHOOK_HEADER = "webhooksecret";
+const CIELO_WEBHOOK_HEADER_LEGACY = "x-webhook-secret";
 
 export type CieloConfig = {
   environment: "sandbox" | "production";
@@ -284,7 +286,11 @@ export class CieloPaymentProvider implements PaymentProvider {
    */
   async parseWebhook(request: Request): Promise<WebhookEvent> {
     const expected = Buffer.from(this.config.webhookSecret ?? "");
-    const received = Buffer.from(request.headers.get(CIELO_WEBHOOK_HEADER) ?? "");
+    const received = Buffer.from(
+      request.headers.get(CIELO_WEBHOOK_HEADER) ??
+        request.headers.get(CIELO_WEBHOOK_HEADER_LEGACY) ??
+        "",
+    );
     if (
       expected.length === 0 ||
       expected.length !== received.length ||

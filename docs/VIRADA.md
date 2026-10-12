@@ -35,7 +35,7 @@ A troca de DNS derruba o site antigo e deixa o e-mail em espera até os registro
 4. **Conferir o DNS.** `dig +short A netshopgarden.com.br` e `dig +short MX netshopgarden.com.br` precisam devolver os valores novos. Mandar um e-mail de teste para a caixa da loja e conferir se chega.
 5. **Resend.** Clicar em Verify no domínio. Só segue quando estiver verificado.
 6. **Vercel, variáveis.** `APP_URL=https://www.netshopgarden.com.br` (ou sem `www`, igual ao domínio principal escolhido na Vercel), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` e `EMAIL_FROM`. Fazer o Redeploy.
-7. **Cielo.** Trocar a URL de notificação para `https://<domínio>/api/webhooks/payments/cielo`, com o mesmo cabeçalho `x-webhook-secret`.
+7. **Cielo.** Trocar a URL de notificação para `https://<domínio>/api/webhooks/payments/cielo`, com o mesmo cabeçalho `webhooksecret`.
 8. **Tarefas agendadas.** Com o plano Pro, aumentar a frequência de `expirar-pagamentos` e `carrinhos-abandonados` no `vercel.json` e publicar.
 9. **Teste completo, ainda em manutenção e logado como equipe:**
    - criar uma conta com um e-mail seu e conferir o e-mail de boas-vindas;
