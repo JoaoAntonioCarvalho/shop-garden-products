@@ -712,7 +712,8 @@ export async function seedCollections() {
     {
       name: "Linha Carol Costa",
       slug: "linha-carol-costa",
-      description: "Vasos e cachepots da Linha Carol Costa, em cerâmica e acabamentos naturais.",
+      description:
+        "Plantas, adubos, substratos, ferramentas e livros da linha Carol Costa.",
       type: "MANUAL",
       legacyPaths: ["/listaprodutos.asp?adicional1=232116"],
       imageId: media.get("colecao-carol-costa")!,
