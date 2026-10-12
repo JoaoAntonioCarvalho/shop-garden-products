@@ -742,9 +742,6 @@ export function CheckoutFlow({
                   {pickup.address.street}, {pickup.address.number}, {pickup.address.district},{" "}
                   {pickup.address.city}/{pickup.address.state}
                 </p>
-                {pickup.description ? (
-                  <p className="mt-1 type-small text-ink-muted">{pickup.description}</p>
-                ) : null}
               </div>
             ) : (
               <>

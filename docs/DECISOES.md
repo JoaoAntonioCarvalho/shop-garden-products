@@ -338,3 +338,10 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Logo vetorizado a partir do JPG do site antigo** (600 × 371): ampliado com Real-ESRGAN e traçado com potrace. O "shop" usa as quatro primeiras letras de "shopping", centralizadas sob o círculo, para o desenho ficar idêntico. No rodapé musgo entra a versão creme de uma cor só, porque vinho não vai sobre musgo.
 - **Remetente dos e-mails do domínio, resposta para o atendimento.** `EMAIL_FROM` continua `contato@netshopgarden.com.br` (o Resend só envia por domínio verificado) e todo e-mail leva `Reply-To` com o e-mail de atendimento da configuração (`netshopgarden@gmail.com`). Não é preciso criar caixa `contato@`.
 - **Fotos padronizadas em lote** (recorte com BiRefNet, ampliação com Real-ESRGAN só quando o produto precisa crescer, fundo branco 1600 × 2000). Todas as 1.031 foram conferidas em folhas de antes e depois; 22 mantiveram a original. A troca muda só para qual imagem o produto aponta: nada foi apagado. As ferramentas ficaram fora do repositório.
+
+## 2026-10-12: testes de pagamento e retirada no checkout
+
+- **Pix real de ponta a ponta:** o pedido NSG-000001 (R$ 1,42, retirada na loja) foi pago e confirmado em 34 segundos, com baixa de estoque. Os três e-mails falharam como esperado: o envio só liga na virada do domínio.
+- **Retirada sem endereço.** A etapa de entrega do checkout começa com "Receber no meu endereço" ou "Retirar na loja, sem custo" (quando há regra de retirada ativa). Na retirada, o pedido é gravado com o endereço da loja (`pickupAddress` na configuração: Av. dos Bandeirantes, 5900, CEP 04071-001, conferido no ViaCEP) e só a opção de retirada é oferecida. O servidor não mudou: continua validando endereço e recalculando o frete.
+- **Configuração nova não quebra mais logo após o deploy.** `getStoreSettings` aplica o padrão do código por cima do que está em cache: antes, uma chave criada num deploy vinha indefinida até o cache ser renovado (foi o que derrubou a tela de retirada no primeiro teste).
+- **Pix expira em 120 minutos**, igual à validade do QR Code na integração antiga da Cielo.

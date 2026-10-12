@@ -59,5 +59,7 @@ const loadSettings = unstable_cache(
  * quando a tag "settings" é invalidada.
  */
 export async function getStoreSettings(): Promise<StoreSettings> {
-  return loadSettings();
+  // O padrão entra de novo por cima do cache: uma chave criada num deploy novo existe mesmo
+  // enquanto o cache ainda guarda a configuração mesclada pela versão anterior.
+  return { ...storeConfig, ...(await loadSettings()) };
 }

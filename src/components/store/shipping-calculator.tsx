@@ -30,6 +30,8 @@ type ShippingCalculatorProps = {
 /** Prazo em texto. Entrega hoje e agendada já se explicam pela descrição, então não repetem o prazo. */
 export function formatDeliveryEstimate(option: ShippingOption): string {
   if (option.requiresScheduling || (option.deliveryDate && option.minDays === 0)) return "";
+  // Retirada na loja: sem prazo de transporte; a descrição já diz quando buscar.
+  if (option.minDays === 0 && option.maxDays === 0) return "";
   if (option.minDays === option.maxDays) {
     return option.minDays === 1 ? "1 dia útil" : `${option.minDays} dias úteis`;
   }
