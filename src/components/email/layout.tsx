@@ -23,6 +23,7 @@ export type EmailStore = {
   legalName: string;
   cnpj: string;
   address: string;
+  orderHandlingNotice: string;
 };
 
 // E-mails não usam as classes do site: clientes de e-mail exigem estilos embutidos.

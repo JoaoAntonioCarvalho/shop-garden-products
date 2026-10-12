@@ -154,7 +154,7 @@ export const faq: Array<[group: string, question: string, answer: string]> = [
   [
     "Trocas",
     "Posso devolver se me arrepender?",
-    "Sim, em até 7 dias corridos depois de receber, com o produto sem uso e na embalagem original. Fale com a gente pelo WhatsApp ou pelo e-mail antes de enviar. No caso de plantas, entre em contato o quanto antes.",
+    "Sim, em até 7 dias corridos depois de receber, com o produto sem uso e na embalagem original. Fale com a gente pelo WhatsApp ou pelo e-mail antes de enviar: combinamos a devolução, e o envio de volta é por nossa conta. No caso de plantas, entre em contato o quanto antes.",
   ],
   [
     "Trocas",

@@ -22,6 +22,7 @@ const store: EmailStore = {
   phoneDisplay: "(11) 95581-7159",
   whatsapp: "5511955817159",
   legalName: "Razão Social de Teste",
+  orderHandlingNotice: "Temos até 3 dias úteis para separar e enviar o seu pedido.",
   cnpj: "00.000.000/0001-00",
   address: "Rua de Teste, 1",
 };

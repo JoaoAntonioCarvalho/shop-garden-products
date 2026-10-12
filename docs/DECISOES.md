@@ -324,3 +324,14 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Equipe** pode alterar preço (`products.edit_price`), além de estoque e clientes. Continua sem acesso à seção Sistema.
 - **Trocas:** reembolso do cartão segue o prazo da bandeira; Pix é devolvido quando o produto chega e é conferido; arranjo sob medida só pelo WhatsApp, com montagem depois do pagamento. O custo do envio na desistência não foi escrito como sendo do cliente: no arrependimento do artigo 49 do CDC ele é do fornecedor, e a cláusula contrária exporia a loja. O texto pede contato antes do envio, e a decisão ficou nas pendências.
 - **Bling** continua sendo o sistema de nota fiscal. A integração segue pendente (`docs/INTEGRACOES.md`, seção 5).
+
+## 2026-10-11 (noite): segunda rodada de respostas da dona
+
+- **Login da equipe por nome de usuário.** A dona pediu os acessos `Katia` e `staffnet`. O login continua por e-mail: quando o texto digitado não tem "@", o site completa `@netshopgarden.com.br` (`STAFF_LOGIN_DOMAIN` em `src/lib/validators/account.ts`). As duas contas não têm caixa de e-mail real: "esqueci a senha" não funciona para elas, a senha é trocada em Admin > Usuários.
+- **Cabeçalho do aviso da Cielo é `webhooksecret`.** O painel da Cielo só aceita letras no nome do cabeçalho. O nome antigo (`x-webhook-secret`) continua aceito.
+- **Prazo de separação como configuração** (`orderHandlingNotice`), mostrado na página do pedido (aguardando pagamento e pago) e no e-mail de pagamento aprovado.
+- **Sem Jadlog.** A dona não tem mais os dados. Produto "só Jadlog" fica como entrega local: fora da área, o aviso manda para o WhatsApp ou para a retirada.
+- **Arrependimento: envio de volta por conta da loja**, como manda o artigo 49 do CDC. Troca por preferência, sem defeito, continua com envio por conta do cliente.
+- **Revisão de nomes e descrições por regras** (`pnpm texts`), não à mão: 774 nomes e 1.060 descrições. O endereço (slug) dos produtos não mudou. Nomes científicos e códigos do produtor foram mantidos.
+- **Coleção Carol Costa pela marca do produto**, porque o site antigo bloqueia leitura automática e a lista de lá não pôde ser conferida.
+- **Newsletter antiga (Dinamize) descartada:** a base não será importada e o registro `innlink` saiu do roteiro da virada.

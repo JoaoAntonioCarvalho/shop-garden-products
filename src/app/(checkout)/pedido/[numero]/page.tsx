@@ -115,6 +115,9 @@ export default async function OrderPage({ params, searchParams }: Props) {
                   ? (order.cancelReason ?? "Este pedido foi cancelado.")
                   : `Pedido ${order.number}. Avisamos por e-mail a cada novidade.`}
         </p>
+        {settings.orderHandlingNotice && (status === "PENDING_PAYMENT" || status === "PAID") ? (
+          <p className="mt-2 measure type-body text-ink-muted">{settings.orderHandlingNotice}</p>
+        ) : null}
         {status === "EXPIRED" ? (
           <Link href="/carrinho" className={buttonClasses("primary", "md", "mt-4")}>
             Refazer o pedido

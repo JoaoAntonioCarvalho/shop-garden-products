@@ -54,6 +54,7 @@ const settingsSchema = z.object({
   email: z.email("E-mail inválido."),
   notificationEmail: z.email("E-mail inválido."),
   businessHours: requiredText("o horário de atendimento", 120),
+  orderHandlingNotice: optionalText(200).transform((value) => value ?? ""),
   instagram: z.preprocess(
     (value) => value ?? "",
     z

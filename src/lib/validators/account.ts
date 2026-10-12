@@ -28,8 +28,16 @@ export const signupSchema = z.object({
   marketingOptIn: z.boolean().default(false),
 });
 
+/** Domínio completado quando a equipe entra só com o nome de usuário ("staffnet"). */
+export const STAFF_LOGIN_DOMAIN = "netshopgarden.com.br";
+
 export const loginSchema = z.object({
-  email: emailSchema,
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .transform((value) => (value.includes("@") ? value : `${value}@${STAFF_LOGIN_DOMAIN}`))
+    .pipe(z.email("Digite o seu e-mail, como nome@exemplo.com.")),
   password: z.string().min(1, "Digite a sua senha."),
 });
 

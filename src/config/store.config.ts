@@ -24,6 +24,8 @@ export type StoreSettings = {
   /** E-mail que recebe as notificações internas (novo pedido, contato, estoque baixo). */
   notificationEmail: string;
   businessHours: string;
+  /** Prazo de separação e envio, mostrado na confirmação do pedido e no e-mail de pagamento aprovado. */
+  orderHandlingNotice: string;
   instagram: string;
   partnerClaim: string;
   pixDiscountPercent: number;
@@ -66,15 +68,16 @@ export const storeConfig: StoreSettings = {
   address: "[Endereço completo]", // TODO(dono): confirmar
   whatsapp: "5511955817159", // TODO(dono): confirmar (número do site atual)
   phoneDisplay: "(11) 95581-7159", // TODO(dono): confirmar
-  email: "contato@netshopgarden.com.br", // TODO(dono): confirmar (e-mail em domínio próprio)
-  notificationEmail: "contato@netshopgarden.com.br", // TODO(dono): confirmar
+  email: "netshopgarden@gmail.com",
+  notificationEmail: "netshopgarden@gmail.com",
   businessHours: "Segunda a sexta, das 9h às 17h. Sábado, das 9h às 14h30",
   instagram: "https://www.instagram.com/netshopgarden",
+  orderHandlingNotice: "Temos até 3 dias úteis para separar e enviar o seu pedido.",
   partnerClaim: "Parceira oficial de e-commerce do Shopping Garden, desde 1999 em São Paulo", // TODO(dono): confirmar
-  pixDiscountPercent: 5, // TODO(dono): confirmar
-  maxInstallments: 6, // TODO(dono): confirmar
-  minInstallmentCents: 3000, // TODO(dono): confirmar
-  freeShippingThresholdCents: 29900, // TODO(dono): confirmar
+  pixDiscountPercent: 5,
+  maxInstallments: 6,
+  minInstallmentCents: 5000,
+  freeShippingThresholdCents: 39900,
   giftWrapEnabled: false, // a loja não tem embalagem para presente paga (resposta da dona, 11/10/2026)
   giftWrapPriceCents: 1500,
   sameDay: {

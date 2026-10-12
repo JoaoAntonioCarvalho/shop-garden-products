@@ -53,6 +53,12 @@ const fields: FieldDef[] = [
     section: "Dados da loja",
   },
   {
+    name: "orderHandlingNotice",
+    label: "Aviso de prazo na confirmação do pedido",
+    type: "text",
+    section: "Dados da loja",
+  },
+  {
     name: "instagram",
     label: "Instagram (endereço completo)",
     type: "text",

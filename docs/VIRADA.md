@@ -6,19 +6,17 @@ O detalhe de cada integração está em `docs/INTEGRACOES.md`, e a zona de DNS c
 
 ## Antes do dia (pode ser feito em qualquer ordem)
 
-| O quê                                                                                            | Quem | Como conferir                                                      |
-| ------------------------------------------------------------------------------------------------ | ---- | ------------------------------------------------------------------ |
-| Pix de teste depois da URL de notificação salva na Cielo (salva em 11/10/2026)                   | Dev  | Um Pix de teste muda o pedido para pago sozinho                    |
-| Comprar com cartão de verdade no site e cancelar o pedido com devolução                          | Dev  | Estorno aparece no pedido e na Cielo                               |
-| Gerar nova `MerchantKey`, novo `ClientSecret` e nova chave do Resend, e trocar na Vercel         | Dev  | Um Pix de teste continua funcionando                               |
-| Trazer a tabela de frete da entrega própria por região e as regras dos Correios do site antigo   | Dona | Regras de frete e áreas de entrega cadastradas em Admin > Frete    |
-| Confirmar o e-mail de atendimento (o informado, `@gmail.com.br`, não recebe mensagens)           | Dona | Admin > Configurações                                              |
-| Conferir os textos de Entrega, Trocas, Privacidade e Termos com as respostas (e com um advogado) | Dona | Admin > Páginas                                                    |
-| Decidir os 34 produtos da fila "A revisar"                                                       | Dona | Admin > Curadoria com a fila vazia                                 |
-| Informar o estoque real (hoje todos os produtos têm 10 unidades)                                 | Dona | Admin > Estoque                                                    |
-| Passar a Vercel para o plano Pro (o gratuito não permite uso comercial)                          | Dev  | Painel da Vercel                                                   |
-| Trocar a senha do administrador e criar os usuários da equipe                                    | Dev  | Admin > Usuários                                                   |
-| Pedir a exportação dos contatos da newsletter na Dinamize, se ainda for usada                    | Dona | Arquivo em `data-privada/` (não importar sem reconfirmar o aceite) |
+| O quê                                                                                            | Quem | Como conferir                                                   |
+| ------------------------------------------------------------------------------------------------ | ---- | --------------------------------------------------------------- |
+| Pix de teste depois da URL de notificação salva na Cielo (salva em 11/10/2026)                   | Dev  | Um Pix de teste muda o pedido para pago sozinho                 |
+| Comprar com cartão de verdade no site e cancelar o pedido com devolução                          | Dev  | Estorno aparece no pedido e na Cielo                            |
+| Gerar nova `MerchantKey`, novo `ClientSecret` e nova chave do Resend, e trocar na Vercel         | Dev  | Um Pix de teste continua funcionando                            |
+| Trazer a tabela de frete da entrega própria por região e as regras dos Correios do site antigo   | Dona | Regras de frete e áreas de entrega cadastradas em Admin > Frete |
+| Conferir os textos de Entrega, Trocas, Privacidade e Termos com as respostas (e com um advogado) | Dona | Admin > Páginas                                                 |
+| Decidir os 34 produtos da fila "A revisar"                                                       | Dona | Admin > Curadoria com a fila vazia                              |
+| Informar o estoque real (hoje todos os produtos têm 10 unidades)                                 | Dona | Admin > Estoque                                                 |
+| Passar a Vercel para o plano Pro (o gratuito não permite uso comercial)                          | Dev  | Painel da Vercel                                                |
+| Trocar a senha do usuário "Administrador" inicial (`katia` e `staffnet` já existem)              | Dev  | Admin > Usuários                                                |
 
 ## No dia, de preferência à noite
 
@@ -31,7 +29,6 @@ A troca de DNS derruba o site antigo e deixa o e-mail em espera até os registro
    2. Os quatro `MX` da Locaweb.
    3. O `TXT` de SPF e os `CNAME` de e-mail (`pop`, `smtp`, `imap`, `mail`, `webmail`, `autodiscover`).
    4. Os registros do Resend (`resend._domainkey`, `rsend`, `send`, `_dmarc`).
-   5. `innlink`, só se a Dinamize ainda for usada.
 4. **Conferir o DNS.** `dig +short A netshopgarden.com.br` e `dig +short MX netshopgarden.com.br` precisam devolver os valores novos. Mandar um e-mail de teste para a caixa da loja e conferir se chega.
 5. **Resend.** Clicar em Verify no domínio. Só segue quando estiver verificado.
 6. **Vercel, variáveis.** `APP_URL=https://www.netshopgarden.com.br` (ou sem `www`, igual ao domínio principal escolhido na Vercel), `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` e `EMAIL_FROM`. Fazer o Redeploy.

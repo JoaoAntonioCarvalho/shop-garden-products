@@ -23,7 +23,7 @@ Respondidos pela dona em 11/10/2026 e gravados em produção.
 | Endereço (rodapé)      | Av. República do Líbano, 789, sala 1, Ibirapuera, São Paulo, SP    | `address`                        |
 | Retirada na loja       | Av. dos Bandeirantes, 5900, Shopping Garden, São Paulo, até as 18h | Admin > Frete, regra `retirada`  |
 
-- [ ] **E-mail de atendimento:** a dona informou `netshopgarden@gmail.com.br`, mas o domínio `gmail.com.br` não recebe e-mails (não é o Gmail). Confirmar o endereço certo, provavelmente `@gmail.com` ou uma caixa `@netshopgarden.com.br` na Locaweb. Até lá o site mostra `contato@netshopgarden.com.br`, que precisa existir.
+- [x] **E-mail de atendimento:** `netshopgarden@gmail.com` (corrigido pela dona em 11/10/2026; o `.br` do final era engano). É também o e-mail que recebe os avisos internos.
 
 ## Regras comerciais
 
@@ -46,13 +46,13 @@ A dona explicou o funcionamento em 11/10/2026. Já está no site: retirada na lo
 
 - [ ] **Tabela de frete da entrega própria por região.** O site antigo tinha uma faixa de valor para cada região. Hoje há uma regra única de exemplo (R$ 19,90 na Grande São Paulo). Trazer a tabela (print do painel da FastCommerce serve) para cadastrar em Admin > Frete, uma regra por faixa de CEP.
 - [ ] **Regras dos Correios do site antigo.** Pegar na FastCommerce o contrato, os serviços e as regras usadas. Os valores do envio nacional no site ainda são de exemplo.
-- [ ] **Jadlog:** a loja tem contrato. Faltam os dados de acesso da API (seção "Para ligar a Jadlog").
-- [ ] **Entrega própria sem escolha de data.** A dona trabalha com "até 3 dias úteis, avisamos antes". O site pede que o cliente escolha a data (a partir de 3 dias). Confirmar se serve ou se a escolha de data deve sair.
-- [ ] **Devolução por desistência:** a dona quer que o cliente pague o envio de volta. No arrependimento em 7 dias de compra online, o entendimento dos tribunais e do Procon é que esse custo é da loja. O texto publicado não promete pagar nem cobra: pede contato antes do envio. Decidir com advogado.
+- [x] **Jadlog:** a dona não tem mais os dados de acesso. Produtos volumosos (os marcados "só Jadlog") ficam com entrega própria na Grande São Paulo e retirada; fora dela, o site manda falar pelo WhatsApp. Os 7 que estavam como "todo o Brasil, só Jadlog" passaram a "só entrega local" em 11/10/2026.
+- [x] **Prazo de separação:** a confirmação do pedido e o e-mail de pagamento aprovado dizem "Temos até 3 dias úteis para separar e enviar o seu pedido" (texto em Admin > Configurações, "Aviso de prazo na confirmação do pedido"). A escolha de data da entrega própria continua, a partir de 3 dias.
+- [x] **Devolução por desistência:** decisão da dona em 11/10/2026: seguir a lei. No arrependimento em 7 dias, o envio de volta é por conta da loja (página de Trocas e FAQ).
 
 ## Equipe
 
-- [ ] Criar em Admin > Usuários o acesso único da equipe, com o papel "Equipe". Esse papel vê pedidos e clientes, ajusta estoque e, desde 11/10/2026, altera preço na lista de produtos. Não acessa configurações, frete, usuários nem auditoria. Com senha compartilhada, a auditoria não distingue quem fez cada alteração.
+- [x] Acessos criados em 11/10/2026: `katia` (dona, papel Administrador) e `staffnet` (equipe, papel Equipe: pedidos, clientes, estoque e preço; sem configurações, frete, usuários nem auditoria). Na tela de entrada basta digitar o nome de usuário: o site completa `@netshopgarden.com.br`. Com senha compartilhada, a auditoria não distingue quem da equipe fez cada alteração. Falta trocar a senha do usuário "Administrador" inicial.
 - [ ] Estoque: a dona controla direto no site, em Admin > Estoque (ajuste por produto, em lote e inventário).
 
 ## Textos a revisar
@@ -66,17 +66,17 @@ A dona explicou o funcionamento em 11/10/2026. Já está no site: retirada na lo
 - **Textos jurídicos** (Trocas e devoluções, Política de privacidade, Política de cookies, Termos de uso): versão completa escrita em 10/10/2026 e publicada (`prisma/seed/legal-pages.ts`, ou Admin > Páginas). Não foi revisada por advogado: a revisão continua recomendada. Pontos que dependem da resposta da dona: prazo de 48 horas para avisar avaria e planta em mau estado, reembolso em até 10 dias úteis, cobrança de nova entrega, substituição de itens de arranjo, compra só por maiores de 18 anos. Como a loja é microempresa, a política indica um canal de atendimento em vez de um encarregado de dados (Resolução CD/ANPD 2/2022).
 - **Perguntas frequentes da página de Ajuda** (Admin > Ajuda).
 - **Texto "Sobre a Net Shop Garden" da home** (Admin > Home).
-- **Linha Carol Costa:** confirmar a descrição da coleção e quais produtos fazem parte dela.
+- **Linha Carol Costa:** a coleção recebeu em 11/10/2026 os 105 produtos ativos com a marca "Carol Costa" (vinda do XML do site antigo). A lista do site antigo não pôde ser lida (firewall): conferir se bate.
 
 ## Logo e fotos
 
-- Logo definitivo: hoje é um logotipo em texto. Trocar `public/brand/logo.svg` e o componente `Logo`.
+- Logo definitivo: hoje é um logotipo em texto. O site antigo bloqueia o download automático: salvar a imagem do logo em `data-privada/` para trocar `public/brand/logo.svg` e o componente `Logo`.
 - **Fotos dos produtos:** vieram do site antigo. Muitas têm a marca d'água "PhotoGrid" no canto, fundos diferentes e enquadramento desigual. As 34 da fila "A revisar" já foram refeitas no padrão novo (fundo branco, 4:5, produto centralizado); o mesmo tratamento pode ser aplicado ao catálogo inteiro.
 - **Imagens de categorias, ocasiões, coleções e banners:** em 11/10/2026 as ilustrações de teste foram trocadas por composições com fotos de produtos da loja. Podem ser substituídas por fotos em ambiente em Admin > Categorias e Admin > Banners. A seção "A loja online do Shopping Garden" pede uma foto real do Shopping Garden.
-- **Depoimentos:** os seis de exemplo foram ocultados e a seção da home foi desligada. Cadastrar depoimentos reais em Admin > Depoimentos e religar a seção em Admin > Home.
-- **Cupons:** só `BEMVINDO5` (5% na primeira compra) está ativo. `NETSHOPGARDENBEMVINDO` (do site antigo), `FRETEGRATIS`, `PRIMAVERA15` e `MAES25` foram desativados até a dona confirmar.
+- **Depoimentos:** seção desligada, por decisão da dona.
+- **Cupons:** só existe `BEMVINDO5` (5% na primeira compra). Os outros foram apagados em 11/10/2026, a pedido da dona.
 - **Categorias sem produto** (13) saíram do menu; voltam em Admin > Categorias quando receberem produtos.
-- **Nomes de produtos em caixa alta** (por exemplo, "FORTH BOKASHI (250G)"): vieram assim do site antigo e precisam de revisão.
+- **Nomes e descrições revisados em lote** em 11/10/2026 (`pnpm texts`): caixa alta, acentos, unidades, "enviamos para todo Brasil" fora do nome, prazo de "02 dias úteis" trocado por 3 e o título repetido no começo da descrição removido. O texto original está em `scripts/data/textos-originais.json` (`pnpm texts originais` desfaz). Os códigos do produtor (MDPT15, MDCA21) ficaram nos nomes.
 - Fotos do hero (2400 × 1050 no desktop e 1200 × 1500 no celular), das categorias e das ocasiões de presente.
 
 ## Decisões de negócio
@@ -136,12 +136,12 @@ O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as crede
 - [x] Nome na fatura do cartão: "NETSHOPGARDEN".
 - [x] Pix de teste de R$ 1,00 pago e confirmado pela Cielo (10/10/2026).
 - [x] Rede de segurança: com a página do pedido aberta, a loja consulta a Cielo e confirma o Pix mesmo sem o aviso (11/10/2026).
-- [ ] Devolução do Pix: a Cielo negou a devolução do teste por falta de saldo na conta Pix ("Merchant with insufficient balance for return"). Perguntar à Cielo como funciona o saldo para devolução de Pix. Enquanto isso, devolução de pedido pago com Pix pode aparecer como "falhou" no painel e precisa ser feita por transferência. O R$ 1,00 do teste ficou na conta da loja.
+- [ ] Devolução do Pix: a Cielo negou a devolução do teste por falta de saldo na conta Pix ("Merchant with insufficient balance for return"). A dona perguntou à Cielo em 11/10/2026; aguardando resposta. Enquanto isso, devolução de pedido pago com Pix pode aparecer como "falhou" no painel e precisa ser feita por transferência.
 - [ ] Fazer uma compra de teste com cartão de verdade e devolver.
-- [ ] Gerar uma nova `MerchantKey` e um novo `ClientSecret` no site da Cielo depois dos testes: os atuais foram enviados por conversa.
-- [ ] Confirmar o parcelamento sem juros (a loja oferece até 6x) e as taxas do contrato: no sem juros, quem paga a taxa do parcelamento é a loja.
-- [ ] Perguntar o prazo de validade do QR Code do Pix e se dá para configurá-lo.
-- [ ] Perguntar sobre antifraude e 3DS (opcionais).
+- [ ] Novas `MerchantKey` e `ClientSecret` geradas pelo dev em 11/10/2026: falta colocá-las no `.env.vercel` e na Vercel (Settings > Environment Variables: `CIELO_MERCHANT_KEY`, `CIELO_CLIENT_SECRET`) e publicar de novo. Trocar também `CIELO_WEBHOOK_SECRET`, que apareceu na conversa.
+- [x] Parcelamento: até 6x sem juros, parcela mínima de R$ 50 (confirmado pela dona). A taxa do parcelamento é da loja.
+- [ ] Validade do QR Code do Pix: pela documentação da Cielo, o padrão é 24 horas na integração nova (`Provider: "Cielo2"`, campo `Payment.QrCode.Expiration`, em segundos) e 2 horas na antiga. A loja expira o pedido em 20 minutos e hoje não envia esse campo: quem pagar depois disso tem o pedido expirado e o dinheiro na conta. Enviar o campo e conferir no Pix de teste (não há ambiente de testes para o Pix novo).
+- [ ] Antifraude e 3DS (opcionais): o antifraude é contratado à parte (ClearSale ou CyberSource), só para cartão e sem garantia contra chargeback. O 3DS 2.0 é pedido à Cielo para Visa e Mastercard, exige integração no site e passa a fraude autenticada para o banco emissor. Os preços não são públicos: pedir à Cielo.
 - [x] URL de notificação na Cielo salva em 11/10/2026, com o endereço da Vercel e o cabeçalho `webhooksecret` (o painel só aceita letras no nome). A Cielo pede cerca de 30 minutos para valer. Trocar a URL quando o domínio definitivo entrar (`docs/INTEGRACOES.md`, seção 1).
 - [ ] Depois da URL salva: comprar com Pix e conferir que o pedido muda para pago sozinho.
 

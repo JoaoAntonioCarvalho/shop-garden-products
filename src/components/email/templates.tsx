@@ -167,6 +167,7 @@ function PaymentApproved({ store, order }: OrderProps) {
         vamos preparar tudo.
       </Paragraph>
       <Paragraph>Entrega: {order.deliveryInfo}.</Paragraph>
+      {store.orderHandlingNotice ? <Paragraph>{store.orderHandlingNotice}</Paragraph> : null}
       <EmailButton href={order.url}>Acompanhar pedido</EmailButton>
       <OrderSummary order={order} />
     </EmailLayout>

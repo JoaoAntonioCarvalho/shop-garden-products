@@ -120,3 +120,24 @@ describe("slug", () => {
     expect(normalizeText("  ORQUÍDEA   Branca ")).toBe("orquidea branca");
   });
 });
+
+describe("login", () => {
+  it("aceita e-mail completo, sem diferenciar maiúsculas", async () => {
+    const { loginSchema } = await import("@/lib/validators/account");
+    expect(loginSchema.parse({ email: " Cliente@Example.com ", password: "x" }).email).toBe(
+      "cliente@example.com",
+    );
+  });
+
+  it("completa o domínio quando a equipe digita só o usuário", async () => {
+    const { loginSchema } = await import("@/lib/validators/account");
+    expect(loginSchema.parse({ email: "Katia", password: "x" }).email).toBe(
+      "katia@netshopgarden.com.br",
+    );
+  });
+
+  it("recusa usuário com espaço", async () => {
+    const { loginSchema } = await import("@/lib/validators/account");
+    expect(loginSchema.safeParse({ email: "nome sobrenome", password: "x" }).success).toBe(false);
+  });
+});

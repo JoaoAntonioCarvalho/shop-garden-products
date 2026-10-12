@@ -90,11 +90,13 @@ export function LoginForm({
       )}
     >
       <FormMessages result={form.result} />
-      <Field label="E-mail" error={form.fieldError("email")}>
+      <Field label="E-mail ou usuário" error={form.fieldError("email")}>
         <Input
           name="email"
-          type="email"
-          autoComplete="email"
+          type="text"
+          inputMode="email"
+          autoCapitalize="none"
+          autoComplete="username"
           defaultValue={defaultEmail}
           required
         />

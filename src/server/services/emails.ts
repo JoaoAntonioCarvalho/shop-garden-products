@@ -28,6 +28,7 @@ export async function emailStore(): Promise<EmailStore & { notificationEmail: st
     legalName: settings.legalName,
     cnpj: settings.cnpj,
     address: settings.address,
+    orderHandlingNotice: settings.orderHandlingNotice,
     notificationEmail: settings.notificationEmail,
   };
 }
