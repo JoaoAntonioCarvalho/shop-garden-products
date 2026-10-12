@@ -8,7 +8,7 @@ O detalhe de cada integração está em `docs/INTEGRACOES.md`, e a zona de DNS c
 
 | O quê                                                                                            | Quem | Como conferir                                                      |
 | ------------------------------------------------------------------------------------------------ | ---- | ------------------------------------------------------------------ |
-| Salvar a URL de notificação na Cielo (falta confirmar no aplicativo Cielo Gestão)                | Dona | Um Pix de teste muda o pedido para pago sozinho                    |
+| Pix de teste depois da URL de notificação salva na Cielo (salva em 11/10/2026)                   | Dev  | Um Pix de teste muda o pedido para pago sozinho                    |
 | Comprar com cartão de verdade no site e cancelar o pedido com devolução                          | Dev  | Estorno aparece no pedido e na Cielo                               |
 | Gerar nova `MerchantKey`, novo `ClientSecret` e nova chave do Resend, e trocar na Vercel         | Dev  | Um Pix de teste continua funcionando                               |
 | Trazer a tabela de frete da entrega própria por região e as regras dos Correios do site antigo   | Dona | Regras de frete e áreas de entrega cadastradas em Admin > Frete    |

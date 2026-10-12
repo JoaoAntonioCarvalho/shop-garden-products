@@ -142,7 +142,7 @@ O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as crede
 - [ ] Confirmar o parcelamento sem juros (a loja oferece até 6x) e as taxas do contrato: no sem juros, quem paga a taxa do parcelamento é a loja.
 - [ ] Perguntar o prazo de validade do QR Code do Pix e se dá para configurá-lo.
 - [ ] Perguntar sobre antifraude e 3DS (opcionais).
-- [ ] URL de notificação na Cielo: preenchida em 10/10/2026 com o endereço da Vercel e o cabeçalho secreto, mas falta a dona confirmar pelo aplicativo Cielo Gestão. Sem isso, o site não fica sabendo que um Pix foi pago. Trocar a URL quando o domínio definitivo entrar (`docs/INTEGRACOES.md`, seção 1).
+- [x] URL de notificação na Cielo salva em 11/10/2026, com o endereço da Vercel e o cabeçalho `webhooksecret` (o painel só aceita letras no nome). A Cielo pede cerca de 30 minutos para valer. Trocar a URL quando o domínio definitivo entrar (`docs/INTEGRACOES.md`, seção 1).
 - [ ] Depois da URL salva: comprar com Pix e conferir que o pedido muda para pago sozinho.
 
 Boleto deixa de ser oferecido com a Cielo.
