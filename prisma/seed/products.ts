@@ -712,8 +712,7 @@ export async function seedCollections() {
     {
       name: "Linha Carol Costa",
       slug: "linha-carol-costa",
-      description:
-        "Plantas, adubos, substratos, ferramentas e livros da linha Carol Costa.",
+      description: "Plantas, adubos, substratos, ferramentas e livros da linha Carol Costa.",
       type: "MANUAL",
       legacyPaths: ["/listaprodutos.asp?adicional1=232116"],
       imageId: media.get("colecao-carol-costa")!,
