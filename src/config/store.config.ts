@@ -90,7 +90,8 @@ export const storeConfig: StoreSettings = {
     ], // TODO(dono): confirmar (capital de SP)
     deliverByHour: 20, // TODO(dono): confirmar
   },
-  pixExpirationMinutes: 30,
+  // Igual à validade do QR Code na Cielo (2 horas): pagar depois de o pedido expirar deixaria o dinheiro sem pedido.
+  pixExpirationMinutes: 120,
   cartExpirationDays: 30,
   lowStockDefaultThreshold: 3,
   welcomeCoupon: "BEMVINDO10", // TODO(dono): confirmar

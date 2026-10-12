@@ -44,9 +44,9 @@ Confirmadas pela dona em 11/10/2026.
 
 A dona explicou o funcionamento em 11/10/2026. Já está no site: retirada na loja ligada (inclusive para produto que não é entregue no CEP do cliente), entrega própria de segunda a sexta com data a partir de 3 dias depois do pedido, e os textos de Entrega, Trocas e Ajuda.
 
-- [ ] **Tabela de frete da entrega própria por região.** O site antigo tinha uma faixa de valor para cada região. Hoje há uma regra única de exemplo (R$ 19,90 na Grande São Paulo). Trazer a tabela (print do painel da FastCommerce serve) para cadastrar em Admin > Frete, uma regra por faixa de CEP.
+- [ ] **Tabela de frete da entrega própria por região.** Está no painel antigo, em `rumo.com.br/adm/FrameLocalidades.asp?IDLoja=30564` (valor fixo por localidade), e os pesos por transportadora em `FrameFaixasCEP.asp`. As páginas pedem login: salvar pelo navegador em `data-privada/` (ou mandar prints). Hoje há uma regra única de exemplo (R$ 19,90 na Grande São Paulo).
 - [ ] **Regras dos Correios do site antigo.** Pegar na FastCommerce o contrato, os serviços e as regras usadas. Os valores do envio nacional no site ainda são de exemplo.
-- [x] **Jadlog:** a dona não tem mais os dados de acesso. Produtos volumosos (os marcados "só Jadlog") ficam com entrega própria na Grande São Paulo e retirada; fora dela, o site manda falar pelo WhatsApp. Os 7 que estavam como "todo o Brasil, só Jadlog" passaram a "só entrega local" em 11/10/2026.
+- [x] **Jadlog:** a dona não tem mais os dados de acesso. Produtos volumosos (os marcados "só Jadlog") ficam com entrega própria na Grande São Paulo e retirada; fora dela, o site manda falar pelo WhatsApp. Os 7 que estavam como "todo o Brasil, só Jadlog" passaram a "só entrega local" em 11/10/2026, inclusive as três plantas de raiz nua: a dona confirmou que não vão pelos Correios.
 - [x] **Prazo de separação:** a confirmação do pedido e o e-mail de pagamento aprovado dizem "Temos até 3 dias úteis para separar e enviar o seu pedido" (texto em Admin > Configurações, "Aviso de prazo na confirmação do pedido"). A escolha de data da entrega própria continua, a partir de 3 dias.
 - [x] **Devolução por desistência:** decisão da dona em 11/10/2026: seguir a lei. No arrependimento em 7 dias, o envio de volta é por conta da loja (página de Trocas e FAQ).
 
@@ -108,7 +108,7 @@ A dona explicou o funcionamento em 11/10/2026. Já está no site: retirada na lo
 - [ ] Conferir se as fotos do site antigo podem ser baixadas pelo endereço que vem no arquivo. Se o servidor de imagens bloquear, será preciso um arquivo com as fotos.
 - [ ] Revisar os produtos em Admin > Curadoria. Em 10/10/2026: 1.031 na loja, 90 na lixeira e **34 na fila "A revisar"** (quase toda a categoria Fibra de coco e os vasos Japi), que ficam lá por decisão da dona.
 - [x] Os 3 produtos mantidos sem foto (`409203`, `481618` e `523929`) foram para a lixeira em 10/10/2026. Dá para restaurar em Admin > Curadoria > Lixeira.
-- [ ] **Informar o estoque real.** Em 10/10/2026 todos os produtos receberam 10 unidades, como valor provisório para a loja poder vender. Ajustar em Admin > Estoque, ou decidir se a quantidade virá do Bling.
+- [ ] **Informar o estoque real (com a dona).** Todos os produtos têm 10 unidades, valor provisório. Ela vai atualizar em Admin > Estoque.
 - [x] Redirecionamentos dos 1.031 produtos publicados gravados em produção em 10/10/2026. Se algum produto da fila "A revisar" for publicado depois, rodar de novo `pnpm import:legacy data-privada/prod/xml-products.xml --redirecionamentos`.
 - [ ] Criar o repositório privado no GitHub e passar o endereço, para o envio do código e a ligação com a Vercel.
 
@@ -140,7 +140,7 @@ O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as crede
 - [ ] Fazer uma compra de teste com cartão de verdade e devolver.
 - [x] Novas `MerchantKey` e `ClientSecret` no `.env.vercel` e na Vercel desde 11/10/2026; a Cielo aceitou as duas (consulta e token de acesso). Falta trocar `CIELO_WEBHOOK_SECRET` (apareceu na conversa; exige salvar de novo a URL de notificação com o token da dona) e a chave do Resend.
 - [x] Parcelamento: até 6x sem juros, parcela mínima de R$ 50 (confirmado pela dona). A taxa do parcelamento é da loja.
-- [ ] Validade do QR Code do Pix: pela documentação da Cielo, o padrão é 24 horas na integração nova (`Provider: "Cielo2"`, campo `Payment.QrCode.Expiration`, em segundos) e 2 horas na antiga. A loja expira o pedido em 20 minutos e hoje não envia esse campo: quem pagar depois disso tem o pedido expirado e o dinheiro na conta. Enviar o campo e conferir no Pix de teste (não há ambiente de testes para o Pix novo).
+- [x] Validade do QR Code do Pix: a conta usa a integração antiga da Cielo, em que o código vale 2 horas (a nova, `Provider: "Cielo2"`, respondeu "Affiliation not found" em 11/10/2026). O campo de prazo é aceito, mas nada indica que a integração antiga o respeite. Por isso a loja passou a expirar o Pix em 120 minutos (Admin > Configurações), igual à Cielo: antes eram 20, e quem pagasse depois ficava com o pedido expirado. Para prazo menor, pedir à Cielo a migração para a integração nova.
 - [ ] Antifraude e 3DS (opcionais): o antifraude é contratado à parte (ClearSale ou CyberSource), só para cartão e sem garantia contra chargeback. O 3DS 2.0 é pedido à Cielo para Visa e Mastercard, exige integração no site e passa a fraude autenticada para o banco emissor. Os preços não são públicos: pedir à Cielo.
 - [x] URL de notificação na Cielo salva em 11/10/2026, com o endereço da Vercel e o cabeçalho `webhooksecret` (o painel só aceita letras no nome). A Cielo pede cerca de 30 minutos para valer. Trocar a URL quando o domínio definitivo entrar (`docs/INTEGRACOES.md`, seção 1).
 - [ ] Depois da URL salva: comprar com Pix e conferir que o pedido muda para pago sozinho.
