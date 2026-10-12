@@ -171,3 +171,18 @@ describe("ordenação, facetas e paginação", () => {
     expect(paginate(items, 99).page).toBe(3);
   });
 });
+
+describe("produtos mandados para o fim da lista", () => {
+  const rows = [
+    row({ id: "a", minPriceCents: 100, demoted: true, isFeatured: true, salesCount30d: 99 }),
+    row({ id: "b", minPriceCents: 300 }),
+    row({ id: "c", minPriceCents: 200 }),
+    row({ id: "d", minPriceCents: 50, totalAvailable: 0 }),
+  ];
+
+  it("ficam depois dos demais em qualquer ordenação, e antes só dos esgotados", () => {
+    expect(sortRows(rows, "relevancia").map((r) => r.id)).toEqual(["b", "c", "a", "d"]);
+    expect(sortRows(rows, "menor-preco").map((r) => r.id)).toEqual(["c", "b", "a", "d"]);
+    expect(sortRows(rows, "mais-vendidos").map((r) => r.id)).toEqual(["b", "c", "a", "d"]);
+  });
+});

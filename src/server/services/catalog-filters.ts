@@ -32,6 +32,8 @@ export type IndexRow = {
   subtype: string | null;
   includesPot: boolean | null;
   brand: string | null;
+  /** Produto com a tag "fim-da-lista": aparece depois de todos os outros, em qualquer ordenação. */
+  demoted?: boolean;
   /** Só na busca: quanto o produto combina com o termo. */
   score?: number;
 };
@@ -260,6 +262,9 @@ export function applyFilters(rows: IndexRow[], filters: Filters): IndexRow[] {
   });
 }
 
+/** Tag que manda o produto para o fim das listagens (foto fraca, por exemplo). Editável no produto. */
+export const DEMOTED_TAG = "fim-da-lista";
+
 export function sortRows(rows: IndexRow[], sort: SortValue): IndexRow[] {
   const published = (row: IndexRow) => (row.publishedAt ? Date.parse(row.publishedAt) : 0);
   // Esgotados sempre vão para o fim, em qualquer ordenação.
@@ -278,8 +283,11 @@ export function sortRows(rows: IndexRow[], sort: SortValue): IndexRow[] {
     "melhor-avaliados": (a, b) =>
       b.ratingAverage - a.ratingAverage || b.ratingCount - a.ratingCount,
   };
+  const demotedLast = (a: IndexRow, b: IndexRow) =>
+    Number(a.demoted ?? false) - Number(b.demoted ?? false);
   return [...rows].sort(
-    (a, b) => soldOutLast(a, b) || comparators[sort](a, b) || a.id.localeCompare(b.id),
+    (a, b) =>
+      soldOutLast(a, b) || demotedLast(a, b) || comparators[sort](a, b) || a.id.localeCompare(b.id),
   );
 }
 

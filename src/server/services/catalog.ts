@@ -8,7 +8,7 @@ import type { StoreSettings } from "@/config/store.config";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { normalizeText } from "@/lib/slug";
-import type { IndexRow } from "./catalog-filters";
+import { DEMOTED_TAG, type IndexRow } from "./catalog-filters";
 import { largestVariantUrl } from "./media";
 import { getPriceDisplay, isPromoActive, type PriceDisplay } from "./pricing";
 
@@ -207,6 +207,7 @@ const loadCatalogIndex = unstable_cache(
       salesCount30d: row.salesCount30d,
       publishedAt: row.publishedAt?.toISOString() ?? null,
       isFeatured: row.isFeatured,
+      demoted: row.tags.includes(DEMOTED_TAG),
       isNew: row.isNew,
       onSale: row.variants.some(
         (v) => isPromoActive(v, now) || (v.compareAtPriceCents ?? 0) > v.priceCents,
