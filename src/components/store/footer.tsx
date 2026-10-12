@@ -145,7 +145,7 @@ export function Footer({
       <div className="bg-moss-900">
         <div className="container-store flex flex-col gap-4 pt-8 pb-24 lg:flex-row lg:items-end lg:justify-between lg:pb-8">
           <div className="flex flex-col gap-3">
-            <Logo name={settings.name} tone="cream" />
+            <Logo name={settings.name} tone="cream" className="self-start" />
             <p className="max-w-2xl type-caption text-cream-50">
               {settings.legalName}, CNPJ {settings.cnpj}. {settings.address}.
             </p>
