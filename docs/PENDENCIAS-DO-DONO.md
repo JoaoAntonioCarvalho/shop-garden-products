@@ -57,7 +57,7 @@ A dona explicou o funcionamento em 11/10/2026. Já está no site: retirada na lo
 
 ## Textos a revisar
 
-- Slogan e texto da parceria com o Shopping Garden (`tagline`, `partnerClaim`): confirmar se continuam válidos.
+- Slogan e texto da parceria com o Shopping Garden: confirmados pela dona em 11/10/2026 (loja desde 1999, "Parceira oficial de e-commerce do Shopping Garden", endereço da Av. dos Bandeirantes, 5900).
 
 ## Textos a revisar (rascunhos criados no seed)
 
@@ -66,11 +66,11 @@ A dona explicou o funcionamento em 11/10/2026. Já está no site: retirada na lo
 - **Textos jurídicos** (Trocas e devoluções, Política de privacidade, Política de cookies, Termos de uso): versão completa escrita em 10/10/2026 e publicada (`prisma/seed/legal-pages.ts`, ou Admin > Páginas). Não foi revisada por advogado: a revisão continua recomendada. Pontos que dependem da resposta da dona: prazo de 48 horas para avisar avaria e planta em mau estado, reembolso em até 10 dias úteis, cobrança de nova entrega, substituição de itens de arranjo, compra só por maiores de 18 anos. Como a loja é microempresa, a política indica um canal de atendimento em vez de um encarregado de dados (Resolução CD/ANPD 2/2022).
 - **Perguntas frequentes da página de Ajuda** (Admin > Ajuda).
 - **Texto "Sobre a Net Shop Garden" da home** (Admin > Home).
-- **Linha Carol Costa:** a coleção recebeu em 11/10/2026 os 105 produtos ativos com a marca "Carol Costa" (vinda do XML do site antigo). A lista do site antigo não pôde ser lida (firewall): conferir se bate.
+- **Linha Carol Costa:** a dona confirmou em 11/10/2026 que o nome pode ser usado. A coleção tem os 105 produtos ativos com a marca "Carol Costa" (vinda do XML do site antigo).
 
 ## Logo e fotos
 
-- Logo definitivo: hoje é um logotipo em texto. O site antigo bloqueia o download automático: salvar a imagem do logo em `data-privada/` para trocar `public/brand/logo.svg` e o componente `Logo`.
+- Logo definitivo: o logo do site antigo está em `data-privada/prod/logo.jpg`, mas diz "net shopping Garden .com.br", nome que o site novo não usa, e é um JPG pequeno (600 × 371). Aguardando a decisão do dono: redesenhar com "Net Shop Garden" no mesmo estilo, usar como está ou manter o logotipo em texto.
 - **Fotos dos produtos:** vieram do site antigo. Muitas têm a marca d'água "PhotoGrid" no canto, fundos diferentes e enquadramento desigual. As 34 da fila "A revisar" já foram refeitas no padrão novo (fundo branco, 4:5, produto centralizado); o mesmo tratamento pode ser aplicado ao catálogo inteiro.
 - **Imagens de categorias, ocasiões, coleções e banners:** em 11/10/2026 as ilustrações de teste foram trocadas por composições com fotos de produtos da loja. Podem ser substituídas por fotos em ambiente em Admin > Categorias e Admin > Banners. A seção "A loja online do Shopping Garden" pede uma foto real do Shopping Garden.
 - **Depoimentos:** seção desligada, por decisão da dona.
@@ -138,7 +138,7 @@ O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as crede
 - [x] Rede de segurança: com a página do pedido aberta, a loja consulta a Cielo e confirma o Pix mesmo sem o aviso (11/10/2026).
 - [ ] Devolução do Pix: a Cielo negou a devolução do teste por falta de saldo na conta Pix ("Merchant with insufficient balance for return"). A dona perguntou à Cielo em 11/10/2026; aguardando resposta. Enquanto isso, devolução de pedido pago com Pix pode aparecer como "falhou" no painel e precisa ser feita por transferência.
 - [ ] Fazer uma compra de teste com cartão de verdade e devolver.
-- [ ] Novas `MerchantKey` e `ClientSecret` geradas pelo dev em 11/10/2026: falta colocá-las no `.env.vercel` e na Vercel (Settings > Environment Variables: `CIELO_MERCHANT_KEY`, `CIELO_CLIENT_SECRET`) e publicar de novo. Trocar também `CIELO_WEBHOOK_SECRET`, que apareceu na conversa.
+- [x] Novas `MerchantKey` e `ClientSecret` no `.env.vercel` e na Vercel desde 11/10/2026; a Cielo aceitou as duas (consulta e token de acesso). Falta trocar `CIELO_WEBHOOK_SECRET` (apareceu na conversa; exige salvar de novo a URL de notificação com o token da dona) e a chave do Resend.
 - [x] Parcelamento: até 6x sem juros, parcela mínima de R$ 50 (confirmado pela dona). A taxa do parcelamento é da loja.
 - [ ] Validade do QR Code do Pix: pela documentação da Cielo, o padrão é 24 horas na integração nova (`Provider: "Cielo2"`, campo `Payment.QrCode.Expiration`, em segundos) e 2 horas na antiga. A loja expira o pedido em 20 minutos e hoje não envia esse campo: quem pagar depois disso tem o pedido expirado e o dinheiro na conta. Enviar o campo e conferir no Pix de teste (não há ambiente de testes para o Pix novo).
 - [ ] Antifraude e 3DS (opcionais): o antifraude é contratado à parte (ClearSale ou CyberSource), só para cartão e sem garantia contra chargeback. O 3DS 2.0 é pedido à Cielo para Visa e Mastercard, exige integração no site e passa a fraude autenticada para o banco emissor. Os preços não são públicos: pedir à Cielo.

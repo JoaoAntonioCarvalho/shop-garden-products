@@ -73,7 +73,7 @@ export const storeConfig: StoreSettings = {
   businessHours: "Segunda a sexta, das 9h às 17h. Sábado, das 9h às 14h30",
   instagram: "https://www.instagram.com/netshopgarden",
   orderHandlingNotice: "Temos até 3 dias úteis para separar e enviar o seu pedido.",
-  partnerClaim: "Parceira oficial de e-commerce do Shopping Garden, desde 1999 em São Paulo", // TODO(dono): confirmar
+  partnerClaim: "Parceira oficial de e-commerce do Shopping Garden, desde 1999 em São Paulo",
   pixDiscountPercent: 5,
   maxInstallments: 6,
   minInstallmentCents: 5000,
