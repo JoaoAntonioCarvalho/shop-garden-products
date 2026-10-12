@@ -23,6 +23,7 @@ export class SmtpEmailProvider implements EmailProvider {
     await this.getTransporter().sendMail({
       from: process.env.EMAIL_FROM || `${storeConfig.name} <${storeConfig.email}>`,
       to: message.to,
+      replyTo: message.replyTo,
       subject: message.subject,
       html: message.html,
       text: message.text,

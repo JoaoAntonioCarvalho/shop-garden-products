@@ -70,6 +70,8 @@ export async function sendEmail<T extends EmailTemplateName>(
       subject,
       html: rendered.html,
       text: rendered.text,
+      // O remetente é do domínio da loja; a resposta vai para o e-mail de atendimento.
+      replyTo: store.email,
       headers: options.headers,
     });
     await db.emailLog.create({

@@ -1,41 +1,26 @@
 import { cn } from "@/lib/cn";
 
 type LogoProps = {
-  /** Nome da loja, vindo da configuração. */
+  /** Nome da loja, vindo da configuração: é o texto alternativo da imagem. */
   name: string;
-  /** Em fundos musgo usa creme. */
+  /** Em fundos musgo usa a versão creme, de uma cor só. */
   tone?: "moss" | "cream";
   className?: string;
 };
 
 /**
- * Logotipo provisório em texto, com uma folha de traço fino.
- * Para trocar pelo logo definitivo, substitua este componente e public/brand/logo.svg.
+ * Logo da loja: o desenho do site antigo, vetorizado, com "shop" no lugar de "shopping".
+ * Os arquivos ficam em public/brand (há também as versões com ".com.br": logo-com-br.svg).
  */
-// TODO(dono): enviar o logo definitivo
 export function Logo({ name, tone = "moss", className }: LogoProps) {
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-2 font-serif text-[24px] leading-none font-semibold whitespace-nowrap md:text-[27px]",
-        tone === "moss" ? "text-moss-700" : "text-cream-50",
-        className,
-      )}
-    >
-      <svg
-        viewBox="0 0 32 40"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        className="h-[1.15em] w-auto flex-none"
-      >
-        <path d="M5 34C5 20 13 9 27 6c1 14-7 25-22 28Z" />
-        <path d="M5 34c5-10 11-17 18-23" />
-      </svg>
-      {name}
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element -- SVG estático, sem ganho com next/image
+    <img
+      src={tone === "moss" ? "/brand/logo.svg" : "/brand/logo-cream.svg"}
+      alt={name}
+      width={596}
+      height={268}
+      className={cn("block h-11 w-auto md:h-[52px]", className)}
+    />
   );
 }

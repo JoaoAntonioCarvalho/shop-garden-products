@@ -335,3 +335,5 @@ Três itens da especificação que tinham ficado de fora, feitos a pedido do don
 - **Revisão de nomes e descrições por regras** (`pnpm texts`), não à mão: 774 nomes e 1.060 descrições. O endereço (slug) dos produtos não mudou. Nomes científicos e códigos do produtor foram mantidos.
 - **Coleção Carol Costa pela marca do produto**, porque o site antigo bloqueia leitura automática e a lista de lá não pôde ser conferida.
 - **Newsletter antiga (Dinamize) descartada:** a base não será importada e o registro `innlink` saiu do roteiro da virada.
+- **Logo vetorizado a partir do JPG do site antigo** (600 × 371): ampliado com Real-ESRGAN e traçado com potrace. O "shop" usa as quatro primeiras letras de "shopping", centralizadas sob o círculo, para o desenho ficar idêntico. No rodapé musgo entra a versão creme de uma cor só, porque vinho não vai sobre musgo.
+- **Remetente dos e-mails do domínio, resposta para o atendimento.** `EMAIL_FROM` continua `contato@netshopgarden.com.br` (o Resend só envia por domínio verificado) e todo e-mail leva `Reply-To` com o e-mail de atendimento da configuração (`netshopgarden@gmail.com`). Não é preciso criar caixa `contato@`.

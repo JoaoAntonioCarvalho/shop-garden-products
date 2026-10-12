@@ -135,7 +135,7 @@ export default async function PrintPage({
                 {order.giftMessage}
               </h1>
             </div>
-            <Logo name={settings.name} className="text-[18px] md:text-[18px]" />
+            <Logo name={settings.name} className="h-9 md:h-9" />
           </article>
         ) : (
           <p>Este pedido não tem mensagem de cartão.</p>
