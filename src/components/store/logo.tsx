@@ -20,7 +20,7 @@ export function Logo({ name, tone = "moss", className }: LogoProps) {
       alt={name}
       width={596}
       height={268}
-      className={cn("block h-11 w-auto md:h-[52px]", className)}
+      className={cn("block h-11 w-auto flex-none self-start md:h-[52px]", className)}
     />
   );
 }
