@@ -64,6 +64,20 @@ export default async function CheckoutPage() {
   };
   const view = await buildCartView(cart, settings, { paymentMethod: draft.paymentMethod ?? "PIX" });
 
+  // Com a retirada ligada em Admin > Frete, o cliente pode escolhê-la sem informar endereço.
+  const pickupRule = await db.shippingRule.findFirst({
+    where: { method: "PICKUP", isActive: true },
+    orderBy: { position: "asc" },
+    select: { code: true, description: true },
+  });
+  const pickup = pickupRule
+    ? {
+        code: pickupRule.code,
+        description: pickupRule.description ?? "",
+        address: settings.pickupAddress,
+      }
+    : null;
+
   return (
     <div className="container-store pb-16">
       <h1 className="sr-only">Finalizar compra</h1>
@@ -98,6 +112,7 @@ export default async function CheckoutPage() {
         giftMessage={view.giftMessage}
         pixDiscountPercent={settings.pixDiscountPercent}
         showTestCards={process.env.NODE_ENV !== "production"}
+        pickup={pickup}
         savedAddresses={(account?.addresses ?? []).map((a) => ({
           id: a.id,
           label: a.label || `${a.street}, ${a.number}`,

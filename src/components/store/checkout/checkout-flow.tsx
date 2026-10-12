@@ -68,6 +68,19 @@ type CheckoutFlowProps = {
   showTestCards: boolean;
   initialNotices: string[];
   savedAddresses?: SavedCheckoutAddress[];
+  /** Retirada na loja: código da opção de frete, texto de orientação e endereço da loja. */
+  pickup?: {
+    code: string;
+    description: string;
+    address: {
+      cep: string;
+      street: string;
+      number: string;
+      district: string;
+      city: string;
+      state: string;
+    };
+  } | null;
 };
 
 export type SavedCheckoutAddress = {
@@ -244,6 +257,7 @@ export function CheckoutFlow({
   showTestCards,
   initialNotices,
   savedAddresses = [],
+  pickup = null,
 }: CheckoutFlowProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -264,6 +278,9 @@ export function CheckoutFlow({
   const [errors, setErrors] = useState<string[]>([]);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [quoting, startQuote] = useTransition();
+  const [mode, setMode] = useState<"delivery" | "pickup">(
+    pickup && draft.shipping?.code === pickup.code ? "pickup" : "delivery",
+  );
   const [placing, startPlacing] = useTransition();
   const idempotencyKey = useRef<string>("");
   const errorRef = useRef<HTMLDivElement>(null);
@@ -347,6 +364,33 @@ export function CheckoutFlow({
         setShipping({ code: "" });
       if (method === "BOLETO" && !result.boleto.available) setMethod("PIX");
     });
+  }
+
+  /** Retirada não pede endereço: o pedido fica com o endereço da loja e só a opção de retirada. */
+  function chooseMode(next: "delivery" | "pickup") {
+    if (next === mode) return;
+    setMode(next);
+    setErrors([]);
+    setCepMessage(null);
+    const filled = next === "pickup" && pickup ? pickup.address : null;
+    for (const key of ["cep", "street", "number", "district", "city"] as const)
+      deliveryForm.setValue(`address.${key}`, filled?.[key] ?? "", { shouldDirty: true });
+    deliveryForm.setValue(
+      "address.state",
+      (filled?.state ?? "") as DeliveryForm["address"]["state"],
+    );
+    deliveryForm.setValue("address.complement", "");
+    deliveryForm.setValue("address.reference", "");
+    deliveryForm.clearErrors("address");
+    if (filled && pickup) {
+      const choice: ShippingChoice = { code: pickup.code };
+      setShipping(choice);
+      refreshQuote(filled.cep, choice);
+    } else {
+      setShipping({ code: "" });
+      setQuote(null);
+      setQuoteError(null);
+    }
   }
 
   async function lookupCep(value: string) {
@@ -660,110 +704,177 @@ export function CheckoutFlow({
             </Alert>
           ) : null}
           <form onSubmit={submitDelivery} noValidate className="flex flex-col gap-4">
-            {savedAddresses.length > 0 ? (
-              <Field label="Usar um endereço salvo">
-                <Select
-                  defaultValue=""
-                  onChange={(event) => {
-                    const saved = savedAddresses.find((item) => item.id === event.target.value);
-                    if (!saved) return;
-                    for (const key of [
-                      "street",
-                      "number",
-                      "complement",
-                      "district",
-                      "city",
-                      "reference",
-                    ] as const) {
-                      deliveryForm.setValue(`address.${key}`, saved[key], {
-                        shouldDirty: true,
-                        shouldValidate: true,
-                      });
-                    }
-                    deliveryForm.setValue(
-                      "address.state",
-                      saved.state as DeliveryForm["address"]["state"],
-                      { shouldDirty: true },
-                    );
-                    deliveryForm.setValue("address.cep", formatCep(saved.cep), {
-                      shouldDirty: true,
-                    });
-                    refreshQuote(saved.cep, { code: "" });
-                    setShipping({ code: "" });
-                  }}
-                >
-                  <option value="">Escolher endereço</option>
-                  {savedAddresses.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.label}, {item.district}, {item.city}/{item.state}
-                    </option>
+            {pickup ? (
+              <fieldset>
+                <legend className="type-body font-semibold text-ink">
+                  Como você quer receber?
+                </legend>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {(
+                    [
+                      ["delivery", "Receber no meu endereço"],
+                      ["pickup", "Retirar na loja, sem custo"],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <label
+                      key={value}
+                      className={cn(
+                        "flex min-h-14 cursor-pointer items-center gap-3 rounded-control border bg-white p-4",
+                        mode === value ? "border-moss-700" : "border-line",
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="como-receber"
+                        className="control-radio"
+                        checked={mode === value}
+                        onChange={() => chooseMode(value)}
+                      />
+                      <span className="type-body font-medium text-ink">{label}</span>
+                    </label>
                   ))}
-                </Select>
-              </Field>
+                </div>
+              </fieldset>
             ) : null}
-            <Field
-              label="CEP"
-              error={deliveryForm.formState.errors.address?.cep?.message}
-              className="max-w-48"
-            >
-              <MaskedInput
-                mask="cep"
-                value={cepValue}
-                onValueChange={(value) => {
-                  deliveryForm.setValue("address.cep", value, { shouldDirty: true });
-                  if (isValidCep(value)) void lookupCep(value);
-                }}
-              />
-            </Field>
-            <p aria-live="polite" className="-mt-2 type-small text-ink-muted empty:hidden">
-              {cepMessage}
-            </p>
-            <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
-              <Field label="Rua" error={deliveryForm.formState.errors.address?.street?.message}>
-                <Input autoComplete="address-line1" {...deliveryForm.register("address.street")} />
-              </Field>
-              <Field label="Número" error={deliveryForm.formState.errors.address?.number?.message}>
-                <Input autoComplete="address-line2" {...deliveryForm.register("address.number")} />
-              </Field>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Complemento" optional>
-                <Input
-                  placeholder="Apartamento, bloco, casa"
-                  {...deliveryForm.register("address.complement")}
-                />
-              </Field>
-              <Field
-                label="Bairro"
-                error={deliveryForm.formState.errors.address?.district?.message}
-              >
-                <Input
-                  autoComplete="address-level3"
-                  {...deliveryForm.register("address.district")}
-                />
-              </Field>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
-              <Field label="Cidade" error={deliveryForm.formState.errors.address?.city?.message}>
-                <Input autoComplete="address-level2" {...deliveryForm.register("address.city")} />
-              </Field>
-              <Field label="Estado" error={deliveryForm.formState.errors.address?.state?.message}>
-                <Select autoComplete="address-level1" {...deliveryForm.register("address.state")}>
-                  <option value="">UF</option>
-                  {UF.map((uf) => (
-                    <option key={uf} value={uf}>
-                      {uf}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-            </div>
-            <Field label="Ponto de referência" optional>
-              <Input
-                placeholder="Portaria, cor do portão, loja próxima"
-                {...deliveryForm.register("address.reference")}
-              />
-            </Field>
+            {mode === "pickup" && pickup ? (
+              <div className="rounded-control border border-line bg-white p-4">
+                <p className="type-body font-medium text-ink">
+                  {pickup.address.street}, {pickup.address.number}, {pickup.address.district},{" "}
+                  {pickup.address.city}/{pickup.address.state}
+                </p>
+                {pickup.description ? (
+                  <p className="mt-1 type-small text-ink-muted">{pickup.description}</p>
+                ) : null}
+              </div>
+            ) : (
+              <>
+                {savedAddresses.length > 0 ? (
+                  <Field label="Usar um endereço salvo">
+                    <Select
+                      defaultValue=""
+                      onChange={(event) => {
+                        const saved = savedAddresses.find((item) => item.id === event.target.value);
+                        if (!saved) return;
+                        for (const key of [
+                          "street",
+                          "number",
+                          "complement",
+                          "district",
+                          "city",
+                          "reference",
+                        ] as const) {
+                          deliveryForm.setValue(`address.${key}`, saved[key], {
+                            shouldDirty: true,
+                            shouldValidate: true,
+                          });
+                        }
+                        deliveryForm.setValue(
+                          "address.state",
+                          saved.state as DeliveryForm["address"]["state"],
+                          { shouldDirty: true },
+                        );
+                        deliveryForm.setValue("address.cep", formatCep(saved.cep), {
+                          shouldDirty: true,
+                        });
+                        refreshQuote(saved.cep, { code: "" });
+                        setShipping({ code: "" });
+                      }}
+                    >
+                      <option value="">Escolher endereço</option>
+                      {savedAddresses.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.label}, {item.district}, {item.city}/{item.state}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                ) : null}
+                <Field
+                  label="CEP"
+                  error={deliveryForm.formState.errors.address?.cep?.message}
+                  className="max-w-48"
+                >
+                  <MaskedInput
+                    mask="cep"
+                    value={cepValue}
+                    onValueChange={(value) => {
+                      deliveryForm.setValue("address.cep", value, { shouldDirty: true });
+                      if (isValidCep(value)) void lookupCep(value);
+                    }}
+                  />
+                </Field>
+                <p aria-live="polite" className="-mt-2 type-small text-ink-muted empty:hidden">
+                  {cepMessage}
+                </p>
+                <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
+                  <Field label="Rua" error={deliveryForm.formState.errors.address?.street?.message}>
+                    <Input
+                      autoComplete="address-line1"
+                      {...deliveryForm.register("address.street")}
+                    />
+                  </Field>
+                  <Field
+                    label="Número"
+                    error={deliveryForm.formState.errors.address?.number?.message}
+                  >
+                    <Input
+                      autoComplete="address-line2"
+                      {...deliveryForm.register("address.number")}
+                    />
+                  </Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Complemento" optional>
+                    <Input
+                      placeholder="Apartamento, bloco, casa"
+                      {...deliveryForm.register("address.complement")}
+                    />
+                  </Field>
+                  <Field
+                    label="Bairro"
+                    error={deliveryForm.formState.errors.address?.district?.message}
+                  >
+                    <Input
+                      autoComplete="address-level3"
+                      {...deliveryForm.register("address.district")}
+                    />
+                  </Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
+                  <Field
+                    label="Cidade"
+                    error={deliveryForm.formState.errors.address?.city?.message}
+                  >
+                    <Input
+                      autoComplete="address-level2"
+                      {...deliveryForm.register("address.city")}
+                    />
+                  </Field>
+                  <Field
+                    label="Estado"
+                    error={deliveryForm.formState.errors.address?.state?.message}
+                  >
+                    <Select
+                      autoComplete="address-level1"
+                      {...deliveryForm.register("address.state")}
+                    >
+                      <option value="">UF</option>
+                      {UF.map((uf) => (
+                        <option key={uf} value={uf}>
+                          {uf}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                </div>
+                <Field label="Ponto de referência" optional>
+                  <Input
+                    placeholder="Portaria, cor do portão, loja próxima"
+                    {...deliveryForm.register("address.reference")}
+                  />
+                </Field>
+              </>
+            )}
 
             <label className="flex min-h-11 cursor-pointer items-start gap-3 py-2">
               <input
@@ -804,7 +915,7 @@ export function CheckoutFlow({
             <fieldset className="mt-2" aria-busy={quoting || undefined}>
               <legend className="type-body font-semibold text-ink">Opções de entrega</legend>
               <div aria-live="polite">
-                {!isValidCep(cepValue ?? "") ? (
+                {mode === "delivery" && !isValidCep(cepValue ?? "") ? (
                   <p className="mt-2 type-small text-ink-muted">
                     Digite o CEP para ver as opções e os prazos.
                   </p>
@@ -843,7 +954,10 @@ export function CheckoutFlow({
                 ) : null}
               </div>
               <div className={cn("mt-3 flex flex-col gap-2", quoting && "opacity-60")}>
-                {quote?.options.map((item) => {
+                {(mode === "pickup" && pickup
+                  ? quote?.options.filter((item) => item.code === pickup.code)
+                  : quote?.options
+                )?.map((item) => {
                   const selected = shipping.code === item.code;
                   return (
                     <div

@@ -17,6 +17,15 @@ export type StoreSettings = {
   legalName: string;
   cnpj: string;
   address: string;
+  /** Endereço da loja onde o pedido é retirado. Usado no checkout quando o cliente escolhe retirar. */
+  pickupAddress: {
+    cep: string;
+    street: string;
+    number: string;
+    district: string;
+    city: string;
+    state: string;
+  };
   /** Número com código do país e DDD, só dígitos, como o wa.me espera. */
   whatsapp: string;
   phoneDisplay: string;
@@ -66,6 +75,14 @@ export const storeConfig: StoreSettings = {
   legalName: "[RAZÃO SOCIAL]", // TODO(dono): confirmar (exigido no rodapé pelo Decreto 7.962/2013)
   cnpj: "[00.000.000/0001-00]", // TODO(dono): confirmar
   address: "[Endereço completo]", // TODO(dono): confirmar
+  pickupAddress: {
+    cep: "04071-001",
+    street: "Av. dos Bandeirantes",
+    number: "5900",
+    district: "Planalto Paulista",
+    city: "São Paulo",
+    state: "SP",
+  },
   whatsapp: "5511955817159", // TODO(dono): confirmar (número do site atual)
   phoneDisplay: "(11) 95581-7159", // TODO(dono): confirmar
   email: "netshopgarden@gmail.com",
