@@ -150,7 +150,7 @@ export const shippingRuleResource = defineResource<RuleRecord>({
   plural: "Frete e entrega",
   feminine: true,
   description:
-    "Cada regra vale para uma faixa de CEP. O valor do frete grátis da loja e o horário de corte padrão ficam em Configurações.",
+    "Cada regra vale para uma faixa de CEP. Use os filtros para ver um tipo de entrega por vez, ou digite um CEP para achar as regras que valem para ele. Clique no nome da regra para alterar valores e prazos.",
   permission: "shipping.manage",
   model: "shippingRule",
   entityType: "ShippingRule",
@@ -163,8 +163,40 @@ export const shippingRuleResource = defineResource<RuleRecord>({
       { key: "price", header: "Valor" },
       { key: "days", header: "Prazo" },
     ],
-    orderBy: { position: "asc" },
-    reorder: true,
+    orderBy: [{ method: "asc" }, { cepStart: "asc" }],
+    searchPlaceholder: "CEP do cliente, por exemplo 04001-000",
+    filters: () => [
+      {
+        type: "select",
+        name: "tipo",
+        label: "Tipo de entrega",
+        options: [
+          { value: "LOCAL_SCHEDULED", label: "Entrega própria" },
+          { value: "NATIONAL_ECONOMY", label: "PAC (envio econômico)" },
+          { value: "NATIONAL_EXPRESS", label: "SEDEX (envio expresso)" },
+          { value: "PICKUP", label: "Retirada na loja" },
+          { value: "SAME_DAY", label: "Entrega hoje" },
+        ],
+      },
+      {
+        type: "select",
+        name: "situacao",
+        label: "Situação",
+        options: [
+          { value: "inativas", label: "Desligadas" },
+          { value: "todas", label: "Todas" },
+        ],
+      },
+    ],
+    // Sem filtro de situação, só as regras ligadas: as de exemplo ficam guardadas, fora da vista.
+    where: ({ q, filters }) => {
+      const cep = normalizeCep(q);
+      return {
+        ...(filters.tipo ? { method: filters.tipo } : {}),
+        ...(filters.situacao === "todas" ? {} : { isActive: filters.situacao !== "inativas" }),
+        ...(cep ? { cepStart: { lte: cep }, cepEnd: { gte: cep } } : {}),
+      };
+    },
     row: (rule) => ({
       name: (
         <>
