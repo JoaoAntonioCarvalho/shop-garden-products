@@ -1155,6 +1155,11 @@ model ShippingRule {
   cepEnd                  String         @db.Char(8)
   baseFeeCents            Int            @default(0)
   feePerKgCents           Int            @default(0)
+  /// Tabela por peso: [{ "upToGrams": 1000, "feeCents": 2100 }, ...], em ordem crescente. Com ela,
+  /// baseFeeCents não é usado e feePerKgCents vale por quilo acima da última faixa.
+  weightTiers             Json?
+  /// Peso máximo do pedido para a regra valer (os Correios levam até 30 kg). Nulo = sem limite.
+  maxWeightGrams          Int?
   /// Frete grátis acima deste subtotal. Sobrescreve o padrão da loja; nulo = sem frete grátis.
   freeAboveCents          Int?
   /// Usa o limite de frete grátis da configuração da loja quando freeAboveCents é nulo.

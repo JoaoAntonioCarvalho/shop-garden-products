@@ -9,6 +9,8 @@ import {
 import {
   computeShippingOptions,
   isBlockedByLocalOnly,
+  priceByWeight,
+  readWeightTiers,
   type ShippingRuleData,
   type ShippingSettings,
 } from "@/server/providers/shipping/mock";
@@ -301,5 +303,68 @@ describe("opções de frete", () => {
   it("regra inativa não aparece; CEP inválido não devolve nada", () => {
     expect(codes(quote("01310-100", [vase], saturdayMorning))).not.toContain("retirada");
     expect(quote("123", [vase], saturdayMorning)).toEqual([]);
+  });
+});
+
+describe("tabela de frete por peso", () => {
+  const tiers = [
+    { upToGrams: 300, feeCents: 2100 },
+    { upToGrams: 1000, feeCents: 2250 },
+    { upToGrams: 2000, feeCents: 2490 },
+  ];
+  const sedex = rule({
+    code: "expresso-sp",
+    name: "SEDEX",
+    method: "NATIONAL_EXPRESS",
+    cepStart: "20000000",
+    cepEnd: "29999999",
+    baseFeeCents: 9999,
+    feePerKgCents: 570,
+    weightTiers: tiers,
+    maxWeightGrams: 30000,
+    freeAboveCents: 69900,
+  });
+  const price = (weightGrams: number, subtotalCents = 10000) =>
+    computeShippingOptions(
+      { cep: "22041-001", items: [{ ...vase, weightGrams }], subtotalCents, now: saturdayMorning },
+      [sedex],
+      settings,
+    );
+
+  it("usa a primeira faixa que comporta o peso, inclusive no limite", () => {
+    expect(price(0)[0].priceCents).toBe(2100);
+    expect(price(300)[0].priceCents).toBe(2100);
+    expect(price(301)[0].priceCents).toBe(2250);
+    expect(price(2000)[0].priceCents).toBe(2490);
+  });
+
+  it("acima da última faixa, soma o valor por quilo excedente, arredondando para cima", () => {
+    expect(price(2001)[0].priceCents).toBe(2490 + 570);
+    expect(price(4500)[0].priceCents).toBe(2490 + 570 * 3);
+    expect(priceByWeight(tiers, 3000, 570)).toBe(2490 + 570);
+  });
+
+  it("não oferece a regra acima do peso máximo", () => {
+    expect(price(30000)).toHaveLength(1);
+    expect(price(30001)).toEqual([]);
+  });
+
+  it("mantém o frete grátis da regra acima do valor", () => {
+    expect(price(1500, 69900)[0]).toMatchObject({ priceCents: 0, isFree: true });
+  });
+
+  it("ignora faixas inválidas e ordena as demais", () => {
+    expect(
+      readWeightTiers([
+        { upToGrams: 2000, feeCents: 10 },
+        { upToGrams: 0, feeCents: 5 },
+        "x",
+        { upToGrams: 1000, feeCents: 7 },
+      ]),
+    ).toEqual([
+      { upToGrams: 1000, feeCents: 7 },
+      { upToGrams: 2000, feeCents: 10 },
+    ]);
+    expect(readWeightTiers(null)).toEqual([]);
   });
 });

@@ -12,6 +12,9 @@ export type ShippingRuleData = {
   cepEnd: string;
   baseFeeCents: number;
   feePerKgCents: number;
+  /** Faixas de peso gravadas no banco (JSON); ver readWeightTiers. */
+  weightTiers?: unknown;
+  maxWeightGrams?: number | null;
   freeAboveCents: number | null;
   usesStoreFreeThreshold: boolean;
   minDays: number;
@@ -31,6 +34,33 @@ export type ShippingSettings = Pick<
 
 const SCHEDULE_DAYS = 14;
 
+export type WeightTier = { upToGrams: number; feeCents: number };
+
+/** Lê as faixas de peso da regra, ignorando o que não for uma faixa válida, em ordem crescente. */
+export function readWeightTiers(value: unknown): WeightTier[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .flatMap((item) => {
+      const upToGrams = Number((item as WeightTier | null)?.upToGrams);
+      const feeCents = Number((item as WeightTier | null)?.feeCents);
+      return Number.isFinite(upToGrams) &&
+        upToGrams > 0 &&
+        Number.isFinite(feeCents) &&
+        feeCents >= 0
+        ? [{ upToGrams, feeCents }]
+        : [];
+    })
+    .sort((a, b) => a.upToGrams - b.upToGrams);
+}
+
+/** Frete pela tabela de peso: a primeira faixa que comporta o pedido; acima da última, o valor por quilo excedente. */
+export function priceByWeight(tiers: WeightTier[], grams: number, feePerKgCents: number): number {
+  const tier = tiers.find((item) => grams <= item.upToGrams);
+  if (tier) return tier.feeCents;
+  const last = tiers[tiers.length - 1];
+  return last.feeCents + feePerKgCents * Math.ceil((grams - last.upToGrams) / 1000);
+}
+
 /**
  * Cálculo simulado de frete a partir das regras cadastradas (seção 9.4). Função pura: recebe as
  * regras e a configuração, e devolve as opções que o cliente vê.
@@ -45,10 +75,8 @@ export function computeShippingOptions(
 
   const hasLocalOnly = input.items.some((item) => item.deliveryScope === "LOCAL_ONLY");
   const allSameDay = input.items.every((item) => item.sameDayEligible);
-  const weightKg = Math.max(
-    1,
-    Math.ceil(input.items.reduce((sum, item) => sum + item.weightGrams * item.quantity, 0) / 1000),
-  );
+  const weightGrams = input.items.reduce((sum, item) => sum + item.weightGrams * item.quantity, 0);
+  const weightKg = Math.max(1, Math.ceil(weightGrams / 1000));
   const today = zonedParts(input.now).dateKey;
 
   const options: ShippingOption[] = [];
@@ -62,14 +90,18 @@ export function computeShippingOptions(
     // Uma opção por modalidade: vale a primeira regra, pela ordem.
     if (seenMethods.has(rule.method)) continue;
     if (hasLocalOnly && !rule.allowsLocalOnlyProducts) continue;
+    if (rule.maxWeightGrams && weightGrams > rule.maxWeightGrams) continue;
 
     const freeAbove =
       rule.freeAboveCents ??
       (rule.usesStoreFreeThreshold ? settings.freeShippingThresholdCents : null);
+    const tiers = readWeightTiers(rule.weightTiers);
     const originalPriceCents =
-      rule.method === "NATIONAL_ECONOMY" || rule.method === "NATIONAL_EXPRESS"
-        ? rule.baseFeeCents + rule.feePerKgCents * weightKg
-        : rule.baseFeeCents;
+      tiers.length > 0
+        ? priceByWeight(tiers, weightGrams, rule.feePerKgCents)
+        : rule.method === "NATIONAL_ECONOMY" || rule.method === "NATIONAL_EXPRESS"
+          ? rule.baseFeeCents + rule.feePerKgCents * weightKg
+          : rule.baseFeeCents;
     const isFree =
       originalPriceCents === 0 ||
       (freeAbove !== null && freeAbove > 0 && input.subtotalCents >= freeAbove);
