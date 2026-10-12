@@ -8,7 +8,7 @@ import type { NavItem } from "@/config/navigation";
 import { cn } from "@/lib/cn";
 
 const itemClass =
-  "flex h-12 items-center gap-1 px-2 text-[15px] whitespace-nowrap xl:px-3 text-ink transition-colors hover:text-moss-700 data-[state=open]:text-moss-700";
+  "flex h-12 items-center gap-1 px-2 text-[15px] whitespace-nowrap 2xl:px-3 text-ink transition-colors hover:text-moss-700 data-[state=open]:text-moss-700";
 
 /**
  * Menu principal do desktop. Abre ao passar o mouse (com 150ms de atraso), por clique e por teclado
@@ -23,7 +23,7 @@ export function MegaMenu({ items }: { items: NavItem[] }) {
       className="relative hidden border-b border-line bg-cream-50 lg:block"
     >
       <div className="container-store">
-        <NavigationMenu.List className="-mx-2 flex items-center xl:-mx-3">
+        <NavigationMenu.List className="-mx-2 flex items-center 2xl:-mx-3">
           {items.map((item) =>
             item.children?.length ? (
               <NavigationMenu.Item key={item.href}>
