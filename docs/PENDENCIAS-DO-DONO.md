@@ -137,13 +137,13 @@ O pagamento dentro do site (Pix e cartão) está escrito. Em 10/10/2026 as crede
 - [x] Pix de teste de R$ 1,00 pago e confirmado pela Cielo (10/10/2026).
 - [x] Rede de segurança: com a página do pedido aberta, a loja consulta a Cielo e confirma o Pix mesmo sem o aviso (11/10/2026).
 - [ ] Devolução do Pix: a Cielo negou a devolução do teste por falta de saldo na conta Pix ("Merchant with insufficient balance for return"). A dona perguntou à Cielo em 11/10/2026; aguardando resposta. Enquanto isso, devolução de pedido pago com Pix pode aparecer como "falhou" no painel e precisa ser feita por transferência.
-- [ ] Fazer uma compra de teste com cartão de verdade e devolver.
+- [x] Compra de teste com cartão de verdade e devolução (12/10/2026): pedido NSG-000002, R$ 1,50 à vista, aprovado na hora e estornado pelo cancelamento, com o item de volta ao estoque. A Cielo confirma o valor cancelado.
 - [x] Novas `MerchantKey` e `ClientSecret` no `.env.vercel` e na Vercel desde 11/10/2026; a Cielo aceitou as duas (consulta e token de acesso). Falta trocar `CIELO_WEBHOOK_SECRET` (apareceu na conversa; exige salvar de novo a URL de notificação com o token da dona) e a chave do Resend.
 - [x] Parcelamento: até 6x sem juros, parcela mínima de R$ 50 (confirmado pela dona). A taxa do parcelamento é da loja.
 - [x] Validade do QR Code do Pix: a conta usa a integração antiga da Cielo, em que o código vale 2 horas (a nova, `Provider: "Cielo2"`, respondeu "Affiliation not found" em 11/10/2026). O campo de prazo é aceito, mas nada indica que a integração antiga o respeite. Por isso a loja passou a expirar o Pix em 120 minutos (Admin > Configurações), igual à Cielo: antes eram 20, e quem pagasse depois ficava com o pedido expirado. Para prazo menor, pedir à Cielo a migração para a integração nova.
 - [ ] Antifraude e 3DS (opcionais): o antifraude é contratado à parte (ClearSale ou CyberSource), só para cartão e sem garantia contra chargeback. O 3DS 2.0 é pedido à Cielo para Visa e Mastercard, exige integração no site e passa a fraude autenticada para o banco emissor. Os preços não são públicos: pedir à Cielo.
 - [x] URL de notificação na Cielo salva em 11/10/2026, com o endereço da Vercel e o cabeçalho `webhooksecret` (o painel só aceita letras no nome). A Cielo pede cerca de 30 minutos para valer. Trocar a URL quando o domínio definitivo entrar (`docs/INTEGRACOES.md`, seção 1).
-- [ ] Depois da URL salva: comprar com Pix e conferir que o pedido muda para pago sozinho.
+- [x] Pix de ponta a ponta (12/10/2026): pedido NSG-000001 pago e confirmado em 34 segundos. Falta repetir uma vez fechando a aba antes de pagar, para isolar o aviso automático da consulta feita pela página.
 
 Boleto deixa de ser oferecido com a Cielo.
 
