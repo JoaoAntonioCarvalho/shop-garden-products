@@ -126,6 +126,7 @@ const ruleSchema = z
       .array(z.coerce.number().int().min(0).max(6))
       .min(1, "Escolha pelo menos um dia da semana."),
     allowsLocalOnlyProducts: bool(),
+    acceptsBulky: bool(),
     description: optionalText(200),
     isActive: bool(),
   })
@@ -273,6 +274,14 @@ export const shippingRuleResource = defineResource<RuleRecord>({
         section: "Onde vale",
         wide: true,
       },
+      {
+        name: "acceptsBulky",
+        label: 'Leva produto volumoso (os marcados como "só Jadlog")',
+        type: "checkbox",
+        section: "Onde vale",
+        wide: true,
+        help: "Desmarque nas regras dos Correios.",
+      },
       { name: "baseFeeCents", label: "Taxa base (R$)", type: "money", section: "Valor" },
       {
         name: "feePerKgCents",
@@ -330,6 +339,7 @@ export const shippingRuleResource = defineResource<RuleRecord>({
       cepStart: rule ? formatCep(rule.cepStart) : "",
       cepEnd: rule ? formatCep(rule.cepEnd) : "",
       allowsLocalOnlyProducts: rule?.allowsLocalOnlyProducts ?? false,
+      acceptsBulky: rule?.acceptsBulky ?? true,
       baseFeeCents: formatCentsPlain(rule?.baseFeeCents ?? 0),
       feePerKgCents: formatCentsPlain(rule?.feePerKgCents ?? 0),
       weightTiers: formatWeightTiers(rule?.weightTiers),

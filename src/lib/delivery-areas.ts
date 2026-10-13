@@ -55,6 +55,8 @@ export type RestrictedItem = {
   localOnly: boolean;
   /** Área de entrega própria do produto, se tiver. */
   area: { name: string; ranges: CepRange[] } | null;
+  /** Produto volumoso, que os Correios não levam. */
+  bulky?: boolean;
 };
 
 export type BlockedItem = { variantId: string; name: string; areaName: string };

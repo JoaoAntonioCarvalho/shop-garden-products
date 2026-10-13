@@ -368,3 +368,32 @@ describe("tabela de frete por peso", () => {
     expect(readWeightTiers(null)).toEqual([]);
   });
 });
+
+describe("duas transportadoras na mesma modalidade", () => {
+  const base = { method: "NATIONAL_ECONOMY" as const, cepStart: "20000000", cepEnd: "29999999" };
+  const options = computeShippingOptions(
+    { cep: "22041-001", items: [vase], subtotalCents: 10000, now: saturdayMorning },
+    [
+      rule({ ...base, code: "economico-pac-1", name: "PAC (Correios)", baseFeeCents: 1500 }),
+      rule({
+        ...base,
+        code: "economico-pac-2",
+        name: "PAC (Correios)",
+        baseFeeCents: 9900,
+        position: 1,
+      }),
+      rule({
+        ...base,
+        code: "economico-jadlog-1",
+        name: "Jadlog",
+        baseFeeCents: 3000,
+        position: 2,
+      }),
+    ],
+    settings,
+  );
+
+  it("mostra uma opção por nome, e a primeira regra de cada um", () => {
+    expect(options.map((option) => option.code)).toEqual(["economico-pac-1", "economico-jadlog-1"]);
+  });
+});

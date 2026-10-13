@@ -15,6 +15,8 @@ export type ShippingRuleData = {
   /** Faixas de peso gravadas no banco (JSON); ver readWeightTiers. */
   weightTiers?: unknown;
   maxWeightGrams?: number | null;
+  /** Falso para regras dos Correios: não levam produto volumoso. */
+  acceptsBulky?: boolean;
   freeAboveCents: number | null;
   usesStoreFreeThreshold: boolean;
   minDays: number;
@@ -87,8 +89,10 @@ export function computeShippingOptions(
     .sort((a, b) => a.position - b.position);
 
   for (const rule of matching) {
-    // Uma opção por modalidade: vale a primeira regra, pela ordem.
-    if (seenMethods.has(rule.method)) continue;
+    // Uma opção por modalidade e nome (PAC e Jadlog são as duas "envio econômico"): vale a
+    // primeira regra, pela ordem.
+    const optionKey = `${rule.method}:${rule.name}`;
+    if (seenMethods.has(optionKey)) continue;
     if (hasLocalOnly && !rule.allowsLocalOnlyProducts) continue;
     if (rule.maxWeightGrams && weightGrams > rule.maxWeightGrams) continue;
 
@@ -138,7 +142,7 @@ export function computeShippingOptions(
           deliveryDate: today,
           description: `Receba hoje até ${settings.sameDay.deliverByHour}h.`,
         });
-        seenMethods.add(rule.method);
+        seenMethods.add(optionKey);
         break;
       }
       case "LOCAL_SCHEDULED": {
@@ -151,7 +155,7 @@ export function computeShippingOptions(
         );
         if (availableDates.length === 0) break;
         options.push({ ...base, requiresScheduling: true, availableDates });
-        seenMethods.add(rule.method);
+        seenMethods.add(optionKey);
         break;
       }
       case "PICKUP":
@@ -162,11 +166,11 @@ export function computeShippingOptions(
           isFree: true,
           description: rule.description || settings.address,
         });
-        seenMethods.add(rule.method);
+        seenMethods.add(optionKey);
         break;
       default:
         options.push(base);
-        seenMethods.add(rule.method);
+        seenMethods.add(optionKey);
     }
   }
 

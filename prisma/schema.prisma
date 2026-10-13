@@ -1160,6 +1160,8 @@ model ShippingRule {
   weightTiers             Json?
   /// Peso máximo do pedido para a regra valer (os Correios levam até 30 kg). Nulo = sem limite.
   maxWeightGrams          Int?
+  /// Leva produto volumoso (marcado "só Jadlog" no cadastro). Os Correios não levam.
+  acceptsBulky            Boolean        @default(true)
   /// Frete grátis acima deste subtotal. Sobrescreve o padrão da loja; nulo = sem frete grátis.
   freeAboveCents          Int?
   /// Usa o limite de frete grátis da configuração da loja quando freeAboveCents é nulo.

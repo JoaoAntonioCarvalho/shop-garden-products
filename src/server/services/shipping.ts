@@ -30,7 +30,11 @@ async function loadRestrictions(items: ShippingQuoteItem[]): Promise<RestrictedI
     select: {
       id: true,
       product: {
-        select: { name: true, deliveryArea: { select: { name: true, cepRanges: true } } },
+        select: {
+          name: true,
+          carrierRestriction: true,
+          deliveryArea: { select: { name: true, cepRanges: true } },
+        },
       },
     },
   });
@@ -41,6 +45,7 @@ async function loadRestrictions(items: ShippingQuoteItem[]): Promise<RestrictedI
       variantId: item.variantId,
       name: product?.name ?? "Um item da sacola",
       localOnly: item.deliveryScope === "LOCAL_ONLY",
+      bulky: product?.carrierRestriction === "JADLOG_ONLY",
       area: product?.deliveryArea
         ? { name: product.deliveryArea.name, ranges: readCepRanges(product.deliveryArea.cepRanges) }
         : null,
@@ -84,11 +89,18 @@ export async function quoteShipping(input: {
     subtotalCents: input.subtotalCents,
     now,
   };
-  const [options, rules, restrictions] = await Promise.all([
+  const [quoted, rules, restrictions] = await Promise.all([
     getShippingProvider().quote(quoteInput),
     loadShippingRules(),
     loadRestrictions(input.items),
   ]);
+  // Produto volumoso não vai pelos Correios: sobram a Jadlog, a entrega própria e a retirada.
+  const noBulky = new Set(
+    rules.filter((rule) => rule.acceptsBulky === false).map((rule) => rule.code),
+  );
+  const options = restrictions.some((item) => item.bulky)
+    ? quoted.filter((option) => !noBulky.has(option.code))
+    : quoted;
   const cep = normalizeCep(input.cep);
   const blockedItems = cep
     ? findBlockedItems(cep, restrictions, !isBlockedByLocalOnly(quoteInput, rules))
