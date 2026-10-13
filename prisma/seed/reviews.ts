@@ -20,7 +20,7 @@ const texts: Record<number, Array<[title: string, body: string]>> = {
     ],
     [
       "Superou a expectativa",
-      "A qualidade é a mesma da loja física. Recebi no mesmo dia, dentro do horário informado.",
+      "A qualidade é a mesma da loja física. Recebi dentro do prazo e do horário informados.",
     ],
     [
       "Presente perfeito",

@@ -199,7 +199,6 @@ const SHEET_FIELDS: FieldDef[] = [
 ];
 
 const DELIVERY_FIELDS: FieldDef[] = [
-  { name: "sameDayEligible", label: "Pode ser entregue hoje (Grande São Paulo)", type: "checkbox" },
   {
     name: "deliveryScope",
     label: "Onde entrega",

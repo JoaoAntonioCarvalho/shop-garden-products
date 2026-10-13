@@ -176,7 +176,6 @@ export const shippingRuleResource = defineResource<RuleRecord>({
           { value: "NATIONAL_ECONOMY", label: "PAC (envio econômico)" },
           { value: "NATIONAL_EXPRESS", label: "SEDEX (envio expresso)" },
           { value: "PICKUP", label: "Retirada na loja" },
-          { value: "SAME_DAY", label: "Entrega hoje" },
         ],
       },
       {
@@ -212,9 +211,11 @@ export const shippingRuleResource = defineResource<RuleRecord>({
       days:
         rule.method === "SAME_DAY"
           ? `No dia, pedidos até ${rule.cutoffTime ?? "o corte da loja"}`
-          : rule.maxDays === 0
-            ? "No dia"
-            : `${rule.minDays} a ${rule.maxDays} dias úteis`,
+          : rule.method === "PICKUP"
+            ? "Quando o pedido estiver pronto"
+            : rule.maxDays === 0
+              ? "No dia"
+              : `${rule.minDays} a ${rule.maxDays} dias úteis`,
     }),
     above: async () => {
       const holidays = await db.holiday.findMany({

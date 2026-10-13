@@ -325,13 +325,6 @@ export const couponResource = defineResource<CouponRecord>({
         type: "checkbox",
         section: "Regras",
       },
-      {
-        name: "appliesToSameDay",
-        label: "Frete grátis vale para a entrega hoje",
-        type: "checkbox",
-        section: "Regras",
-        showIf: { field: "type", in: ["FREE_SHIPPING"] },
-      },
       { name: "isActive", label: "Ativo", type: "checkbox", section: "Regras" },
       {
         name: "categoryIds",

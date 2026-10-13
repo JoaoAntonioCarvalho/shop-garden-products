@@ -73,7 +73,14 @@ export async function ProductListing({
     settings,
   );
   const activeFilters = countActiveFilters(query.filters);
-  const panelProps = { query, facets, groups: filterGroups, extraParams, resultCount: page.total };
+  const panelProps = {
+    query,
+    facets,
+    groups: filterGroups,
+    extraParams,
+    resultCount: page.total,
+    sameDayEnabled: settings.sameDay.enabled,
+  };
 
   return (
     <div className="grid gap-x-10 lg:grid-cols-[240px_1fr]">

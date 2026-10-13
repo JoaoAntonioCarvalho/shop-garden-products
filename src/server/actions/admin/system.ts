@@ -93,7 +93,45 @@ const settingsSchema = z.object({
   maintenanceMode: bool(),
 });
 
-/** Salva só o que mudou em relação ao que está valendo, audita e invalida o cache da loja inteira. */
+/** Grava só o que mudou em relação ao que está valendo, audita e invalida o cache da loja inteira. */
+async function persistSettings(
+  next: Partial<StoreSettings>,
+  user: { id: string },
+  audit: (entry: {
+    action: string;
+    entityType: string;
+    diff: Prisma.InputJsonValue;
+  }) => Promise<void>,
+): Promise<boolean> {
+  const current = await getStoreSettings();
+  const stored = await db.storeSetting.findMany({ select: { key: true } });
+  const changed: Record<string, { antes: unknown; depois: unknown }> = {};
+  for (const [key, value] of Object.entries(next) as Array<[keyof StoreSettings, unknown]>) {
+    const before =
+      key === "analytics"
+        ? {
+            ...current.analytics,
+            ...(stored.some((row) => row.key === "analytics") ? {} : storeConfig.analytics),
+          }
+        : current[key];
+    if (JSON.stringify(before) === JSON.stringify(value)) continue;
+    changed[key] = { antes: before, depois: value };
+    await db.storeSetting.upsert({
+      where: { key },
+      update: { value: value as Prisma.InputJsonValue, updatedById: user.id },
+      create: { key, value: value as Prisma.InputJsonValue, updatedById: user.id },
+    });
+  }
+  if (Object.keys(changed).length === 0) return false;
+  await audit({
+    action: "settings.update",
+    entityType: "StoreSetting",
+    diff: changed as Prisma.InputJsonValue,
+  });
+  invalidate("settings", "home", "catalog", "pages", "categories");
+  return true;
+}
+
 export async function saveSettingsAction(input: unknown): Promise<AdminResult> {
   return runAdmin("settings.manage", settingsSchema, input, async (data, { user, audit }) => {
     const {
@@ -124,33 +162,62 @@ export async function saveSettingsAction(input: unknown): Promise<AdminResult> {
       throw new AdminError(
         `O cupom de boas-vindas ${next.welcomeCoupon} não existe. Crie o cupom antes.`,
       );
-    const current = await getStoreSettings();
-    const stored = await db.storeSetting.findMany({ select: { key: true } });
-    const changed: Record<string, { antes: unknown; depois: unknown }> = {};
-    for (const [key, value] of Object.entries(next) as Array<[keyof StoreSettings, unknown]>) {
-      const before =
-        key === "analytics"
-          ? {
-              ...current.analytics,
-              ...(stored.some((row) => row.key === "analytics") ? {} : storeConfig.analytics),
-            }
-          : current[key];
-      if (JSON.stringify(before) === JSON.stringify(value)) continue;
-      changed[key] = { antes: before, depois: value };
-      await db.storeSetting.upsert({
-        where: { key },
-        update: { value: value as Prisma.InputJsonValue, updatedById: user.id },
-        create: { key, value: value as Prisma.InputJsonValue, updatedById: user.id },
-      });
-    }
-    if (Object.keys(changed).length === 0) return { message: "Nada foi alterado" };
-    await audit({
-      action: "settings.update",
-      entityType: "StoreSetting",
-      diff: changed as Prisma.InputJsonValue,
-    });
-    invalidate("settings", "home", "catalog", "pages", "categories");
+    if (!(await persistSettings(next, user, audit))) return { message: "Nada foi alterado" };
     return { message: "Configurações salvas" };
+  });
+}
+
+// ───────────── Informações da loja (painel simples) ─────────────
+
+const storeInfoSchema = z.object({
+  whatsapp: settingsSchema.shape.whatsapp,
+  phoneDisplay: settingsSchema.shape.phoneDisplay,
+  email: settingsSchema.shape.email,
+  instagram: settingsSchema.shape.instagram,
+  businessHours: settingsSchema.shape.businessHours,
+  pickupStreet: requiredText("a rua da loja de retirada", 120),
+  pickupNumber: requiredText("o número", 20),
+  pickupDistrict: requiredText("o bairro", 80),
+  pickupCity: requiredText("a cidade", 80),
+  pickupState: z.string().trim().toUpperCase().length(2, "Informe a sigla do estado, como SP."),
+  pickupCep: z
+    .string()
+    .transform((value) => normalizeCep(value) ?? "")
+    .pipe(z.string().length(8, "Informe o CEP da loja com 8 dígitos.")),
+  pickupInstructions: requiredText("as orientações da retirada", 300),
+  ownDeliveryNote: optionalText(200).transform((value) => value ?? ""),
+  orderHandlingNotice: optionalText(200).transform((value) => value ?? ""),
+  freeShippingThresholdCents: settingsSchema.shape.freeShippingThresholdCents,
+  pixDiscountPercent: settingsSchema.shape.pixDiscountPercent,
+  maxInstallments: settingsSchema.shape.maxInstallments,
+  minInstallmentCents: settingsSchema.shape.minInstallmentCents,
+});
+
+/** O painel "Informações da loja": os mesmos dados das Configurações, só os do dia a dia. */
+export async function saveStoreInfoAction(input: unknown): Promise<AdminResult> {
+  return runAdmin("settings.manage", storeInfoSchema, input, async (data, { user, audit }) => {
+    const {
+      pickupStreet,
+      pickupNumber,
+      pickupDistrict,
+      pickupCity,
+      pickupState,
+      pickupCep,
+      ...flat
+    } = data;
+    const next: Partial<StoreSettings> = {
+      ...flat,
+      pickupAddress: {
+        cep: `${pickupCep.slice(0, 5)}-${pickupCep.slice(5)}`,
+        street: pickupStreet,
+        number: pickupNumber,
+        district: pickupDistrict,
+        city: pickupCity,
+        state: pickupState,
+      },
+    };
+    if (!(await persistSettings(next, user, audit))) return { message: "Nada foi alterado" };
+    return { message: "Informações salvas. A loja já mostra os dados novos." };
   });
 }
 

@@ -43,7 +43,7 @@ export const pages: Array<{
     content: `<h2>Entrega própria em São Paulo</h2>
 <p>Na Grande São Paulo, a entrega é feita por equipe própria. Você escolhe a data no checkout, a partir de 3 dias úteis depois do pedido: é o tempo de separar e conferir cada item. As entregas acontecem de segunda a sexta, em horário comercial, e avisamos você antes de sair. O valor depende da região e aparece ao informar o CEP.</p>
 <h2>Retirada na loja</h2>
-<p>Você pode retirar o pedido sem custo no Shopping Garden: Av. dos Bandeirantes, 5900, São Paulo. Aguarde o e-mail avisando que o pedido está pronto para retirada antes de ir até a loja. A retirada é feita até as 18h.</p>
+<p>Você pode retirar o pedido sem custo no Shopping Garden: {{enderecoRetirada}}. {{retirada}}</p>
 <h2>Envio para todo o Brasil</h2>
 <p>Vasos, cachepots, flores e plantas artificiais, objetos de decoração, aromas e itens de jardinagem seguem pelos Correios. Peças mais volumosas vão por transportadora (Jadlog). O prazo e o valor aparecem ao informar o CEP no produto, na sacola ou no checkout.</p>
 <h2>Frete grátis</h2>
@@ -98,11 +98,6 @@ export const faq: Array<[group: string, question: string, answer: string]> = [
   ],
   [
     "Entrega",
-    "Vocês entregam no mesmo dia?",
-    "Não. A entrega própria na Grande São Paulo é feita em até 3 dias úteis, de segunda a sexta, em horário comercial. Se tiver pressa, você pode retirar o pedido na loja assim que receber o e-mail de confirmação.",
-  ],
-  [
-    "Entrega",
     "Plantas são entregues fora de São Paulo?",
     "Não. Plantas vivas, orquídeas e arranjos naturais são entregues por equipe própria nas regiões atendidas ou retirados na loja. Se o seu CEP não for atendido, fale com a gente pelo WhatsApp {{telefone}}. Os demais produtos seguem para todo o Brasil.",
   ],
@@ -114,7 +109,7 @@ export const faq: Array<[group: string, question: string, answer: string]> = [
   [
     "Entrega",
     "Posso retirar na loja?",
-    "Sim, sem custo. O endereço é Av. dos Bandeirantes, 5900, Shopping Garden, São Paulo. Aguarde o e-mail avisando que o pedido está pronto antes de ir. A retirada é feita até as 18h.",
+    "Sim, sem custo, no Shopping Garden: {{enderecoRetirada}}. {{retirada}}",
   ],
   [
     "Pedidos",

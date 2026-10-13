@@ -151,8 +151,6 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
               placeholder: "presente, sala",
             },
           }),
-          bulk("sameDayOn", "Ligar entrega hoje"),
-          bulk("sameDayOff", "Desligar entrega hoje"),
         ]
       : []),
     ...(can(user, "products.edit_price")

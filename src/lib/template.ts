@@ -7,6 +7,12 @@ export function formatCutoff(time: string): string {
   return minutes === "00" ? `${Number(hours)}h` : `${Number(hours)}h${minutes}`;
 }
 
+/** "Av. dos Bandeirantes, 5900, Planalto Paulista, São Paulo/SP" */
+export function pickupAddressLine(settings: Pick<StoreSettings, "pickupAddress">): string {
+  const { street, number, district, city, state } = settings.pickupAddress;
+  return `${street}, ${number}, ${district}, ${city}/${state}`;
+}
+
 /** Valores disponíveis como {{marcador}} em páginas, FAQ, banners e seções da home. */
 export function templateValues(settings: StoreSettings): Record<string, string> {
   return {
@@ -17,6 +23,8 @@ export function templateValues(settings: StoreSettings): Record<string, string> 
     telefone: settings.phoneDisplay,
     email: settings.email,
     horario: settings.businessHours,
+    enderecoRetirada: pickupAddressLine(settings),
+    retirada: settings.pickupInstructions,
     corte: formatCutoff(settings.sameDay.cutoffTime),
     descontoPix: String(settings.pixDiscountPercent),
     freteGratis: formatBRLShort(settings.freeShippingThresholdCents),

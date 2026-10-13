@@ -1,5 +1,6 @@
 import type { StoreSettings } from "@/config/store.config";
 import { getSameDayStatus, nextDeliveryDates, zonedParts } from "@/lib/dates";
+import { pickupAddressLine } from "@/lib/template";
 import { isCepInRange, normalizeCep } from "@/lib/validators/cep";
 import type { ShippingOption, ShippingProvider, ShippingQuoteInput } from "./types";
 
@@ -31,7 +32,13 @@ export type ShippingRuleData = {
 
 export type ShippingSettings = Pick<
   StoreSettings,
-  "sameDay" | "freeShippingThresholdCents" | "holidays" | "address"
+  | "sameDay"
+  | "freeShippingThresholdCents"
+  | "holidays"
+  | "address"
+  | "pickupAddress"
+  | "pickupInstructions"
+  | "ownDeliveryNote"
 >;
 
 const SCHEDULE_DAYS = 14;
@@ -154,7 +161,12 @@ export function computeShippingOptions(
           Math.max(1, rule.minDays),
         );
         if (availableDates.length === 0) break;
-        options.push({ ...base, requiresScheduling: true, availableDates });
+        options.push({
+          ...base,
+          description: settings.ownDeliveryNote || base.description,
+          requiresScheduling: true,
+          availableDates,
+        });
         seenMethods.add(optionKey);
         break;
       }
@@ -164,7 +176,8 @@ export function computeShippingOptions(
           priceCents: 0,
           originalPriceCents: 0,
           isFree: true,
-          description: rule.description || settings.address,
+          // Endereço e horário vêm das Informações da loja, não do texto da regra.
+          description: `${pickupAddressLine(settings)}. ${settings.pickupInstructions}`.trim(),
         });
         seenMethods.add(optionKey);
         break;

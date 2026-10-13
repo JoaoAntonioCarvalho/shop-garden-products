@@ -61,7 +61,6 @@ const filters: FilterField[] = [
     name: "entrega",
     label: "Método de entrega",
     options: [
-      { value: "entrega-hoje", label: "Entrega hoje" },
       { value: "agendada", label: "Entrega agendada" },
       { value: "economico", label: "Envio econômico" },
       { value: "expresso", label: "Envio expresso" },
@@ -76,7 +75,6 @@ const filters: FilterField[] = [
   { type: "text", name: "cupom", label: "Cupom", placeholder: "Código" },
   { type: "text", name: "valor-min", label: "Valor mínimo", placeholder: "R$" },
   { type: "text", name: "valor-max", label: "Valor máximo", placeholder: "R$" },
-  { type: "toggle", name: "hoje", label: "Entrega hoje" },
   { type: "toggle", name: "atrasados", label: "Atrasados" },
 ];
 

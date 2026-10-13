@@ -28,6 +28,8 @@ type FilterPanelProps = {
   /** Parâmetros que precisam ser preservados na URL (por exemplo o termo da busca). */
   extraParams?: Record<string, string>;
   resultCount: number;
+  /** A loja faz entrega no mesmo dia (configuração). Sem isso, o filtro "Entrega hoje" não aparece. */
+  sameDayEnabled?: boolean;
 };
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
@@ -67,7 +69,7 @@ function Option({
 }
 
 /** Controles de filtro. O estado vive na URL: cada mudança navega, e a página é compartilhável. */
-function FilterControls({ query, facets, groups, extraParams }: FilterPanelProps) {
+function FilterControls({ query, facets, groups, extraParams, sameDayEnabled }: FilterPanelProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [pending, startTransition] = useTransition();
@@ -206,11 +208,13 @@ function FilterControls({ query, facets, groups, extraParams }: FilterPanelProps
           checked={filters.inStock}
           onChange={(c) => toggleBoolean("inStock", c)}
         />
-        <Option
-          label="Entrega hoje"
-          checked={filters.sameDay}
-          onChange={(c) => toggleBoolean("sameDay", c)}
-        />
+        {sameDayEnabled ? (
+          <Option
+            label="Entrega hoje"
+            checked={filters.sameDay}
+            onChange={(c) => toggleBoolean("sameDay", c)}
+          />
+        ) : null}
         <Option
           label="Em promoção"
           checked={filters.onSale}

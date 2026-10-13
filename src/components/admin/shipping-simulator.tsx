@@ -18,7 +18,6 @@ export function ShippingSimulator() {
   const [subtotal, setSubtotal] = useState("150");
   const [weight, setWeight] = useState("2000");
   const [localOnly, setLocalOnly] = useState(false);
-  const [sameDay, setSameDay] = useState(true);
   const [result, setResult] = useState<ShippingSimulation | null>(null);
   const [pending, startTransition] = useTransition();
   return (
@@ -33,7 +32,7 @@ export function ShippingSimulator() {
               subtotal,
               weightGrams: weight,
               localOnly,
-              sameDayEligible: sameDay,
+              sameDayEligible: false,
             }),
           ),
         );
@@ -78,15 +77,6 @@ export function ShippingSimulator() {
         </Button>
       </div>
       <div className="mt-2 flex flex-wrap gap-4">
-        <label className="flex cursor-pointer items-center gap-2">
-          <input
-            type="checkbox"
-            className="control-check size-4"
-            checked={sameDay}
-            onChange={(event) => setSameDay(event.target.checked)}
-          />
-          Produtos com entrega hoje
-        </label>
         <label className="flex cursor-pointer items-center gap-2">
           <input
             type="checkbox"

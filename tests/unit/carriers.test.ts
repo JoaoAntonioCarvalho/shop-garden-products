@@ -333,6 +333,16 @@ const settings: ShippingSettings = {
   freeShippingThresholdCents: 29900,
   holidays: [],
   address: "Endereço de teste",
+  pickupAddress: {
+    cep: "04071-001",
+    street: "Av. dos Bandeirantes",
+    number: "5900",
+    district: "Planalto Paulista",
+    city: "São Paulo",
+    state: "SP",
+  },
+  pickupInstructions: "Retirada até as 16h.",
+  ownDeliveryNote: "",
 };
 const item = (variantId: string): ShippingQuoteItem => ({
   variantId,

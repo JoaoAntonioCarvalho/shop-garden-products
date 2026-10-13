@@ -33,6 +33,10 @@ export type StoreSettings = {
   /** E-mail que recebe as notificações internas (novo pedido, contato, estoque baixo). */
   notificationEmail: string;
   businessHours: string;
+  /** Orientações e horário da retirada na loja, mostrados no frete, no checkout, na página de Entrega e na Ajuda. */
+  pickupInstructions: string;
+  /** Texto da entrega própria nas opções de frete (dias e horário). */
+  ownDeliveryNote: string;
   /** Prazo de separação e envio, mostrado na confirmação do pedido e no e-mail de pagamento aprovado. */
   orderHandlingNotice: string;
   instagram: string;
@@ -89,6 +93,10 @@ export const storeConfig: StoreSettings = {
   notificationEmail: "netshopgarden@gmail.com",
   businessHours: "Segunda a sexta, das 9h às 17h. Sábado, das 9h às 14h30",
   instagram: "https://www.instagram.com/netshopgarden",
+  pickupInstructions:
+    "Aguarde o e-mail avisando que o pedido está pronto antes de ir até a loja. Retirada até as 16h.",
+  ownDeliveryNote:
+    "Equipe própria, de segunda a sexta, em horário comercial. Avisamos antes de sair.",
   orderHandlingNotice: "Temos até 3 dias úteis para separar e enviar o seu pedido.",
   partnerClaim: "Parceira oficial de e-commerce do Shopping Garden, desde 1999 em São Paulo",
   pixDiscountPercent: 5,
@@ -98,7 +106,7 @@ export const storeConfig: StoreSettings = {
   giftWrapEnabled: false, // a loja não tem embalagem para presente paga (resposta da dona, 11/10/2026)
   giftWrapPriceCents: 1500,
   sameDay: {
-    enabled: true,
+    enabled: false, // a loja não entrega no mesmo dia (dona, 12/10/2026)
     cutoffTime: "14:00", // TODO(dono): confirmar
     days: [1, 2, 3, 4, 5, 6], // TODO(dono): confirmar (segunda a sábado)
     cepRanges: [

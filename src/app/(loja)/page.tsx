@@ -37,7 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getStoreSettings();
   return pageMetadata({
     title: `${settings.name}: ${settings.tagline.charAt(0).toLowerCase()}${settings.tagline.slice(1)}`,
-    description: `${settings.partnerClaim}. Orquídeas, plantas naturais, arranjos, vasos e cachepots com entrega no mesmo dia em São Paulo.`,
+    description: `${settings.partnerClaim}. Orquídeas, plantas naturais, arranjos, vasos e cachepots, com entrega própria em São Paulo e envio para todo o Brasil.`,
     path: "/",
     absoluteTitle: true,
   });
