@@ -133,6 +133,7 @@ Atualizado ao longo do projeto.
 | Sitemap, robots, imagem OG, cabeçalhos   | `src/app/sitemap.ts`, `robots.ts`, `og/route.tsx`, `next.config.ts`                                           |
 | Plano e progresso                        | `docs/PLANO.md`                                                                                               |
 | Decisões                                 | `docs/DECISOES.md`                                                                                            |
+| Painel simples de horários e contatos    | `src/app/admin/informacoes/page.tsx` (`saveStoreInfoAction`)                                                  |
 | Pendências do dono                       | `docs/PENDENCIAS-DO-DONO.md`                                                                                  |
 | Roteiro da virada do domínio             | `docs/VIRADA.md`                                                                                              |
 
