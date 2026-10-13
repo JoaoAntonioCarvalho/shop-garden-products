@@ -18,7 +18,7 @@ import {
 test.beforeAll(() => restockTestProducts());
 test.afterAll(() => db.$disconnect());
 
-test("convidado compra com Pix, entrega hoje, paga pelo simulador e recebe os e-mails", async ({
+test("convidado compra com Pix, envio econômico, paga pelo simulador e recebe os e-mails", async ({
   page,
   context,
 }) => {
@@ -34,15 +34,12 @@ test("convidado compra com Pix, entrega hoje, paga pelo simulador e recebe os e-
   await page.getByRole("dialog").getByRole("link", { name: "Finalizar compra" }).click();
   await fillIdentification(page, email);
   await fillAddress(page, SAO_PAULO);
-  await chooseShipping(page, /Entrega hoje/);
+  await chooseShipping(page, /Envio econômico/);
   await page.getByRole("button", { name: "Continuar para o pagamento" }).click();
 
   // Pix é o método padrão, com o desconto em destaque.
   await expect(page.getByRole("radio", { name: /Pix/ })).toBeChecked();
   await expect(page.getByText(/Pague R\$\s[\d.,]+ no Pix \(economize/)).toBeVisible();
-  // Boleto não vale para entrega hoje, e o motivo aparece.
-  await expect(page.getByRole("radio", { name: /Boleto/ })).toBeDisabled();
-  await expect(page.getByText(/Indisponível para entrega hoje/)).toBeVisible();
 
   await page.getByRole("button", { name: "Continuar para a revisão" }).click();
   const number = await reviewAndPlaceOrder(page);
@@ -59,7 +56,7 @@ test("convidado compra com Pix, entrega hoje, paga pelo simulador e recebe os e-
 
   const order = await db.order.findUniqueOrThrow({ where: { number }, include: { items: true } });
   expect(order.status).toBe("PAID");
-  expect(order.shippingMethodCode).toBe("entrega-hoje");
+  expect(order.shippingMethodCode).toBe("economico-0");
   expect(order.pixDiscountCents).toBeGreaterThan(0);
   expect(order.totalCents).toBe(order.subtotalCents - order.pixDiscountCents + order.shippingCents);
 
@@ -171,7 +168,9 @@ test("produto só local com CEP de outro estado mostra o aviso e bloqueia o envi
 
   // Com CEP de São Paulo, as entregas locais aparecem e o envio por transportadora não.
   await fillAddress(page, SAO_PAULO);
-  await expect(page.getByRole("radio", { name: /Entrega hoje/ })).toBeVisible();
+  // A loja não entrega no mesmo dia: a entrega local é a agendada.
+  await expect(page.getByRole("radio", { name: /Entrega agendada/ })).toBeVisible();
+  await expect(page.getByRole("radio", { name: /Entrega hoje/ })).toHaveCount(0);
   await expect(page.getByRole("radio", { name: /Envio econômico/ })).toHaveCount(0);
 });
 
