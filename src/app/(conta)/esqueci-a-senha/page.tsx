@@ -5,7 +5,8 @@ import { ForgotPasswordForm } from "@/components/store/account/auth-forms";
 
 export const metadata: Metadata = { title: "Esqueci a senha" };
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage({ searchParams }: PageProps<"/esqueci-a-senha">) {
+  const { email } = await searchParams;
   return (
     <AuthCard
       title="Esqueci a senha"
@@ -16,7 +17,7 @@ export default function ForgotPasswordPage() {
         </Link>
       }
     >
-      <ForgotPasswordForm />
+      <ForgotPasswordForm defaultEmail={typeof email === "string" ? email : ""} />
     </AuthCard>
   );
 }

@@ -47,14 +47,30 @@ export type SignupInput = {
   marketingOptIn: boolean;
 };
 
+/**
+ * O e-mail é de um cliente trazido do site antigo que ainda não criou a senha aqui. Quem tenta
+ * entrar ou se cadastrar com ele é avisado de que a conta existe e precisa redefinir a senha.
+ */
+export async function isLegacyAccountWithoutPassword(emailInput: string): Promise<boolean> {
+  const user = await db.user.findUnique({
+    where: { email: emailInput.trim().toLowerCase() },
+    select: { legacyImportedAt: true, passwordHash: true, isActive: true, anonymizedAt: true },
+  });
+  return Boolean(
+    user?.legacyImportedAt && !user.passwordHash && user.isActive && !user.anonymizedAt,
+  );
+}
+
 /** Cria a conta. Se o e-mail já tem conta, devolve null (quem chama não revela isso ao visitante). */
 export async function createAccount(input: SignupInput) {
   const email = input.email.toLowerCase();
   const existing = await db.user.findUnique({
     where: { email },
-    select: { id: true, passwordHash: true, anonymizedAt: true },
+    select: { id: true, passwordHash: true, anonymizedAt: true, legacyImportedAt: true },
   });
-  if (existing?.passwordHash || existing?.anonymizedAt) return null;
+  // Conta do site antigo tem histórico de pedidos e endereços: só quem recebe o link de
+  // redefinição no e-mail pode assumi-la, nunca um cadastro novo com o mesmo e-mail.
+  if (existing?.passwordHash || existing?.anonymizedAt || existing?.legacyImportedAt) return null;
 
   const now = new Date();
   const data = {

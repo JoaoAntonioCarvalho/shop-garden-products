@@ -274,6 +274,7 @@ export function CheckoutFlow({
   const [card, setCard] = useState<{ token: CardTokenData; installments: number } | null>(null);
   const [accepted, setAccepted] = useState(false);
   const [hasAccount, setHasAccount] = useState(false);
+  const [legacyAccount, setLegacyAccount] = useState(false);
   const [changes, setChanges] = useState<string[]>(initialNotices);
   const [errors, setErrors] = useState<string[]>([]);
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -440,6 +441,7 @@ export function CheckoutFlow({
     setIdentification(values);
     const result = await saveDraft({ identification: values });
     setHasAccount(Boolean(result.hasAccount));
+    setLegacyAccount(Boolean(result.legacyAccount));
     setStep(2);
     const cep = deliveryForm.getValues("address.cep");
     if (isValidCep(cep) && !quote) refreshQuote(cep, shipping);
@@ -699,6 +701,18 @@ export function CheckoutFlow({
                 className="font-medium text-moss-700 underline underline-offset-3"
               >
                 Entrar para usar seus endereços salvos
+              </Link>{" "}
+              ou continue sem entrar.
+            </Alert>
+          ) : null}
+          {legacyAccount ? (
+            <Alert tone="info" className="mb-4">
+              Você já tem uma conta neste site.{" "}
+              <Link
+                href={`/esqueci-a-senha?email=${encodeURIComponent(identification?.email ?? "")}`}
+                className="font-medium text-moss-700 underline underline-offset-3"
+              >
+                Redefina a sua senha para entrar
               </Link>{" "}
               ou continue sem entrar.
             </Alert>

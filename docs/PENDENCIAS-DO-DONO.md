@@ -229,6 +229,10 @@ A loja antiga já emitia pelo Bling. O caminho recomendado é manter o Bling com
 
 A base antiga de clientes e assinantes **não** deve ser importada para disparos de marketing sem uma campanha de reconfirmação de consentimento (LGPD). Arquivos de importação com dados reais ficam somente na pasta `data-privada/`, que não entra no repositório.
 
+Em 12/10/2026 foram importados os clientes e os pedidos de 2022 em diante (2.073 contas sem senha e 1.546 pedidos de histórico). Os consentimentos de marketing ficaram desligados. Para trazer anos anteriores: `pnpm import:clientes-antigos --desde 2016 --gravar`.
+
+- [ ] Depois da virada, avisar os clientes antigos de que a conta existe no site novo e que basta redefinir a senha (o link de senha só chega quando o e-mail automático estiver ligado).
+
 ## Marcações no código
 
 ### `TODO(dono)`: valores e textos a confirmar

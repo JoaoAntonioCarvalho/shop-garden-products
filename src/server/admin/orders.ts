@@ -1,6 +1,7 @@
 import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { zonedParts } from "@/lib/dates";
+import { LEGACY_ORDER_PREFIX } from "@/lib/legacy-customers";
 import { onlyDigits } from "@/lib/validators/cpf";
 import { ORDER_STATUSES } from "@/server/services/order-status";
 import { normalizeOrderNumber } from "@/server/services/order-view";
@@ -16,7 +17,7 @@ const PAYMENT_STATUSES = [
   "CANCELED",
 ];
 const METHODS = ["PIX", "CREDIT_CARD", "BOLETO", "MANUAL"];
-const CHANNELS = ["SITE", "WHATSAPP", "STORE", "PHONE"];
+const CHANNELS = ["SITE", "WHATSAPP", "STORE", "PHONE", "LEGACY"];
 
 export const shippingKindFilters: Record<string, string> = {
   "entrega-hoje": "entrega-hoje",
@@ -37,6 +38,8 @@ export function orderWhere({ q, filters }: ListParams): Prisma.OrderWhereInput {
     and.push({ paymentStatus: filters.pagamento as never });
   if (METHODS.includes(filters.metodo)) and.push({ paymentMethod: filters.metodo as never });
   if (CHANNELS.includes(filters.canal)) and.push({ channel: filters.canal as never });
+  // O histórico do site antigo só aparece quando pedido: pelo filtro de canal ou por uma busca.
+  else if (!q) and.push({ channel: { not: "LEGACY" } });
   if (shippingKindFilters[filters.entrega])
     and.push({ shippingMethodCode: { startsWith: shippingKindFilters[filters.entrega] } });
   if (filters.cupom) and.push({ couponCode: { equals: filters.cupom.toUpperCase() } });
@@ -75,9 +78,12 @@ export function orderWhere({ q, filters }: ListParams): Prisma.OrderWhereInput {
   if (q) {
     const digits = onlyDigits(q);
     const number = /^(nsg-?)?\d+$/i.test(q.trim()) ? normalizeOrderNumber(q) : null;
+    // O número do site antigo, com ou sem o prefixo: "25934" ou "ANT-25934".
+    const legacyNumber = /^(ant-?)?\d+$/i.test(q.trim()) ? `${LEGACY_ORDER_PREFIX}${digits}` : null;
     and.push({
       OR: [
         ...(number ? [{ number }] : []),
+        ...(legacyNumber ? [{ number: legacyNumber }] : []),
         { customerName: { contains: q, mode: "insensitive" } },
         { customerEmail: { contains: q.toLowerCase() } },
         ...(digits.length >= 4
@@ -94,6 +100,7 @@ export const channelLabels: Record<string, string> = {
   WHATSAPP: "WhatsApp",
   STORE: "Loja",
   PHONE: "Telefone",
+  LEGACY: "Site antigo",
 };
 
 export function sourceLabel(order: { utmSource: string | null; utmMedium: string | null }): string {

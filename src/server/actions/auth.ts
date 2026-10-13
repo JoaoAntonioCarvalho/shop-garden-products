@@ -12,6 +12,7 @@ import { loginSchema, passwordSchema, signupSchema } from "@/lib/validators/acco
 import { emailSchema } from "@/lib/validators/checkout";
 import {
   createAccount,
+  isLegacyAccountWithoutPassword,
   mergeCartOnLogin,
   requestPasswordReset,
   resetPassword,
@@ -22,7 +23,19 @@ import { getStoreSettings } from "@/server/services/settings";
 
 export type AuthResult =
   | { ok: true; message?: string }
-  | { ok: false; error: string; fieldErrors?: Record<string, string> };
+  | {
+      ok: false;
+      error: string;
+      fieldErrors?: Record<string, string>;
+      /** Conta vinda do site antigo: o formulário oferece o caminho para criar a senha. */
+      resetEmail?: string;
+    };
+
+const legacyAccount = (email: string): AuthResult => ({
+  ok: false,
+  error: "Você já tem uma conta neste site. Redefina a sua senha para entrar.",
+  resetEmail: email,
+});
 
 const fieldErrorsOf = (issues: Array<{ path: PropertyKey[]; message: string }>) =>
   Object.fromEntries(issues.map((issue) => [String(issue.path[0] ?? "form"), issue.message]));
@@ -40,6 +53,15 @@ export async function loginAction(input: {
   password: string;
   returnTo?: string;
 }): Promise<AuthResult> {
+  const ipHash = clientIpHash(await headers());
+  // Cliente do site antigo ainda sem senha aqui: o aviso vale mesmo sem a senha digitada.
+  const typedEmail = loginSchema.shape.email.safeParse(input.email);
+  if (typedEmail.success) {
+    const lookups = await rateLimit("legacyLookup", ipHash);
+    if (lookups.allowed && (await isLegacyAccountWithoutPassword(typedEmail.data)))
+      return legacyAccount(typedEmail.data);
+  }
+
   const parsed = loginSchema.safeParse(input);
   if (!parsed.success)
     return {
@@ -49,7 +71,6 @@ export async function loginAction(input: {
     };
 
   // 5 tentativas por e-mail e IP a cada 15 minutos.
-  const ipHash = clientIpHash(await headers());
   const limit = await rateLimit("login", `${ipHash}:${parsed.data.email}`);
   if (!limit.allowed) return { ok: false, error: rateLimitMessage(limit) };
 
@@ -94,6 +115,8 @@ export async function signupAction(input: {
 
   const user = await createAccount(parsed.data);
   if (!user) {
+    if (await isLegacyAccountWithoutPassword(parsed.data.email))
+      return legacyAccount(parsed.data.email);
     return {
       ok: false,
       error:

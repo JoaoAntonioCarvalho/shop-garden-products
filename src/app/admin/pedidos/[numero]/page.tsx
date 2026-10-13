@@ -78,6 +78,7 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/pedid
 
   const status = order.status as OrderStatusCode;
   const kind = shippingKindOf(order.shippingMethodCode);
+  const legacy = order.channel === "LEGACY";
   const address = order.shippingAddress as Record<string, string>;
   const addressLines = addressLinesOf(address);
   const authorIds = [
@@ -164,7 +165,12 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/pedid
         }
       />
 
-      {can(user, "orders.update_status") ? (
+      {legacy ? (
+        <p className="mb-4 rounded-md border bg-secondary px-4 py-3 text-sm">
+          Pedido trazido do site antigo. Fica só para consulta: não muda de status, não entra nas
+          vendas e não envia e-mail.
+        </p>
+      ) : can(user, "orders.update_status") ? (
         <div className="mb-4">
           <OrderActions
             orderId={order.id}
@@ -388,7 +394,7 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/pedid
             ) : null}
           </Section>
 
-          {can(user, "orders.resend_email") ? (
+          {!legacy && can(user, "orders.resend_email") ? (
             <Section title="E-mails">
               <ResendEmailForm orderId={order.id} delivered={status === "DELIVERED"} />
             </Section>

@@ -26,6 +26,7 @@ import {
 import type { CardTokenization } from "@/server/providers/payment/types";
 import { getInstallments } from "@/server/services/pricing";
 import { rateLimit, rateLimitMessage } from "@/server/services/rate-limit";
+import { isLegacyAccountWithoutPassword } from "@/server/services/accounts";
 import { getStoreSettings } from "@/server/services/settings";
 import { blockedContactMessage } from "@/lib/delivery-areas";
 import { quoteShipping } from "@/server/services/shipping";
@@ -136,7 +137,7 @@ export async function checkoutQuoteAction(
 /** Guarda o andamento do checkout no carrinho, para o cliente poder sair e voltar. Nunca dados de cartão. */
 export async function saveCheckoutDraftAction(
   draft: CheckoutDraft,
-): Promise<{ ok: boolean; hasAccount?: boolean }> {
+): Promise<{ ok: boolean; hasAccount?: boolean; legacyAccount?: boolean }> {
   const cart = await getCart();
   if (!cart) return { ok: false };
   const email = emailSchema.safeParse(draft.identification?.email ?? "");
@@ -161,7 +162,13 @@ export async function saveCheckoutDraftAction(
     where: { email: email.data, passwordHash: { not: null }, anonymizedAt: null },
     select: { id: true },
   });
-  return { ok: true, hasAccount: Boolean(account) };
+  if (account) return { ok: true, hasAccount: true };
+  // Cliente do site antigo que ainda não criou a senha aqui.
+  return {
+    ok: true,
+    hasAccount: false,
+    legacyAccount: await isLegacyAccountWithoutPassword(email.data),
+  };
 }
 
 /** Tira da sacola os itens que não podem ser entregues no CEP informado. */

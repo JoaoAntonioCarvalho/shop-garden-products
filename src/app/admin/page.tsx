@@ -28,6 +28,7 @@ const channelLabels: Record<string, string> = {
   WHATSAPP: "WhatsApp",
   STORE: "Loja",
   PHONE: "Telefone",
+  LEGACY: "Site antigo",
 };
 
 function Change({ value, invert = false }: { value: number | null; invert?: boolean }) {

@@ -17,6 +17,13 @@ export class OrderNotFoundError extends Error {
   }
 }
 
+/** Pedidos trazidos do site antigo são só histórico: não mudam de status, estoque nem pagamento. */
+export class LegacyOrderError extends Error {
+  constructor() {
+    super("Este pedido veio do site antigo e fica só para consulta.");
+  }
+}
+
 /** Próximo número legível do pedido, pela sequência do Postgres: NSG-000123. */
 export async function nextOrderNumber(tx: Tx): Promise<string> {
   const [row] = await tx.$queryRaw<
@@ -58,9 +65,10 @@ export async function transitionOrder(
 
   const result = await db.$transaction(async (tx) => {
     // Bloqueia o pedido: duas mudanças simultâneas (webhook e admin, por exemplo) entram em fila.
-    const locked = await tx.$queryRaw<Array<{ id: string; status: OrderStatus }>>`
-      SELECT id, status FROM "Order" WHERE id = ${orderId} FOR UPDATE`;
+    const locked = await tx.$queryRaw<Array<{ id: string; status: OrderStatus; channel: string }>>`
+      SELECT id, status, channel::text AS channel FROM "Order" WHERE id = ${orderId} FOR UPDATE`;
     if (locked.length === 0) throw new OrderNotFoundError();
+    if (locked[0].channel === "LEGACY") throw new LegacyOrderError();
     const fromStatus = locked[0].status as OrderStatusCode;
     assertTransition(fromStatus, toStatus);
 

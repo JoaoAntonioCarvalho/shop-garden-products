@@ -2,6 +2,7 @@ import "server-only";
 import { timingSafeEqual } from "node:crypto";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import { isLegacyOrderNumber } from "@/lib/legacy-customers";
 
 const orderViewInclude = {
   items: { orderBy: { id: "asc" } },
@@ -25,7 +26,7 @@ export async function getOrderForViewer(
   number: string,
   access: { token?: string | null; userId?: string | null },
 ): Promise<OrderView | null> {
-  if (!/^NSG-\d{6,}$/.test(number)) return null;
+  if (!/^NSG-\d{6,}$/.test(number) && !isLegacyOrderNumber(number)) return null;
   const order = await db.order.findUnique({ where: { number }, include: orderViewInclude });
   if (!order) return null;
   if (access.token && safeEqual(access.token, order.accessToken)) return order;

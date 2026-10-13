@@ -168,7 +168,8 @@ export async function buildOrderEmailData(
       payments: { orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
-  if (!order) return null;
+  // Pedido do site antigo é só histórico: nenhum e-mail sai por ele.
+  if (!order || order.channel === "LEGACY") return null;
   const payment = order.payments[0];
   const base = appUrl();
   const url = `${base}/pedido/${order.number}?token=${order.accessToken}`;

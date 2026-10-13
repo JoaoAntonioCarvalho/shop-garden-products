@@ -6,6 +6,7 @@ import type { Permission } from "@/lib/permissions";
 import type { CurrentUser } from "@/lib/session";
 import { StockAdjustmentError } from "@/server/services/inventory";
 import { InvalidTransitionError } from "@/server/services/order-status";
+import { LegacyOrderError } from "@/server/services/orders";
 
 export type AdminResult<T = undefined> =
   | { ok: true; message: string; data?: T }
@@ -60,6 +61,7 @@ export async function runAdmin<Schema extends z.ZodType, T = undefined>(
       error instanceof ForbiddenError ||
       error instanceof AdminError ||
       error instanceof InvalidTransitionError ||
+      error instanceof LegacyOrderError ||
       error instanceof StockAdjustmentError
     ) {
       return { ok: false, error: error.message };

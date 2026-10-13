@@ -39,6 +39,8 @@ export const RATE_LIMITS = {
   login: [5, 15 * 60],
   signup: [5, 60 * 60],
   passwordReset: [5, 60 * 60],
+  // Aviso de "você já tem conta" para clientes do site antigo: limita a sondagem de e-mails.
+  legacyLookup: [20, 15 * 60],
   tracking: [10, 15 * 60],
   publicForm: [8, 10 * 60],
   search: [60, 60],

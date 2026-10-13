@@ -31,6 +31,7 @@ export default async function AccountOrderPage({ params }: PageProps<"/conta/ped
   if (!order) notFound();
 
   const status = order.status as OrderStatusCode;
+  const legacy = order.channel === "LEGACY";
   const slugs = await db.product.findMany({
     where: {
       id: {
@@ -49,7 +50,10 @@ export default async function AccountOrderPage({ params }: PageProps<"/conta/ped
         <h1 className="type-h2 text-moss-900">Pedido {order.number}</h1>
         <OrderStatusBadge status={status} />
       </header>
-      <p className="mt-1 type-small text-ink-muted">Feito em {formatDate(order.createdAt)}</p>
+      <p className="mt-1 type-small text-ink-muted">
+        Feito em {formatDate(order.createdAt)}
+        {legacy ? ", no nosso site anterior" : ""}
+      </p>
 
       <div className="mt-5 flex flex-wrap gap-3">
         {status === "PENDING_PAYMENT" ? (
@@ -169,7 +173,7 @@ export default async function AccountOrderPage({ params }: PageProps<"/conta/ped
                 <strong className="font-semibold">{order.trackingCode}</strong>
               </p>
             ) : null}
-            <CarrierTracking code={order.trackingCode} />
+            {legacy ? null : <CarrierTracking code={order.trackingCode} />}
           </section>
           <section
             aria-labelledby="entrega"

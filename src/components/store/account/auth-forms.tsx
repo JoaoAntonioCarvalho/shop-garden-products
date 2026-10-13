@@ -35,8 +35,34 @@ function useAuthForm() {
   return { result, pending, run, fieldError };
 }
 
+/**
+ * Cliente do site antigo que ainda não criou a senha aqui: em vez do erro, o aviso de que a conta
+ * existe e o botão que envia o link para criar a senha.
+ */
+function LegacyAccountNotice({ message, email }: { message: string; email: string }) {
+  const [sent, setSent] = useState<AuthResult | null>(null);
+  const [pending, startTransition] = useTransition();
+  if (sent) return <FormMessages result={sent} />;
+  return (
+    <Alert tone="info" live>
+      <p>{message}</p>
+      <Button
+        type="button"
+        variant="secondary"
+        className="mt-3"
+        loading={pending}
+        onClick={() => startTransition(async () => setSent(await forgotPasswordAction(email)))}
+      >
+        Enviar link para criar a senha
+      </Button>
+    </Alert>
+  );
+}
+
 function FormMessages({ result }: { result: AuthResult | null }) {
   if (!result) return null;
+  if (!result.ok && result.resetEmail)
+    return <LegacyAccountNotice message={result.error} email={result.resetEmail} />;
   return result.ok ? (
     result.message ? (
       <Alert tone="success" live>
@@ -233,7 +259,7 @@ export function SignupForm({
   );
 }
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ defaultEmail = "" }: { defaultEmail?: string }) {
   const form = useAuthForm();
   if (form.result?.ok) return <FormMessages result={form.result} />;
   return (
@@ -244,7 +270,13 @@ export function ForgotPasswordForm() {
     >
       <FormMessages result={form.result} />
       <Field label="E-mail da sua conta">
-        <Input name="email" type="email" autoComplete="email" required />
+        <Input
+          name="email"
+          type="email"
+          autoComplete="email"
+          defaultValue={defaultEmail}
+          required
+        />
       </Field>
       <Button type="submit" loading={form.pending}>
         Enviar link para nova senha
