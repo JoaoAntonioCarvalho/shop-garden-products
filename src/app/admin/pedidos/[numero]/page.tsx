@@ -380,7 +380,11 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/pedid
                     <p key={refund.id} className="mt-1 text-destructive">
                       Estorno de {formatBRL(refund.amountCents)} em{" "}
                       {formatDateTime(refund.createdAt)}
-                      {refund.status === "FAILED" ? " (falhou no gateway: conferir)" : ""}
+                      {refund.status === "FAILED"
+                        ? payment.method === "PIX"
+                          ? ". A Cielo não devolveu: o valor do Pix já foi transferido para a conta da loja. Devolva ao cliente por transferência Pix."
+                          : " (falhou no gateway: conferir)"
+                        : ""}
                     </p>
                   ))}
                 </li>
