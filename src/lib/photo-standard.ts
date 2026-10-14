@@ -49,6 +49,24 @@ export function standardPlacement(bounds: Bounds, frame: typeof STANDARD_PHOTO =
   };
 }
 
+/** Largura da base do produto: o que é opaco nas últimas linhas do recorte (o pé do vaso, não a copa). */
+export function baseSpan(
+  image: { data: Uint8ClampedArray | Uint8Array; width: number },
+  solid: Bounds,
+): { left: number; right: number } {
+  const rows = Math.max(1, Math.round(solid.height * 0.04));
+  let left = solid.x + solid.width;
+  let right = solid.x - 1;
+  for (let y = solid.y + solid.height - rows; y < solid.y + solid.height; y++) {
+    for (let x = solid.x; x < solid.x + solid.width; x++) {
+      if (image.data[(y * image.width + x) * 4 + 3] <= 160) continue;
+      if (x < left) left = x;
+      if (x > right) right = x;
+    }
+  }
+  return right < left ? { left: solid.x, right: solid.x + solid.width - 1 } : { left, right };
+}
+
 /** Monta a foto padronizada (JPEG) a partir do recorte RGBA. Só roda no navegador. */
 export async function composeStandardPhoto(cutout: ImageData): Promise<Blob> {
   const bounds = alphaBounds(cutout.data, cutout.width, cutout.height);
@@ -66,16 +84,23 @@ export async function composeStandardPhoto(cutout: ImageData): Promise<Blob> {
   context.fillRect(0, 0, canvas.width, canvas.height);
 
   const place = standardPlacement(bounds);
-  // Sombra de contato: uma elipse suave sob a base do produto.
+  // Sombra de contato: uma elipse suave sob a base do produto. A base é medida só na parte
+  // opaca do recorte, porque o resto da sombra da foto original vem quase transparente e
+  // deixaria a sombra nova descolada.
+  const solid = alphaBounds(cutout.data, cutout.width, cutout.height, 160) ?? bounds;
+  const foot = baseSpan(cutout, solid);
+  const base = place.y + (solid.y + solid.height - bounds.y) * place.scale;
+  const footWidth = (foot.right - foot.left + 1) * place.scale;
+  const footCenter = place.x + ((foot.left + foot.right) / 2 - bounds.x) * place.scale;
   context.save();
-  context.filter = "blur(22px)";
-  context.fillStyle = "rgba(0, 0, 0, 0.13)";
+  context.filter = "blur(20px)";
+  context.fillStyle = "rgba(0, 0, 0, 0.11)";
   context.beginPath();
   context.ellipse(
-    canvas.width / 2,
-    place.y + place.height - 6,
-    place.width * 0.4,
-    Math.max(10, place.height * 0.012),
+    footCenter,
+    base - 8,
+    footWidth * 0.52,
+    Math.max(10, place.height * 0.01),
     0,
     0,
     Math.PI * 2,

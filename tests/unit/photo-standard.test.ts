@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { alphaBounds, standardPlacement, STANDARD_PHOTO } from "@/lib/photo-standard";
+import { alphaBounds, baseSpan, standardPlacement, STANDARD_PHOTO } from "@/lib/photo-standard";
 
 function image(width: number, height: number, opaque: Array<[number, number]>) {
   const data = new Uint8ClampedArray(width * height * 4);
@@ -35,5 +35,15 @@ describe("foto padronizada", () => {
     const place = standardPlacement({ x: 50, y: 20, width: 1000, height: 300 });
     expect(place.width).toBeCloseTo(STANDARD_PHOTO.width * 0.76);
     expect(place.height).toBeLessThan(STANDARD_PHOTO.height * 0.76);
+  });
+
+  it("mede a base pelo pé do produto, não pela parte mais larga", () => {
+    // Copa larga em cima (linha 0) e vaso estreito embaixo (linhas 98 e 99).
+    const opaque: Array<[number, number]> = [];
+    for (let x = 0; x < 50; x++) opaque.push([x, 0]);
+    for (let x = 20; x < 30; x++) opaque.push([x, 98], [x, 99]);
+    const data = image(50, 100, opaque);
+    const solid = alphaBounds(data, 50, 100, 160)!;
+    expect(baseSpan({ data, width: 50 }, solid)).toEqual({ left: 20, right: 29 });
   });
 });
