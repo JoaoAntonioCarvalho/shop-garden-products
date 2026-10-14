@@ -1,6 +1,9 @@
 allowBuilds:
   "@prisma/engines": true
   esbuild: true
+  # O recorte de fotos roda no navegador: a versão do motor para Node não é usada.
+  onnxruntime-node: false
   prisma: true
+  protobufjs: false
   sharp: true
   unrs-resolver: true
