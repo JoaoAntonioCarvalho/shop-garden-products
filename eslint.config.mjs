@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "src/generated/**",
     "uploads/**",
     "data-privada/**",
+    "public/ort/**",
     "playwright-report/**",
     "test-results/**",
   ]),

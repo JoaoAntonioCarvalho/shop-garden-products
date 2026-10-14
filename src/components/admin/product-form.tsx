@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, GripVertical, Plus, Trash2, Wand2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type ReactNode } from "react";
@@ -14,6 +14,7 @@ import {
   type FormValues,
 } from "@/components/admin/entity-form";
 import { ImageUploader, MediaLibraryDialog } from "@/components/admin/media-picker";
+import { PhotoStandardizer } from "@/components/admin/photo/photo-standardizer";
 import { SearchPicker } from "@/components/admin/search-picker";
 import {
   AlertDialog,
@@ -260,6 +261,8 @@ export function ProductForm({
   const [values, setValues] = useState<FormValues>(data.values);
   const [variants, setVariants] = useState<VariantRow[]>(data.variants);
   const [images, setImages] = useState<ImageRow[]>(data.images);
+  const [standardizing, setStandardizing] = useState<string | null>(null);
+  const standardizingImage = images.find((image) => image.mediaId === standardizing) ?? null;
   const [related, setRelated] = useState(data.related);
   const [options, setOptions] = useState<Array<{ name: string; values: string }>>(() => {
     const collected = new Map<string, Set<string>>();
@@ -838,6 +841,29 @@ export function ProductForm({
                       onOpenChange={setLibrary}
                       onPick={addImage}
                     />
+                    <PhotoStandardizer
+                      image={
+                        standardizingImage
+                          ? {
+                              mediaId: standardizingImage.mediaId,
+                              alt: standardizingImage.alt,
+                              name: String(values.sku ?? "") || "produto",
+                            }
+                          : null
+                      }
+                      onClose={() => setStandardizing(null)}
+                      onReplace={(item) => {
+                        // A foto padronizada entra no lugar da original, com o mesmo texto e capa.
+                        setImages((current) =>
+                          current.map((entry) =>
+                            entry.mediaId === standardizing
+                              ? { ...entry, mediaId: item.id, url: item.thumb }
+                              : entry,
+                          ),
+                        );
+                        touch();
+                      }}
+                    />
                   </>
                 ) : null}
                 {images.length === 0 ? (
@@ -935,6 +961,18 @@ export function ProductForm({
                         />
                         Capa
                       </label>
+                      {canEditImages ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setStandardizing(image.mediaId)}
+                        >
+                          <Wand2 aria-hidden="true" />
+                          Padronizar foto
+                          <span className="sr-only"> {index + 1}</span>
+                        </Button>
+                      ) : null}
                       <div className="flex">
                         <Button
                           type="button"

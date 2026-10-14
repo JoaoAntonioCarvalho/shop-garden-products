@@ -134,6 +134,7 @@ Atualizado ao longo do projeto.
 | Plano e progresso                        | `docs/PLANO.md`                                                                                               |
 | Decisões                                 | `docs/DECISOES.md`                                                                                            |
 | Clientes e pedidos do site antigo        | `src/lib/legacy-customers.ts`, `pnpm import:clientes-antigos` (canal `LEGACY`, `User.legacyImportedAt`)       |
+| Padronizar foto (recorte no navegador)   | `src/components/admin/photo/`, `src/lib/photo-standard.ts`, `scripts/copy-ort.mjs`                            |
 | Painel simples de horários e contatos    | `src/app/admin/informacoes/page.tsx` (`saveStoreInfoAction`)                                                  |
 | Pendências do dono                       | `docs/PENDENCIAS-DO-DONO.md`                                                                                  |
 | Roteiro da virada do domínio             | `docs/VIRADA.md`                                                                                              |

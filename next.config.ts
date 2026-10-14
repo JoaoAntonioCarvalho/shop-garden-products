@@ -20,6 +20,15 @@ const csp = [
   "object-src 'none'",
 ].join("; ");
 
+/**
+ * No painel, o "Padronizar foto" recorta o fundo no próprio navegador: precisa compilar
+ * WebAssembly (servido pelo site, em /ort) e baixar o modelo do Hugging Face.
+ */
+const adminCsp = csp
+  .replace("script-src 'self'", "script-src 'self' 'wasm-unsafe-eval'")
+  .replace("connect-src 'self'", "connect-src 'self' https://huggingface.co https://*.hf.co")
+  .concat("; worker-src 'self' blob:");
+
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
   { key: "X-Frame-Options", value: "DENY" },
@@ -51,7 +60,20 @@ const nextConfig: NextConfig = {
       : [],
   },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // A última regra que casa com o caminho vence: o painel fica com a política própria.
+      {
+        source: "/admin/:path*",
+        headers: [{ key: "Content-Security-Policy", value: adminCsp }],
+      },
+      // O recorte roda em um worker, e a política de um worker é a do arquivo dele. Em um
+      // script comum este cabeçalho não tem efeito.
+      {
+        source: "/_next/static/:path*",
+        headers: [{ key: "Content-Security-Policy", value: adminCsp }],
+      },
+    ];
   },
   logging: {
     // Em desenvolvimento o Next registra os argumentos de cada server action. Isso incluiria
