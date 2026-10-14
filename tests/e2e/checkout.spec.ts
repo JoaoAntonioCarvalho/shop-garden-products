@@ -149,6 +149,9 @@ test("cupom inválido mostra a mensagem certa e cupom válido aplica o desconto"
   // R$ 249,00 com 10% de desconto.
   await expect(page.getByText("- R$ 24,90")).toBeVisible();
   await expect(page.locator("dl").getByText("R$ 224,10").first()).toBeVisible();
+  // Um cupom por pedido: com um aplicado, não há onde digitar outro.
+  await expect(field).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Aplicar cupom" })).toHaveCount(0);
 });
 
 test("produto só local com CEP de outro estado mostra o aviso e bloqueia o envio nacional", async ({

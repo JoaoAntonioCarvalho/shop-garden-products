@@ -206,6 +206,13 @@ export async function applyCouponAction(code: string): Promise<CouponActionResul
   if (!cart || cart.items.length === 0)
     return { ok: false, error: "Adicione um produto à sacola antes de usar o cupom." };
 
+  // Um cupom por pedido: o segundo nunca soma nem troca o primeiro sem a pessoa remover.
+  if (cart.couponCode && cart.couponCode !== cleaned)
+    return {
+      ok: false,
+      error: `Só um cupom vale por pedido. Remova o cupom ${cart.couponCode} para usar outro.`,
+    };
+
   // Valida com o cupom aplicado; se não valer, a sacola fica como estava.
   const view = await buildCartView({ ...cart, couponCode: cleaned }, settings);
   if (!view.coupon?.ok)
