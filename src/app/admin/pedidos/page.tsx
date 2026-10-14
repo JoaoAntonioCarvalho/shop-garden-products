@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Printer } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/admin/admin-shell";
 import { DataTable, type DataColumn } from "@/components/admin/data-table";
@@ -25,6 +26,8 @@ export const metadata: Metadata = { title: "Pedidos" };
 
 const columns: DataColumn[] = [
   { key: "number", header: "Número", sortable: true },
+  // Logo depois do número: no fim da tabela, a coluna ficaria fora da tela.
+  { key: "print", header: "Imprimir" },
   { key: "createdAt", header: "Data", sortable: true },
   { key: "customer", header: "Cliente" },
   { key: "totalCents", header: "Total", sortable: true, align: "right" },
@@ -83,6 +86,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
   const params = parseListParams(await searchParams, { sort: "createdAt", dir: "desc" });
   const order = orderByOf(params, ["number", "createdAt", "totalCents"] as const, "createdAt");
   const where = orderWhere(params);
+  const canPrint = can(user, "orders.print");
 
   const [orders, total] = await Promise.all([
     db.order.findMany({
@@ -187,6 +191,14 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
                 <span className="block text-xs text-muted-foreground">{sourceLabel(item)}</span>
               </>
             ),
+            print: canPrint ? (
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/admin/pedidos/${item.number}/imprimir/pedido`} target="_blank">
+                  <Printer aria-hidden="true" />
+                  Imprimir<span className="sr-only"> o pedido {item.number}</span>
+                </Link>
+              </Button>
+            ) : null,
           },
         }))}
       />

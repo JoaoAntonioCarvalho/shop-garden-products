@@ -144,6 +144,11 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/pedid
           can(user, "orders.print") ? (
             <>
               <Button asChild variant="outline" size="sm">
+                <Link href={`/admin/pedidos/${order.number}/imprimir/pedido`} target="_blank">
+                  Imprimir pedido
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
                 <Link href={`/admin/pedidos/${order.number}/imprimir/separacao`} target="_blank">
                   Lista de separação
                 </Link>
