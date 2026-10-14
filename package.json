@@ -8,9 +8,9 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "next dev --port 3100",
-    "build": "next build",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "dev": "node scripts/copy-ort.mjs && next dev --port 3100",
+    "build": "node scripts/copy-ort.mjs && next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && node scripts/copy-ort.mjs && next build",
     "start": "next start --port 3100",
     "lint": "eslint",
     "format": "prettier --write .",
@@ -30,7 +30,7 @@
     "import:clientes-antigos": "tsx --require ./scripts/allow-server-only.cjs scripts/import-legacy-customers.ts",
     "photos": "tsx --require ./scripts/allow-server-only.cjs scripts/product-photos.ts",
     "texts": "tsx --require ./scripts/allow-server-only.cjs scripts/product-texts.ts",
-    "postinstall": "prisma generate && node scripts/copy-ort.mjs"
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",

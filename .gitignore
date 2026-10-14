@@ -28,7 +28,7 @@ next-env.d.ts
 # arquivos de importação com dados reais (LGPD): nunca entram no repositório
 /data-privada/
 
-# motor de recorte de fotos, copiado de node_modules no postinstall
+# motor de recorte de fotos, copiado de node_modules antes do dev e do build
 /public/ort/
 
 # diversos
